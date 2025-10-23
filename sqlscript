@@ -1,0 +1,334 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
+CREATE TABLE public.admin_activities (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  admin_id uuid,
+  action character varying NOT NULL,
+  description text,
+  target_type character varying,
+  target_id uuid,
+  ip_address inet,
+  user_agent text,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT admin_activities_pkey PRIMARY KEY (id),
+  CONSTRAINT admin_activities_admin_id_fkey FOREIGN KEY (admin_id) REFERENCES public.admin_users(id)
+);
+CREATE TABLE public.admin_users (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  email character varying NOT NULL UNIQUE,
+  password_hash character varying NOT NULL,
+  first_name character varying NOT NULL,
+  last_name character varying NOT NULL,
+  role character varying DEFAULT 'admin'::character varying CHECK (role::text = ANY (ARRAY['admin'::character varying, 'super_admin'::character varying]::text[])),
+  is_active boolean DEFAULT true,
+  last_login timestamp with time zone,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT admin_users_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.buyer_addresses (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  user_id uuid,
+  type text NOT NULL DEFAULT 'home'::text,
+  name text NOT NULL,
+  phone text NOT NULL,
+  address_line_1 text NOT NULL,
+  address_line_2 text,
+  barangay text,
+  city text NOT NULL,
+  province text NOT NULL,
+  zip_code text,
+  country text DEFAULT 'Philippines'::text,
+  is_default boolean DEFAULT false,
+  is_active boolean DEFAULT true,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT buyer_addresses_pkey PRIMARY KEY (id),
+  CONSTRAINT buyer_addresses_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.buyer_users(id)
+);
+CREATE TABLE public.buyer_orders (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  order_number text NOT NULL UNIQUE,
+  buyer_id uuid,
+  seller_id uuid,
+  status text DEFAULT 'pending'::text,
+  payment_status text DEFAULT 'pending'::text,
+  delivery_status text DEFAULT 'pending'::text,
+  items jsonb NOT NULL,
+  subtotal numeric NOT NULL DEFAULT 0,
+  delivery_fee numeric NOT NULL DEFAULT 0,
+  payment_fee numeric NOT NULL DEFAULT 0,
+  total_amount numeric NOT NULL DEFAULT 0,
+  payment_method text,
+  payment_provider text,
+  payment_id text,
+  payment_fee_rate numeric,
+  delivery_address jsonb NOT NULL,
+  courier_service text DEFAULT 'lalamove'::text,
+  tracking_number text,
+  estimated_delivery timestamp with time zone,
+  buyer_message text,
+  seller_notes text,
+  order_type text DEFAULT 'purchase'::text,
+  barter_details jsonb,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  confirmed_at timestamp with time zone,
+  shipped_at timestamp with time zone,
+  delivered_at timestamp with time zone,
+  cancelled_at timestamp with time zone,
+  paid_at timestamp with time zone,
+  CONSTRAINT buyer_orders_pkey PRIMARY KEY (id),
+  CONSTRAINT buyer_orders_buyer_id_fkey FOREIGN KEY (buyer_id) REFERENCES public.buyer_users(id)
+);
+CREATE TABLE public.buyer_users (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  email text NOT NULL UNIQUE,
+  display_name text,
+  first_name text,
+  last_name text,
+  middle_name text,
+  user_type text DEFAULT 'buyer'::text,
+  phone text,
+  address text,
+  profile_image text,
+  is_verified boolean DEFAULT false,
+  is_active boolean DEFAULT true,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT buyer_users_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.conversations (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  product_id uuid,
+  buyer_id uuid,
+  seller_id uuid,
+  offer_id uuid,
+  status text DEFAULT 'active'::text,
+  last_message_at timestamp with time zone DEFAULT now(),
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT conversations_pkey PRIMARY KEY (id),
+  CONSTRAINT conversations_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.products(id)
+);
+CREATE TABLE public.delivery_tracking (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  order_id uuid,
+  courier_service text NOT NULL,
+  tracking_number text NOT NULL,
+  status text DEFAULT 'pending'::text,
+  current_location text,
+  estimated_delivery timestamp with time zone,
+  actual_delivery timestamp with time zone,
+  delivery_notes text,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT delivery_tracking_pkey PRIMARY KEY (id),
+  CONSTRAINT delivery_tracking_order_id_fkey FOREIGN KEY (order_id) REFERENCES public.buyer_orders(id)
+);
+CREATE TABLE public.message_reads (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  message_id uuid,
+  user_id uuid,
+  read_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT message_reads_pkey PRIMARY KEY (id),
+  CONSTRAINT message_reads_message_id_fkey FOREIGN KEY (message_id) REFERENCES public.messages(id),
+  CONSTRAINT message_reads_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.messages (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  conversation_id uuid,
+  sender_id uuid,
+  message_type text DEFAULT 'text'::text,
+  content text NOT NULL,
+  metadata jsonb DEFAULT '{}'::jsonb,
+  is_read boolean DEFAULT false,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT messages_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.offers (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  product_id uuid,
+  buyer_id uuid,
+  seller_id uuid,
+  conversation_id uuid,
+  offer_type text NOT NULL,
+  cash_amount numeric,
+  barter_items jsonb,
+  message text,
+  status text DEFAULT 'pending'::text,
+  expires_at timestamp with time zone,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT offers_pkey PRIMARY KEY (id),
+  CONSTRAINT offers_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.products(id),
+  CONSTRAINT offers_buyer_id_fkey FOREIGN KEY (buyer_id) REFERENCES auth.users(id),
+  CONSTRAINT offers_seller_id_fkey FOREIGN KEY (seller_id) REFERENCES auth.users(id),
+  CONSTRAINT offers_conversation_id_fkey FOREIGN KEY (conversation_id) REFERENCES public.conversations(id)
+);
+CREATE TABLE public.order_items (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  order_id uuid,
+  product_id text NOT NULL,
+  product_name text NOT NULL,
+  product_image text,
+  seller_id uuid,
+  seller_name text,
+  price numeric NOT NULL,
+  quantity integer NOT NULL DEFAULT 1,
+  total_price numeric NOT NULL,
+  is_barter boolean DEFAULT false,
+  barter_item_id text,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT order_items_pkey PRIMARY KEY (id),
+  CONSTRAINT order_items_order_id_fkey FOREIGN KEY (order_id) REFERENCES public.buyer_orders(id)
+);
+CREATE TABLE public.otp_verifications (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  email text NOT NULL,
+  otp_code text NOT NULL,
+  user_type text NOT NULL,
+  expires_at timestamp with time zone NOT NULL,
+  is_used boolean DEFAULT false,
+  attempts integer DEFAULT 0,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT otp_verifications_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.payment_transactions (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  order_id uuid,
+  payment_intent_id text UNIQUE,
+  amount numeric NOT NULL,
+  currency text DEFAULT 'PHP'::text,
+  payment_method text NOT NULL,
+  payment_provider text,
+  status text DEFAULT 'pending'::text,
+  fee_amount numeric DEFAULT 0,
+  net_amount numeric NOT NULL,
+  provider_response jsonb,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  processed_at timestamp with time zone,
+  CONSTRAINT payment_transactions_pkey PRIMARY KEY (id),
+  CONSTRAINT payment_transactions_order_id_fkey FOREIGN KEY (order_id) REFERENCES public.buyer_orders(id)
+);
+CREATE TABLE public.product_categories (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  name text NOT NULL UNIQUE,
+  slug text NOT NULL UNIQUE,
+  description text,
+  parent_id uuid,
+  icon text,
+  is_active boolean DEFAULT true,
+  sort_order integer DEFAULT 0,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT product_categories_pkey PRIMARY KEY (id),
+  CONSTRAINT product_categories_parent_id_fkey FOREIGN KEY (parent_id) REFERENCES public.product_categories(id)
+);
+CREATE TABLE public.product_conditions (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  name text NOT NULL UNIQUE,
+  description text,
+  sort_order integer DEFAULT 0,
+  is_active boolean DEFAULT true,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT product_conditions_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.product_likes (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  product_id uuid NOT NULL,
+  user_id uuid NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT product_likes_pkey PRIMARY KEY (id),
+  CONSTRAINT product_likes_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.products(id),
+  CONSTRAINT product_likes_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.buyer_users(id)
+);
+CREATE TABLE public.product_tag_relationships (
+  product_id uuid NOT NULL,
+  tag_id uuid NOT NULL,
+  CONSTRAINT product_tag_relationships_pkey PRIMARY KEY (product_id, tag_id),
+  CONSTRAINT product_tag_relationships_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.products(id),
+  CONSTRAINT product_tag_relationships_tag_id_fkey FOREIGN KEY (tag_id) REFERENCES public.product_tags(id)
+);
+CREATE TABLE public.product_tags (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  name text NOT NULL UNIQUE,
+  slug text NOT NULL UNIQUE,
+  color text DEFAULT '#3B82F6'::text,
+  is_active boolean DEFAULT true,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT product_tags_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.product_views (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  product_id uuid NOT NULL,
+  user_id uuid,
+  ip_address inet,
+  user_agent text,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT product_views_pkey PRIMARY KEY (id),
+  CONSTRAINT product_views_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.products(id),
+  CONSTRAINT product_views_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.buyer_users(id)
+);
+CREATE TABLE public.products (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  seller_id uuid NOT NULL,
+  name text NOT NULL,
+  description text NOT NULL,
+  category text NOT NULL,
+  condition text NOT NULL,
+  location text NOT NULL,
+  brand text,
+  model text,
+  quantity integer NOT NULL DEFAULT 1,
+  price numeric,
+  original_price numeric,
+  product_type text NOT NULL DEFAULT 'preloved'::text,
+  selling_mode text NOT NULL DEFAULT 'sell'::text,
+  barter_preferences text,
+  estimated_value numeric,
+  images ARRAY DEFAULT '{}'::text[],
+  primary_image text,
+  status text DEFAULT 'active'::text,
+  is_featured boolean DEFAULT false,
+  is_verified boolean DEFAULT false,
+  views integer DEFAULT 0,
+  likes integer DEFAULT 0,
+  shares integer DEFAULT 0,
+  rating numeric DEFAULT 0,
+  total_ratings integer DEFAULT 0,
+  sold_at timestamp with time zone,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT products_pkey PRIMARY KEY (id),
+  CONSTRAINT products_seller_id_fkey FOREIGN KEY (seller_id) REFERENCES public.user_profiles(id)
+);
+CREATE TABLE public.user_profiles (
+  id uuid NOT NULL,
+  email text NOT NULL,
+  user_type text DEFAULT 'buyer'::text,
+  display_name text,
+  phone text,
+  address text,
+  profile_image text,
+  is_verified boolean DEFAULT false,
+  is_active boolean DEFAULT true,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  business_name text,
+  business_description text,
+  business_address text,
+  id_type text,
+  id_front_url text,
+  id_back_url text,
+  seller_status text CHECK ((seller_status = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text])) OR seller_status IS NULL),
+  verified_at timestamp with time zone,
+  verified_by uuid,
+  rejection_reason text,
+  submitted_at timestamp with time zone,
+  store_owner_name text,
+  CONSTRAINT user_profiles_pkey PRIMARY KEY (id),
+  CONSTRAINT user_profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id),
+  CONSTRAINT user_profiles_verified_by_fkey FOREIGN KEY (verified_by) REFERENCES public.admin_users(id)
+);

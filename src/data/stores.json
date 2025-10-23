@@ -1,0 +1,332 @@
+{
+  "stores": [
+    {
+      "id": "brilliant-channel-001",
+      "storeId": "brilliant-channel-001",
+      "name": "Brilliant Channel",
+      "slug": "brilliant-channel",
+      "description": "Your trusted partner for electronics and gadgets. We offer genuine products with warranty and excellent customer service across the Philippines.",
+      "longDescription": "Brilliant Channel has been serving Filipino customers since 2020 with high-quality electronics and exceptional service. We specialize in cameras, audio equipment, smartphones, and laptops from trusted brands like Canon, Sony, Apple, and Samsung. All our products come with warranty and our dedicated customer support team is always ready to help.",
+      "logo": "/stores/brilliant-channel-logo.jpg",
+      "coverImage": "/stores/brilliant-channel-cover.jpg",
+      "verified": true,
+      "featured": true,
+      "rating": 4.8,
+      "reviewsCount": 2547,
+      "followersCount": 15420,
+      "productsCount": 892,
+      "totalSales": 25847,
+      "location": {
+        "city": "Cebu City",
+        "province": "Cebu",
+        "country": "Philippines",
+        "address": "IT Park, Lahug, Cebu City, 6000"
+      },
+      "contact": {
+        "phone": "+63 32 123 4567",
+        "email": "support@brilliantchannel.com",
+        "website": "https://brilliantchannel.com"
+      },
+      "businessHours": {
+        "monday": "9:00 AM - 8:00 PM",
+        "tuesday": "9:00 AM - 8:00 PM",
+        "wednesday": "9:00 AM - 8:00 PM",
+        "thursday": "9:00 AM - 8:00 PM",
+        "friday": "9:00 AM - 8:00 PM",
+        "saturday": "10:00 AM - 7:00 PM",
+        "sunday": "10:00 AM - 6:00 PM"
+      },
+      "joinedDate": "2020-03-15",
+      "responseRate": "98%",
+      "responseTime": "2 hours",
+      "categories": ["Electronics", "Cameras", "Audio", "Smartphones", "Laptops"],
+      "specialties": ["Photography Equipment", "Audio Gear", "Mobile Devices"],
+      "policies": {
+        "shipping": "Free shipping for orders over ₱1,500. Same-day delivery available in Metro Cebu.",
+        "returns": "7-day return policy with full refund. 30-day exchange policy.",
+        "warranty": "1-year warranty on all products. Extended warranty available.",
+        "payment": "Cash on delivery, GCash, Maya, Credit/Debit cards accepted."
+      },
+      "awards": ["Top Seller 2024", "Best Customer Service", "Verified Merchant", "5-Star Rating Excellence"],
+      "certifications": ["DTI Registered", "BIR Certified", "Authorized Retailer"],
+      "socialMedia": {
+        "facebook": "brilliantchannelph",
+        "instagram": "brilliant_channel",
+        "youtube": "BrilliantChannelPH",
+        "tiktok": "brilliantchannel"
+      },
+      "bankDetails": {
+        "bankName": "BPI",
+        "accountName": "Brilliant Channel Electronics",
+        "accountNumber": "1234-5678-90"
+      },
+      "owner": {
+        "name": "Maria Santos",
+        "experience": "15 years in electronics retail",
+        "bio": "Passionate about technology and helping customers find the perfect devices for their needs."
+      }
+    },
+    {
+      "id": "tech-haven-ph",
+      "storeId": "tech-haven-ph", 
+      "name": "Tech Haven PH",
+      "slug": "tech-haven-ph",
+      "description": "Your one-stop shop for the latest tech gadgets, gaming gear, and computer accessories. Premium quality at affordable prices.",
+      "longDescription": "Tech Haven PH is a leading technology retailer specializing in gaming equipment, computer peripherals, and the latest gadgets. Founded in 2019, we've built a reputation for competitive pricing and expert technical support. Our team consists of tech enthusiasts who understand what gamers and professionals need.",
+      "logo": "/stores/tech-haven-logo.jpg",
+      "coverImage": "/stores/tech-haven-cover.jpg",
+      "verified": true,
+      "featured": true,
+      "rating": 4.7,
+      "reviewsCount": 1893,
+      "followersCount": 12750,
+      "productsCount": 1245,
+      "totalSales": 18956,
+      "location": {
+        "city": "Makati City",
+        "province": "Metro Manila",
+        "country": "Philippines",
+        "address": "Glorietta Mall, Makati City, 1224"
+      },
+      "contact": {
+        "phone": "+63 2 987 6543",
+        "email": "info@techhavenph.com",
+        "website": "https://techhavenph.com"
+      },
+      "businessHours": {
+        "monday": "10:00 AM - 9:00 PM",
+        "tuesday": "10:00 AM - 9:00 PM", 
+        "wednesday": "10:00 AM - 9:00 PM",
+        "thursday": "10:00 AM - 9:00 PM",
+        "friday": "10:00 AM - 9:00 PM",
+        "saturday": "10:00 AM - 10:00 PM",
+        "sunday": "11:00 AM - 8:00 PM"
+      },
+      "joinedDate": "2019-08-20",
+      "responseRate": "96%",
+      "responseTime": "3 hours",
+      "categories": ["Gaming", "Computers", "Peripherals", "Accessories"],
+      "specialties": ["Gaming Equipment", "PC Building", "Tech Support"],
+      "policies": {
+        "shipping": "Free shipping nationwide for orders over ₱2,000. Express delivery available.",
+        "returns": "14-day return policy. 60-day exchange for defective items.",
+        "warranty": "Official warranty from manufacturers. Tech support included.",
+        "payment": "All major payment methods accepted. Installment available."
+      },
+      "awards": ["Gaming Store of the Year 2023", "Customer Choice Award", "Fast Growing Business"],
+      "certifications": ["Authorized Gaming Partner", "Microsoft Partner", "NVIDIA Elite"],
+      "socialMedia": {
+        "facebook": "techhavenph",
+        "instagram": "tech_haven_ph",
+        "youtube": "TechHavenPhilippines",
+        "twitter": "techhavenph"
+      },
+      "bankDetails": {
+        "bankName": "Metrobank",
+        "accountName": "Tech Haven Philippines Inc.",
+        "accountNumber": "9876-5432-10"
+      },
+      "owner": {
+        "name": "John Rodriguez",
+        "experience": "12 years in technology retail",
+        "bio": "Former software engineer turned entrepreneur, passionate about bringing the latest technology to Filipino consumers."
+      }
+    },
+    {
+      "id": "fashion-forward-boutique",
+      "storeId": "fashion-forward-boutique",
+      "name": "Fashion Forward Boutique",
+      "slug": "fashion-forward-boutique", 
+      "description": "Trendy and affordable fashion for the modern Filipino. Curated collection of Korean and local fashion brands.",
+      "longDescription": "Fashion Forward Boutique brings you the latest trends from Korea and the best of local Filipino fashion. We believe that style should be accessible to everyone, which is why we offer high-quality pieces at affordable prices. Our collection includes casual wear, formal attire, and accessories for both men and women.",
+      "logo": "/stores/fashion-forward-logo.jpg",
+      "coverImage": "/stores/fashion-forward-cover.jpg",
+      "verified": true,
+      "featured": false,
+      "rating": 4.6,
+      "reviewsCount": 987,
+      "followersCount": 8450,
+      "productsCount": 567,
+      "totalSales": 12340,
+      "location": {
+        "city": "Quezon City",
+        "province": "Metro Manila", 
+        "country": "Philippines",
+        "address": "SM North EDSA, Quezon City, 1105"
+      },
+      "contact": {
+        "phone": "+63 2 456 7890",
+        "email": "hello@fashionforwardboutique.com",
+        "website": "https://fashionforwardboutique.com"
+      },
+      "businessHours": {
+        "monday": "10:00 AM - 8:00 PM",
+        "tuesday": "10:00 AM - 8:00 PM",
+        "wednesday": "10:00 AM - 8:00 PM", 
+        "thursday": "10:00 AM - 8:00 PM",
+        "friday": "10:00 AM - 9:00 PM",
+        "saturday": "10:00 AM - 9:00 PM",
+        "sunday": "11:00 AM - 7:00 PM"
+      },
+      "joinedDate": "2021-05-10",
+      "responseRate": "94%",
+      "responseTime": "4 hours",
+      "categories": ["Fashion", "Clothing", "Accessories", "Korean Fashion"],
+      "specialties": ["Korean Fashion", "Trendy Accessories", "Affordable Style"],
+      "policies": {
+        "shipping": "Free shipping for orders over ₱1,000. COD available nationwide.",
+        "returns": "7-day return policy for unworn items with tags.",
+        "warranty": "Quality guarantee on all products.",
+        "payment": "COD, GCash, Maya, Bank transfer accepted."
+      },
+      "awards": ["Rising Fashion Store 2023", "Customer Favorite", "Trendsetter Award"],
+      "certifications": ["DTI Registered", "SEC Registered"],
+      "socialMedia": {
+        "facebook": "fashionforwardboutique",
+        "instagram": "fashion_forward_boutique",
+        "tiktok": "fashionforwardboutique",
+        "pinterest": "fashionforwardboutique"
+      },
+      "bankDetails": {
+        "bankName": "BDO",
+        "accountName": "Fashion Forward Boutique",
+        "accountNumber": "5678-9012-34"
+      },
+      "owner": {
+        "name": "Sarah Kim",
+        "experience": "8 years in fashion retail",
+        "bio": "Fashion enthusiast with a passion for making Korean trends accessible to Filipino consumers."
+      }
+    },
+    {
+      "id": "home-essentials-depot",
+      "storeId": "home-essentials-depot",
+      "name": "Home Essentials Depot",
+      "slug": "home-essentials-depot",
+      "description": "Everything you need for your home. From kitchen appliances to furniture, we have quality home essentials at great prices.",
+      "longDescription": "Home Essentials Depot is your trusted source for home improvement and essential household items. We offer a wide range of products from kitchen appliances and furniture to garden supplies and home decor. Our mission is to help Filipino families create comfortable and beautiful homes without breaking the bank.",
+      "logo": "/stores/home-essentials-logo.jpg",
+      "coverImage": "/stores/home-essentials-cover.jpg",
+      "verified": true,
+      "featured": false,
+      "rating": 4.5,
+      "reviewsCount": 1456,
+      "followersCount": 6890,
+      "productsCount": 834,
+      "totalSales": 15678,
+      "location": {
+        "city": "Davao City",
+        "province": "Davao del Sur",
+        "country": "Philippines",
+        "address": "Victoria Plaza, Davao City, 8000"
+      },
+      "contact": {
+        "phone": "+63 82 234 5678",
+        "email": "support@homeessentialsdepot.com",
+        "website": "https://homeessentialsdepot.com"
+      },
+      "businessHours": {
+        "monday": "8:00 AM - 7:00 PM",
+        "tuesday": "8:00 AM - 7:00 PM",
+        "wednesday": "8:00 AM - 7:00 PM",
+        "thursday": "8:00 AM - 7:00 PM",
+        "friday": "8:00 AM - 8:00 PM",
+        "saturday": "8:00 AM - 8:00 PM",
+        "sunday": "9:00 AM - 6:00 PM"
+      },
+      "joinedDate": "2020-11-03",
+      "responseRate": "92%",
+      "responseTime": "5 hours",
+      "categories": ["Home & Garden", "Furniture", "Kitchen", "Appliances"],
+      "specialties": ["Home Improvement", "Kitchen Solutions", "Furniture"],
+      "policies": {
+        "shipping": "Free delivery within Davao City for orders over ₱2,500. Nationwide shipping available.",
+        "returns": "15-day return policy. Installation service available.",
+        "warranty": "Manufacturer warranty on all appliances. Service center support.",
+        "payment": "Cash, installment plans, major cards accepted."
+      },
+      "awards": ["Best Home Store Mindanao 2023", "Quality Excellence Award"],
+      "certifications": ["Authorized Appliance Dealer", "Furniture Association Member"],
+      "socialMedia": {
+        "facebook": "homeessentialsdepot",
+        "instagram": "home_essentials_depot",
+        "youtube": "HomeEssentialsDepotPH"
+      },
+      "bankDetails": {
+        "bankName": "PNB",
+        "accountName": "Home Essentials Depot Inc.",
+        "accountNumber": "3456-7890-12"
+      },
+      "owner": {
+        "name": "Roberto Fernandez",
+        "experience": "20 years in home retail",
+        "bio": "Experienced in home improvement with a passion for helping families create their dream homes."
+      }
+    },
+    {
+      "id": "active-lifestyle-sports",
+      "storeId": "active-lifestyle-sports",
+      "name": "Active Lifestyle Sports",
+      "slug": "active-lifestyle-sports",
+      "description": "Sports equipment and fitness gear for an active lifestyle. Quality products for athletes and fitness enthusiasts.",
+      "longDescription": "Active Lifestyle Sports is dedicated to promoting health and fitness in the Philippines. We offer a comprehensive selection of sports equipment, fitness gear, and athletic apparel from leading brands. Whether you're a professional athlete or just starting your fitness journey, we have the right equipment to help you achieve your goals.",
+      "logo": "/stores/active-lifestyle-logo.jpg",
+      "coverImage": "/stores/active-lifestyle-cover.jpg",
+      "verified": true,
+      "featured": false,
+      "rating": 4.4,
+      "reviewsCount": 743,
+      "followersCount": 5670,
+      "productsCount": 456,
+      "totalSales": 8945,
+      "location": {
+        "city": "Iloilo City",
+        "province": "Iloilo",
+        "country": "Philippines",
+        "address": "SM City Iloilo, Iloilo City, 5000"
+      },
+      "contact": {
+        "phone": "+63 33 345 6789",
+        "email": "info@activelifestylesports.com",
+        "website": "https://activelifestylesports.com"
+      },
+      "businessHours": {
+        "monday": "9:00 AM - 8:00 PM",
+        "tuesday": "9:00 AM - 8:00 PM",
+        "wednesday": "9:00 AM - 8:00 PM",
+        "thursday": "9:00 AM - 8:00 PM",
+        "friday": "9:00 AM - 9:00 PM",
+        "saturday": "9:00 AM - 9:00 PM",
+        "sunday": "10:00 AM - 7:00 PM"
+      },
+      "joinedDate": "2021-02-14",
+      "responseRate": "89%",
+      "responseTime": "6 hours",
+      "categories": ["Sports", "Fitness", "Athletic Wear", "Equipment"],
+      "specialties": ["Fitness Equipment", "Sports Gear", "Athletic Training"],
+      "policies": {
+        "shipping": "Free shipping for orders over ₱1,800. Assembly service available.",
+        "returns": "10-day return policy. Exchange available for sizing issues.",
+        "warranty": "Manufacturer warranty on equipment. Maintenance service available.",
+        "payment": "COD, online banking, credit cards accepted."
+      },
+      "awards": ["Sports Retailer of the Year Visayas 2023"],
+      "certifications": ["Sports Equipment Association Member"],
+      "socialMedia": {
+        "facebook": "activelifestylesports",
+        "instagram": "active_lifestyle_sports",
+        "youtube": "ActiveLifestyleSportsPH"
+      },
+      "bankDetails": {
+        "bankName": "Landbank",
+        "accountName": "Active Lifestyle Sports Corp.",
+        "accountNumber": "7890-1234-56"
+      },
+      "owner": {
+        "name": "Mark Dela Cruz",
+        "experience": "10 years in sports retail",
+        "bio": "Former athlete and fitness coach dedicated to helping others achieve their fitness goals."
+      }
+    }
+  ]
+}

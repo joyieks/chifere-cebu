@@ -1,0 +1,783 @@
+{
+  "products": [
+    {
+      "id": "canon-eos-2000d-kit",
+      "sku": "CAN-EOS-2000D-1855",
+      "name": "Canon EOS 2000D Camera With 18-55 DC III KIT SET",
+      "slug": "canon-eos-2000d-camera-kit",
+      "description": "Perfect entry-level DSLR camera for photography enthusiasts. Includes 18-55mm lens, perfect for portraits and landscapes.",
+      "longDescription": "The Canon EOS 2000D is designed for first-time DSLR users who want to take great photos. With a 24.1MP sensor, built-in Wi-Fi, and guided modes, it's never been easier to capture and share amazing photos. The kit includes the versatile EF-S 18-55mm f/3.5-5.6 DC III lens, perfect for everyday photography.",
+      "brand": {
+        "id": "canon",
+        "name": "Canon"
+      },
+      "category": {
+        "id": "cameras",
+        "name": "Cameras",
+        "parentId": "electronics"
+      },
+      "images": [
+        {
+          "url": "/products/canon-eos-2000d-1.jpg",
+          "alt": "Canon EOS 2000D front view",
+          "isPrimary": true
+        },
+        {
+          "url": "/products/canon-eos-2000d-2.jpg", 
+          "alt": "Canon EOS 2000D with lens",
+          "isPrimary": false
+        },
+        {
+          "url": "/products/canon-eos-2000d-3.jpg",
+          "alt": "Canon EOS 2000D back LCD",
+          "isPrimary": false
+        }
+      ],
+      "price": {
+        "current": 21900,
+        "original": 25000,
+        "currency": "PHP",
+        "discount": 12
+      },
+      "stock": {
+        "inStock": true,
+        "quantity": 15,
+        "lowStockThreshold": 5
+      },
+      "specifications": {
+        "Sensor": "24.1MP APS-C CMOS",
+        "ISO Range": "100-6400 (expandable to 12800)",
+        "Video": "Full HD 1080p",
+        "LCD": "3.0 inch fixed",
+        "Weight": "475g (body only)",
+        "Dimensions": "129 x 101.3 x 77.6mm",
+        "Lens Mount": "Canon EF/EF-S",
+        "Battery Life": "500 shots"
+      },
+      "features": [
+        "24.1MP APS-C CMOS sensor",
+        "Built-in Wi-Fi and NFC",
+        "Scene Intelligent Auto mode",
+        "Creative Auto mode",
+        "Full HD video recording",
+        "9-point autofocus system"
+      ],
+      "included": [
+        "Canon EOS 2000D Body",
+        "EF-S 18-55mm f/3.5-5.6 DC III lens",
+        "Battery Pack LP-E10",
+        "Battery Charger LC-E10",
+        "Neck Strap EW-400D",
+        "Instruction Manual"
+      ],
+      "storeId": "brilliant-channel-001",
+      "rating": {
+        "average": 4.5,
+        "count": 89
+      },
+      "sales": {
+        "totalSold": 245,
+        "monthlyAverage": 20
+      },
+      "tags": ["DSLR", "Canon", "Photography", "Beginner", "Kit"],
+      "featured": true,
+      "condition": "new",
+      "warranty": "1 year international warranty",
+      "shipping": {
+        "weight": "1.2kg",
+        "dimensions": "15x12x10cm",
+        "freeShipping": true,
+        "estimatedDays": "2-3 days"
+      },
+      "seo": {
+        "title": "Canon EOS 2000D DSLR Camera Kit - Best Price Philippines",
+        "description": "Buy Canon EOS 2000D DSLR Camera with 18-55mm lens kit. Perfect for beginners. Free shipping, 1-year warranty.",
+        "keywords": ["Canon EOS 2000D", "DSLR camera", "photography", "beginner camera"]
+      },
+      "createdAt": "2024-01-15T08:30:00Z",
+      "updatedAt": "2024-01-20T14:22:00Z"
+    },
+    {
+      "id": "sony-wh1000xm4-headphones",
+      "sku": "SONY-WH1000XM4-BLK",
+      "name": "Sony WH-1000XM4 Wireless Noise Canceling Headphones",
+      "slug": "sony-wh1000xm4-wireless-headphones",
+      "description": "Industry-leading noise cancellation with exceptional sound quality. Perfect for music lovers and professionals.",
+      "longDescription": "Experience the next level of audio quality with Sony's WH-1000XM4 headphones. Featuring industry-leading noise cancellation, premium sound quality, and smart features like Speak-to-Chat technology. With 30-hour battery life and quick charge capability, these headphones are perfect for travel, work, or daily listening.",
+      "brand": {
+        "id": "sony",
+        "name": "Sony"
+      },
+      "category": {
+        "id": "audio",
+        "name": "Audio",
+        "parentId": "electronics"
+      },
+      "images": [
+        {
+          "url": "/products/sony-wh1000xm4-1.jpg",
+          "alt": "Sony WH-1000XM4 side view",
+          "isPrimary": true
+        },
+        {
+          "url": "/products/sony-wh1000xm4-2.jpg",
+          "alt": "Sony WH-1000XM4 folded",
+          "isPrimary": false
+        },
+        {
+          "url": "/products/sony-wh1000xm4-3.jpg",
+          "alt": "Sony WH-1000XM4 case",
+          "isPrimary": false
+        }
+      ],
+      "price": {
+        "current": 15990,
+        "original": 18000,
+        "currency": "PHP",
+        "discount": 11
+      },
+      "stock": {
+        "inStock": true,
+        "quantity": 8,
+        "lowStockThreshold": 5
+      },
+      "specifications": {
+        "Driver Unit": "40mm dome type",
+        "Frequency Response": "4Hz-40,000Hz",
+        "Battery Life": "30 hours with NC",
+        "Charging Time": "3 hours (full charge)",
+        "Quick Charge": "10 min for 5 hours",
+        "Weight": "254g",
+        "Connectivity": "Bluetooth 5.0, NFC, 3.5mm",
+        "Codec": "LDAC, aptX HD, AAC, SBC"
+      },
+      "features": [
+        "Industry-leading noise cancellation",
+        "30-hour battery life",
+        "Quick Attention mode",
+        "Speak-to-Chat technology",
+        "Multipoint connection",
+        "Touch sensor controls",
+        "360 Reality Audio support"
+      ],
+      "included": [
+        "Sony WH-1000XM4 Headphones",
+        "Carrying case",
+        "USB-C charging cable",
+        "Audio cable (3.5mm)",
+        "Airplane adapter",
+        "Quick Start Guide"
+      ],
+      "storeId": "brilliant-channel-001",
+      "rating": {
+        "average": 4.7,
+        "count": 156
+      },
+      "sales": {
+        "totalSold": 89,
+        "monthlyAverage": 12
+      },
+      "tags": ["Sony", "Headphones", "Noise Canceling", "Wireless", "Premium"],
+      "featured": true,
+      "condition": "new",
+      "warranty": "1 year Sony warranty",
+      "shipping": {
+        "weight": "0.8kg",
+        "dimensions": "25x20x15cm",
+        "freeShipping": true,
+        "estimatedDays": "1-2 days"
+      },
+      "seo": {
+        "title": "Sony WH-1000XM4 Noise Canceling Headphones - Best Price PH",
+        "description": "Buy Sony WH-1000XM4 wireless noise canceling headphones. Industry-leading noise cancellation, 30hr battery. Free shipping.",
+        "keywords": ["Sony WH-1000XM4", "noise canceling headphones", "wireless headphones", "premium audio"]
+      },
+      "createdAt": "2024-01-12T10:15:00Z",
+      "updatedAt": "2024-01-18T16:45:00Z"
+    },
+    {
+      "id": "iphone-13-pro-max-256gb",
+      "sku": "APPL-IP13PM-256-GRN",
+      "name": "Apple iPhone 13 Pro Max 256GB - Alpine Green",
+      "slug": "iphone-13-pro-max-256gb-alpine-green",
+      "description": "The ultimate iPhone experience with Pro camera system, Super Retina XDR display, and A15 Bionic chip.",
+      "longDescription": "iPhone 13 Pro Max delivers the most advanced iPhone experience yet. With the revolutionary Pro camera system, you can capture stunning photos and videos in any lighting. The 6.7-inch Super Retina XDR display with ProMotion provides an incredibly smooth and responsive experience. Powered by the A15 Bionic chip for lightning-fast performance.",
+      "brand": {
+        "id": "apple",
+        "name": "Apple"
+      },
+      "category": {
+        "id": "smartphones",
+        "name": "Smartphones", 
+        "parentId": "electronics"
+      },
+      "images": [
+        {
+          "url": "/products/iphone-13-pro-max-1.jpg",
+          "alt": "iPhone 13 Pro Max Alpine Green front",
+          "isPrimary": true
+        },
+        {
+          "url": "/products/iphone-13-pro-max-2.jpg",
+          "alt": "iPhone 13 Pro Max camera system",
+          "isPrimary": false
+        },
+        {
+          "url": "/products/iphone-13-pro-max-3.jpg",
+          "alt": "iPhone 13 Pro Max back view",
+          "isPrimary": false
+        }
+      ],
+      "price": {
+        "current": 65990,
+        "original": 70000,
+        "currency": "PHP",
+        "discount": 6
+      },
+      "stock": {
+        "inStock": false,
+        "quantity": 0,
+        "lowStockThreshold": 5
+      },
+      "specifications": {
+        "Display": "6.7-inch Super Retina XDR",
+        "Resolution": "2778x1284 pixels at 458 ppi",
+        "Chip": "A15 Bionic chip",
+        "Storage": "256GB",
+        "Camera": "Pro 12MP camera system",
+        "Video": "4K Dolby Vision HDR recording",
+        "Battery": "Up to 28 hours video playback",
+        "Water Resistance": "IP68",
+        "5G": "Yes"
+      },
+      "features": [
+        "6.7-inch Super Retina XDR display with ProMotion",
+        "Pro camera system with 3x optical zoom",
+        "A15 Bionic chip with 5-core GPU",
+        "5G connectivity",
+        "Face ID",
+        "MagSafe and wireless charging",
+        "iOS 15"
+      ],
+      "included": [
+        "iPhone 13 Pro Max",
+        "USB-C to Lightning Cable",
+        "Documentation"
+      ],
+      "storeId": "brilliant-channel-001",
+      "rating": {
+        "average": 4.9,
+        "count": 234
+      },
+      "sales": {
+        "totalSold": 567,
+        "monthlyAverage": 45
+      },
+      "tags": ["iPhone", "Apple", "Pro", "Smartphone", "Premium"],
+      "featured": false,
+      "condition": "new",
+      "warranty": "1 year Apple limited warranty",
+      "shipping": {
+        "weight": "0.4kg",
+        "dimensions": "20x15x5cm",
+        "freeShipping": true,
+        "estimatedDays": "1-2 days"
+      },
+      "seo": {
+        "title": "iPhone 13 Pro Max 256GB Alpine Green - Official Apple Store PH",
+        "description": "Buy iPhone 13 Pro Max 256GB Alpine Green. Pro camera system, A15 Bionic chip, 6.7-inch display. Official warranty.",
+        "keywords": ["iPhone 13 Pro Max", "Apple smartphone", "256GB", "Alpine Green", "Pro camera"]
+      },
+      "createdAt": "2024-01-08T09:20:00Z",
+      "updatedAt": "2024-01-22T11:30:00Z"
+    },
+    {
+      "id": "samsung-galaxy-watch-4-44mm",
+      "sku": "SAMS-GW4-44-BLK", 
+      "name": "Samsung Galaxy Watch 4 44mm Black",
+      "slug": "samsung-galaxy-watch-4-44mm-black",
+      "description": "Advanced smartwatch with body composition analysis, sleep tracking, and comprehensive fitness features.",
+      "longDescription": "Samsung Galaxy Watch 4 combines style and technology in one powerful smartwatch. With advanced health monitoring including body composition analysis, sleep tracking, and comprehensive fitness features, it's your perfect health companion. Compatible with Android devices and featuring fast charging and long battery life.",
+      "brand": {
+        "id": "samsung",
+        "name": "Samsung"
+      },
+      "category": {
+        "id": "wearables",
+        "name": "Wearables",
+        "parentId": "electronics"
+      },
+      "images": [
+        {
+          "url": "/products/galaxy-watch-4-1.jpg",
+          "alt": "Samsung Galaxy Watch 4 front view",
+          "isPrimary": true
+        },
+        {
+          "url": "/products/galaxy-watch-4-2.jpg",
+          "alt": "Samsung Galaxy Watch 4 side view",
+          "isPrimary": false
+        },
+        {
+          "url": "/products/galaxy-watch-4-3.jpg",
+          "alt": "Samsung Galaxy Watch 4 apps",
+          "isPrimary": false
+        }
+      ],
+      "price": {
+        "current": 12990,
+        "original": 15000,
+        "currency": "PHP",
+        "discount": 13
+      },
+      "stock": {
+        "inStock": true,
+        "quantity": 3,
+        "lowStockThreshold": 5
+      },
+      "specifications": {
+        "Display": "1.4-inch Super AMOLED",
+        "Resolution": "450 x 450 pixels",
+        "Processor": "Exynos W920 Dual Core",
+        "Memory": "1.5GB RAM, 16GB storage",
+        "Battery": "361mAh",
+        "Water Resistance": "5ATM + IP68",
+        "Connectivity": "Bluetooth 5.0, Wi-Fi, NFC",
+        "Sensors": "Heart rate, SpO2, 3-axis accelerometer"
+      },
+      "features": [
+        "Body composition analysis",
+        "Advanced sleep tracking",
+        "90+ workout modes",
+        "Heart rate monitoring",
+        "SpO2 monitoring",
+        "GPS tracking",
+        "Water resistant 5ATM + IP68",
+        "Fast wireless charging"
+      ],
+      "included": [
+        "Samsung Galaxy Watch 4",
+        "Sport band",
+        "Wireless charging dock",
+        "USB-C cable",
+        "Quick start guide"
+      ],
+      "storeId": "brilliant-channel-001",
+      "rating": {
+        "average": 4.4,
+        "count": 67
+      },
+      "sales": {
+        "totalSold": 123,
+        "monthlyAverage": 15
+      },
+      "tags": ["Samsung", "Smartwatch", "Fitness", "Health", "Wearable"],
+      "featured": true,
+      "condition": "new",
+      "warranty": "1 year Samsung warranty",
+      "shipping": {
+        "weight": "0.3kg",
+        "dimensions": "15x15x8cm",
+        "freeShipping": true,
+        "estimatedDays": "2-3 days"
+      },
+      "seo": {
+        "title": "Samsung Galaxy Watch 4 44mm Black - Best Price Philippines",
+        "description": "Buy Samsung Galaxy Watch 4 44mm smartwatch. Body composition analysis, fitness tracking. Official warranty.",
+        "keywords": ["Samsung Galaxy Watch 4", "smartwatch", "fitness tracker", "health monitoring"]
+      },
+      "createdAt": "2024-01-10T14:25:00Z",
+      "updatedAt": "2024-01-19T09:15:00Z"
+    },
+    {
+      "id": "macbook-pro-13-m2-256gb",
+      "sku": "APPL-MBP13-M2-256-SG",
+      "name": "MacBook Pro 13\" M2 Chip 256GB - Space Gray",
+      "slug": "macbook-pro-13-m2-chip-256gb-space-gray",
+      "description": "Supercharged by M2 chip for incredible performance. Perfect for professionals and creative work.",
+      "longDescription": "The 13-inch MacBook Pro with M2 chip delivers exceptional performance and battery life for professional workflows. With an advanced 8-core CPU and 10-core GPU, it handles demanding tasks with ease. The brilliant Retina display, studio-quality mics, and advanced camera make it perfect for video calls and content creation.",
+      "brand": {
+        "id": "apple",
+        "name": "Apple"
+      },
+      "category": {
+        "id": "laptops",
+        "name": "Laptops",
+        "parentId": "electronics"
+      },
+      "images": [
+        {
+          "url": "/products/macbook-pro-13-m2-1.jpg",
+          "alt": "MacBook Pro 13 M2 open view",
+          "isPrimary": true
+        },
+        {
+          "url": "/products/macbook-pro-13-m2-2.jpg",
+          "alt": "MacBook Pro 13 M2 closed",
+          "isPrimary": false
+        },
+        {
+          "url": "/products/macbook-pro-13-m2-3.jpg",
+          "alt": "MacBook Pro 13 M2 ports",
+          "isPrimary": false
+        }
+      ],
+      "price": {
+        "current": 68990,
+        "original": 75000,
+        "currency": "PHP", 
+        "discount": 8
+      },
+      "stock": {
+        "inStock": true,
+        "quantity": 12,
+        "lowStockThreshold": 5
+      },
+      "specifications": {
+        "Chip": "Apple M2 chip",
+        "CPU": "8-core CPU with 4 performance and 4 efficiency cores",
+        "GPU": "10-core GPU",
+        "Memory": "8GB unified memory",
+        "Storage": "256GB SSD",
+        "Display": "13.3-inch Retina display",
+        "Resolution": "2560x1600 native resolution",
+        "Battery": "Up to 20 hours",
+        "Weight": "1.4 kg"
+      },
+      "features": [
+        "Apple M2 chip for exceptional performance",
+        "13.3-inch Retina display with 500 nits brightness",
+        "8GB unified memory",
+        "256GB SSD storage", 
+        "Touch Bar and Touch ID",
+        "Two Thunderbolt/USB 4 ports",
+        "Up to 20 hours battery life",
+        "Studio-quality three-mic array"
+      ],
+      "included": [
+        "13-inch MacBook Pro",
+        "67W USB-C Power Adapter",
+        "USB-C to MagSafe 3 Cable",
+        "Documentation"
+      ],
+      "storeId": "brilliant-channel-001",
+      "rating": {
+        "average": 4.8,
+        "count": 98
+      },
+      "sales": {
+        "totalSold": 234,
+        "monthlyAverage": 25
+      },
+      "tags": ["MacBook", "Apple", "M2", "Laptop", "Professional"],
+      "featured": false,
+      "condition": "new",
+      "warranty": "1 year Apple limited warranty",
+      "shipping": {
+        "weight": "2.1kg",
+        "dimensions": "35x25x8cm",
+        "freeShipping": true,
+        "estimatedDays": "2-3 days"
+      },
+      "seo": {
+        "title": "MacBook Pro 13\" M2 Chip 256GB Space Gray - Official Apple Store",
+        "description": "Buy MacBook Pro 13-inch with M2 chip. 8-core CPU, 10-core GPU, 256GB SSD. Professional laptop with 20hr battery.",
+        "keywords": ["MacBook Pro 13", "M2 chip", "Apple laptop", "256GB", "professional laptop"]
+      },
+      "createdAt": "2024-01-05T11:40:00Z",
+      "updatedAt": "2024-01-21T15:20:00Z"
+    },
+    {
+      "id": "ipad-air-5th-gen-64gb",
+      "sku": "APPL-IPAD-AIR5-64-BL",
+      "name": "iPad Air 5th Generation 64GB - Blue",
+      "slug": "ipad-air-5th-generation-64gb-blue",
+      "description": "Powerful iPad Air with M1 chip. Perfect for creativity, productivity, and entertainment.",
+      "longDescription": "iPad Air features the powerful M1 chip for incredible performance in a thin and light design. With a stunning 10.9-inch Liquid Retina display, advanced cameras, and all-day battery life, it's perfect for work, creativity, and entertainment. Compatible with Apple Pencil and Magic Keyboard for enhanced productivity.",
+      "brand": {
+        "id": "apple",
+        "name": "Apple"
+      },
+      "category": {
+        "id": "tablets",
+        "name": "Tablets",
+        "parentId": "electronics"
+      },
+      "images": [
+        {
+          "url": "/products/ipad-air-5-1.jpg",
+          "alt": "iPad Air 5th Gen front view",
+          "isPrimary": true
+        },
+        {
+          "url": "/products/ipad-air-5-2.jpg",
+          "alt": "iPad Air 5th Gen with Apple Pencil",
+          "isPrimary": false
+        },
+        {
+          "url": "/products/ipad-air-5-3.jpg",
+          "alt": "iPad Air 5th Gen back view",
+          "isPrimary": false
+        }
+      ],
+      "price": {
+        "current": 32990,
+        "original": 35000,
+        "currency": "PHP",
+        "discount": 6
+      },
+      "stock": {
+        "inStock": true,
+        "quantity": 7,
+        "lowStockThreshold": 5
+      },
+      "specifications": {
+        "Chip": "Apple M1 chip",
+        "Display": "10.9-inch Liquid Retina display",
+        "Resolution": "2360x1640 at 264 ppi",
+        "Storage": "64GB",
+        "Camera": "12MP Wide camera",
+        "Front Camera": "12MP Ultra Wide front camera",
+        "Battery": "Up to 10 hours",
+        "Connectivity": "Wi-Fi 6, Bluetooth 5.0",
+        "Weight": "461 grams"
+      },
+      "features": [
+        "Apple M1 chip with 8-core CPU",
+        "10.9-inch Liquid Retina display",
+        "12MP Wide and Ultra Wide cameras",
+        "Touch ID built into the top button",
+        "Apple Pencil (2nd generation) support",
+        "Magic Keyboard support",
+        "USB-C connector",
+        "All-day battery life"
+      ],
+      "included": [
+        "iPad Air",
+        "USB-C Charge Cable (1 meter)",
+        "20W USB-C Power Adapter",
+        "Documentation"
+      ],
+      "storeId": "brilliant-channel-001",
+      "rating": {
+        "average": 4.6,
+        "count": 145
+      },
+      "sales": {
+        "totalSold": 178,
+        "monthlyAverage": 22
+      },
+      "tags": ["iPad", "Apple", "M1", "Tablet", "Creative"],
+      "featured": true,
+      "condition": "new",
+      "warranty": "1 year Apple limited warranty",
+      "shipping": {
+        "weight": "0.7kg",
+        "dimensions": "28x22x3cm",
+        "freeShipping": true,
+        "estimatedDays": "1-2 days"
+      },
+      "seo": {
+        "title": "iPad Air 5th Generation 64GB Blue - M1 Chip iPad",
+        "description": "Buy iPad Air 5th Gen with M1 chip. 10.9-inch Liquid Retina display, 64GB storage. Apple Pencil compatible.",
+        "keywords": ["iPad Air 5", "M1 chip", "Apple tablet", "64GB", "Blue iPad"]
+      },
+      "createdAt": "2024-01-07T13:55:00Z",
+      "updatedAt": "2024-01-20T10:10:00Z"
+    },
+    {
+      "id": "razer-deathadder-v3-pro",
+      "sku": "RZR-DAV3P-BLK",
+      "name": "Razer DeathAdder V3 Pro Wireless Gaming Mouse",
+      "slug": "razer-deathadder-v3-pro-wireless-gaming-mouse",
+      "description": "Ultimate wireless gaming mouse with Focus Pro 30K sensor and 90-hour battery life. Perfect for esports.",
+      "longDescription": "The Razer DeathAdder V3 Pro is the pinnacle of gaming mouse technology. Featuring the Focus Pro 30K sensor, HyperSpeed Wireless technology, and up to 90 hours of battery life, it delivers uncompromising performance for competitive gaming. The ergonomic design ensures comfort during extended gaming sessions.",
+      "brand": {
+        "id": "razer",
+        "name": "Razer"
+      },
+      "category": {
+        "id": "gaming",
+        "name": "Gaming",
+        "parentId": "electronics"
+      },
+      "images": [
+        {
+          "url": "/products/razer-deathadder-v3-pro-1.jpg",
+          "alt": "Razer DeathAdder V3 Pro top view",
+          "isPrimary": true
+        },
+        {
+          "url": "/products/razer-deathadder-v3-pro-2.jpg",
+          "alt": "Razer DeathAdder V3 Pro side view",
+          "isPrimary": false
+        },
+        {
+          "url": "/products/razer-deathadder-v3-pro-3.jpg",
+          "alt": "Razer DeathAdder V3 Pro RGB lighting",
+          "isPrimary": false
+        }
+      ],
+      "price": {
+        "current": 7990,
+        "original": 8500,
+        "currency": "PHP",
+        "discount": 6
+      },
+      "stock": {
+        "inStock": true,
+        "quantity": 25,
+        "lowStockThreshold": 10
+      },
+      "specifications": {
+        "Sensor": "Focus Pro 30K Optical Sensor",
+        "DPI": "Up to 30,000 DPI",
+        "IPS": "750 inches per second",
+        "Acceleration": "50G",
+        "Buttons": "8 programmable buttons",
+        "Battery Life": "Up to 90 hours",
+        "Connectivity": "HyperSpeed Wireless (2.4GHz), Bluetooth",
+        "Weight": "63g (without cable)"
+      },
+      "features": [
+        "Focus Pro 30K optical sensor",
+        "HyperSpeed Wireless technology",
+        "90-hour battery life",
+        "Gen-3 optical mouse switches",
+        "Ergonomic right-handed design",
+        "8 programmable buttons",
+        "Razer Chroma RGB lighting",
+        "DPI on-the-fly switching"
+      ],
+      "included": [
+        "Razer DeathAdder V3 Pro",
+        "HyperSpeed Wireless USB receiver",
+        "USB-A to USB-C charging cable",
+        "Important product information guide"
+      ],
+      "storeId": "tech-haven-ph",
+      "rating": {
+        "average": 4.8,
+        "count": 234
+      },
+      "sales": {
+        "totalSold": 456,
+        "monthlyAverage": 38
+      },
+      "tags": ["Razer", "Gaming Mouse", "Wireless", "Esports", "Pro"],
+      "featured": true,
+      "condition": "new",
+      "warranty": "2 years Razer warranty",
+      "shipping": {
+        "weight": "0.3kg",
+        "dimensions": "20x15x8cm",
+        "freeShipping": true,
+        "estimatedDays": "1-2 days"
+      },
+      "seo": {
+        "title": "Razer DeathAdder V3 Pro Wireless Gaming Mouse - Best Price PH",
+        "description": "Buy Razer DeathAdder V3 Pro gaming mouse. Focus Pro 30K sensor, 90hr battery, wireless. Perfect for esports.",
+        "keywords": ["Razer DeathAdder V3 Pro", "gaming mouse", "wireless mouse", "esports", "Focus Pro 30K"]
+      },
+      "createdAt": "2024-01-11T09:30:00Z",
+      "updatedAt": "2024-01-23T14:45:00Z"
+    },
+    {
+      "id": "nvidia-rtx-4070-super",
+      "sku": "NVD-RTX4070S-16GB",
+      "name": "NVIDIA GeForce RTX 4070 SUPER 16GB Graphics Card",
+      "slug": "nvidia-rtx-4070-super-16gb-graphics-card",
+      "description": "Next-gen gaming and content creation with RT Cores and Tensor Cores. Perfect for 1440p gaming and ray tracing.",
+      "longDescription": "Experience next-generation gaming with the NVIDIA GeForce RTX 4070 SUPER. Built on the Ada Lovelace architecture, it delivers exceptional performance for 1440p gaming with ray tracing enabled. With 16GB of GDDR6X memory and advanced features like DLSS 3, it's perfect for gaming, streaming, and content creation.",
+      "brand": {
+        "id": "nvidia",
+        "name": "NVIDIA"
+      },
+      "category": {
+        "id": "gaming",
+        "name": "Gaming",
+        "parentId": "electronics"
+      },
+      "images": [
+        {
+          "url": "/products/rtx-4070-super-1.jpg",
+          "alt": "NVIDIA RTX 4070 SUPER graphics card",
+          "isPrimary": true
+        },
+        {
+          "url": "/products/rtx-4070-super-2.jpg",
+          "alt": "RTX 4070 SUPER backplate",
+          "isPrimary": false
+        },
+        {
+          "url": "/products/rtx-4070-super-3.jpg",
+          "alt": "RTX 4070 SUPER ports",
+          "isPrimary": false
+        }
+      ],
+      "price": {
+        "current": 42990,
+        "original": 45000,
+        "currency": "PHP",
+        "discount": 4
+      },
+      "stock": {
+        "inStock": true,
+        "quantity": 6,
+        "lowStockThreshold": 5
+      },
+      "specifications": {
+        "GPU": "Ada Lovelace",
+        "CUDA Cores": "7168",
+        "RT Cores": "56 3rd gen",
+        "Tensor Cores": "224 4th gen",
+        "Base Clock": "1980 MHz",
+        "Boost Clock": "2475 MHz",
+        "Memory": "16GB GDDR6X",
+        "Memory Bus": "256-bit",
+        "TGP": "220W"
+      },
+      "features": [
+        "Ada Lovelace architecture",
+        "16GB GDDR6X memory",
+        "Ray tracing technology",
+        "DLSS 3 Frame Generation",
+        "AV1 encoding",
+        "4K gaming capable",
+        "VR ready",
+        "Multiple display support"
+      ],
+      "included": [
+        "NVIDIA GeForce RTX 4070 SUPER",
+        "Installation guide",
+        "Driver disk"
+      ],
+      "storeId": "tech-haven-ph",
+      "rating": {
+        "average": 4.9,
+        "count": 89
+      },
+      "sales": {
+        "totalSold": 156,
+        "monthlyAverage": 18
+      },
+      "tags": ["NVIDIA", "RTX", "Graphics Card", "Gaming", "Ray Tracing"],
+      "featured": true,
+      "condition": "new",
+      "warranty": "3 years NVIDIA warranty",
+      "shipping": {
+        "weight": "1.8kg",
+        "dimensions": "35x15x8cm",
+        "freeShipping": true,
+        "estimatedDays": "2-3 days"
+      },
+      "seo": {
+        "title": "NVIDIA RTX 4070 SUPER 16GB Graphics Card - Gaming GPU PH",
+        "description": "Buy NVIDIA RTX 4070 SUPER 16GB graphics card. Ada Lovelace, ray tracing, DLSS 3. Perfect for 1440p gaming.",
+        "keywords": ["NVIDIA RTX 4070 SUPER", "graphics card", "gaming GPU", "ray tracing", "DLSS 3"]
+      },
+      "createdAt": "2024-01-09T16:20:00Z",
+      "updatedAt": "2024-01-24T12:30:00Z"
+    }
+  ]
+}

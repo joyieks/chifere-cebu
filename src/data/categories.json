@@ -1,0 +1,206 @@
+{
+  "categories": [
+    {
+      "id": "electronics",
+      "name": "Electronics",
+      "slug": "electronics",
+      "description": "Electronic devices and gadgets",
+      "image": "/categories/electronics.jpg",
+      "parentId": null,
+      "subcategories": [
+        {
+          "id": "smartphones",
+          "name": "Smartphones",
+          "slug": "smartphones",
+          "description": "Mobile phones and accessories",
+          "image": "/categories/smartphones.jpg",
+          "parentId": "electronics"
+        },
+        {
+          "id": "laptops",
+          "name": "Laptops",
+          "slug": "laptops", 
+          "description": "Portable computers and notebooks",
+          "image": "/categories/laptops.jpg",
+          "parentId": "electronics"
+        },
+        {
+          "id": "tablets",
+          "name": "Tablets",
+          "slug": "tablets",
+          "description": "Tablet computers and e-readers",
+          "image": "/categories/tablets.jpg",
+          "parentId": "electronics"
+        },
+        {
+          "id": "cameras",
+          "name": "Cameras",
+          "slug": "cameras",
+          "description": "Digital cameras and photography equipment",
+          "image": "/categories/cameras.jpg",
+          "parentId": "electronics"
+        },
+        {
+          "id": "audio",
+          "name": "Audio",
+          "slug": "audio",
+          "description": "Headphones, speakers, and audio equipment",
+          "image": "/categories/audio.jpg",
+          "parentId": "electronics"
+        },
+        {
+          "id": "wearables",
+          "name": "Wearables",
+          "slug": "wearables",
+          "description": "Smart watches and fitness trackers",
+          "image": "/categories/wearables.jpg",
+          "parentId": "electronics"
+        },
+        {
+          "id": "gaming",
+          "name": "Gaming",
+          "slug": "gaming",
+          "description": "Gaming consoles and accessories",
+          "image": "/categories/gaming.jpg",
+          "parentId": "electronics"
+        }
+      ]
+    },
+    {
+      "id": "fashion",
+      "name": "Fashion",
+      "slug": "fashion",
+      "description": "Clothing, shoes, and accessories",
+      "image": "/categories/fashion.jpg",
+      "parentId": null,
+      "subcategories": [
+        {
+          "id": "mens-clothing",
+          "name": "Men's Clothing",
+          "slug": "mens-clothing",
+          "description": "Men's apparel and accessories",
+          "image": "/categories/mens-clothing.jpg",
+          "parentId": "fashion"
+        },
+        {
+          "id": "womens-clothing",
+          "name": "Women's Clothing",
+          "slug": "womens-clothing",
+          "description": "Women's apparel and accessories",
+          "image": "/categories/womens-clothing.jpg",
+          "parentId": "fashion"
+        },
+        {
+          "id": "shoes",
+          "name": "Shoes",
+          "slug": "shoes",
+          "description": "Footwear for all occasions",
+          "image": "/categories/shoes.jpg",
+          "parentId": "fashion"
+        },
+        {
+          "id": "bags",
+          "name": "Bags",
+          "slug": "bags",
+          "description": "Handbags, backpacks, and luggage",
+          "image": "/categories/bags.jpg",
+          "parentId": "fashion"
+        }
+      ]
+    },
+    {
+      "id": "home-garden",
+      "name": "Home & Garden",
+      "slug": "home-garden",
+      "description": "Home improvement and garden supplies",
+      "image": "/categories/home-garden.jpg",
+      "parentId": null,
+      "subcategories": [
+        {
+          "id": "furniture",
+          "name": "Furniture",
+          "slug": "furniture",
+          "description": "Home and office furniture",
+          "image": "/categories/furniture.jpg",
+          "parentId": "home-garden"
+        },
+        {
+          "id": "kitchen",
+          "name": "Kitchen",
+          "slug": "kitchen",
+          "description": "Kitchen appliances and utensils",
+          "image": "/categories/kitchen.jpg",
+          "parentId": "home-garden"
+        },
+        {
+          "id": "garden",
+          "name": "Garden",
+          "slug": "garden",
+          "description": "Gardening tools and supplies",
+          "image": "/categories/garden.jpg",
+          "parentId": "home-garden"
+        }
+      ]
+    },
+    {
+      "id": "sports",
+      "name": "Sports & Outdoors",
+      "slug": "sports",
+      "description": "Sports equipment and outdoor gear",
+      "image": "/categories/sports.jpg",
+      "parentId": null,
+      "subcategories": [
+        {
+          "id": "fitness",
+          "name": "Fitness",
+          "slug": "fitness",
+          "description": "Exercise equipment and accessories",
+          "image": "/categories/fitness.jpg",
+          "parentId": "sports"
+        },
+        {
+          "id": "outdoor",
+          "name": "Outdoor",
+          "slug": "outdoor",
+          "description": "Camping and outdoor adventure gear",
+          "image": "/categories/outdoor.jpg",
+          "parentId": "sports"
+        }
+      ]
+    },
+    {
+      "id": "books",
+      "name": "Books",
+      "slug": "books",
+      "description": "Books, magazines, and educational materials",
+      "image": "/categories/books.jpg",
+      "parentId": null,
+      "subcategories": [
+        {
+          "id": "fiction",
+          "name": "Fiction",
+          "slug": "fiction",
+          "description": "Novels and fictional literature",
+          "image": "/categories/fiction.jpg",
+          "parentId": "books"
+        },
+        {
+          "id": "non-fiction",
+          "name": "Non-Fiction",
+          "slug": "non-fiction",
+          "description": "Educational and reference books",
+          "image": "/categories/non-fiction.jpg",
+          "parentId": "books"
+        },
+        {
+          "id": "textbooks",
+          "name": "Textbooks",
+          "slug": "textbooks",
+          "description": "Academic and educational textbooks",
+          "image": "/categories/textbooks.jpg",
+          "parentId": "books"
+        }
+      ]
+    }
+  ]
+}

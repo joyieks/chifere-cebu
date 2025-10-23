@@ -1,0 +1,9 @@
+<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#eff6ff"/>
+  <rect x="120" y="100" width="160" height="100" fill="#3b82f6" rx="12"/>
+  <rect x="140" y="120" width="40" height="40" fill="#ffffff" rx="4"/>
+  <rect x="200" y="120" width="40" height="40" fill="#ffffff" rx="4"/>
+  <rect x="260" y="120" width="40" height="40" fill="#ffffff" rx="4"/>
+  <text x="200" y="230" text-anchor="middle" font-family="Inter, sans-serif" font-size="16" fill="#1e40af" font-weight="600">Store</text>
+  <text x="200" y="250" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#3b82f6">ChiFere Marketplace</text>
+</svg>

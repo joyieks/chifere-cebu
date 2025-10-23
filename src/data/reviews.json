@@ -1,0 +1,301 @@
+{
+  "reviews": [
+    {
+      "id": "rev-001",
+      "productId": "canon-eos-2000d-kit",
+      "storeId": "brilliant-channel-001",
+      "userId": "user-001",
+      "userName": "Miguel Santos",
+      "userAvatar": "/avatars/user1.jpg",
+      "rating": 5,
+      "title": "Perfect camera for beginners!",
+      "comment": "I'm completely new to photography and this camera has been amazing to learn with. The auto modes work great and the image quality is fantastic for the price. The kit lens is also very versatile. Brilliant Channel shipped it super fast and packaging was excellent. Highly recommended for anyone starting their photography journey!",
+      "helpful": 23,
+      "verified": true,
+      "images": [
+        "/reviews/canon-review-1.jpg",
+        "/reviews/canon-review-2.jpg"
+      ],
+      "pros": [
+        "Easy to use for beginners",
+        "Great image quality",
+        "Good battery life",
+        "Fast autofocus"
+      ],
+      "cons": [
+        "LCD screen not touch-enabled",
+        "Limited video features"
+      ],
+      "createdAt": "2024-01-18T14:30:00Z",
+      "updatedAt": "2024-01-18T14:30:00Z"
+    },
+    {
+      "id": "rev-002",
+      "productId": "canon-eos-2000d-kit",
+      "storeId": "brilliant-channel-001",
+      "userId": "user-002",
+      "userName": "Anna Reyes",
+      "userAvatar": "/avatars/user2.jpg",
+      "rating": 4,
+      "title": "Good value DSLR",
+      "comment": "Solid camera for the price point. Build quality is good and it takes nice photos. The WiFi feature is handy for sharing photos instantly. Only complaint is that the LCD screen feels a bit dated compared to newer models, but overall very satisfied with the purchase.",
+      "helpful": 15,
+      "verified": true,
+      "images": [],
+      "pros": [
+        "Good value for money",
+        "WiFi connectivity",
+        "Lightweight"
+      ],
+      "cons": [
+        "Dated LCD screen",
+        "Plastic build"
+      ],
+      "createdAt": "2024-01-16T10:15:00Z",
+      "updatedAt": "2024-01-16T10:15:00Z"
+    },
+    {
+      "id": "rev-003",
+      "productId": "sony-wh1000xm4-headphones",
+      "storeId": "brilliant-channel-001",
+      "userId": "user-003",
+      "userName": "James Cruz",
+      "userAvatar": "/avatars/user3.jpg",
+      "rating": 5,
+      "title": "Best noise-canceling headphones ever!",
+      "comment": "These headphones are absolutely incredible! The noise cancellation is so good that I can't hear anything around me when it's on. Sound quality is pristine with deep bass and clear highs. Battery life easily lasts the whole day. Perfect for work-from-home calls and music listening. Worth every peso!",
+      "helpful": 31,
+      "verified": true,
+      "images": [
+        "/reviews/sony-review-1.jpg"
+      ],
+      "pros": [
+        "Amazing noise cancellation",
+        "Excellent sound quality",
+        "Long battery life",
+        "Comfortable for long use"
+      ],
+      "cons": [
+        "Expensive",
+        "Touch controls can be sensitive"
+      ],
+      "createdAt": "2024-01-20T16:45:00Z",
+      "updatedAt": "2024-01-20T16:45:00Z"
+    },
+    {
+      "id": "rev-004",
+      "productId": "sony-wh1000xm4-headphones", 
+      "storeId": "brilliant-channel-001",
+      "userId": "user-004",
+      "userName": "Carla Mendoza",
+      "userAvatar": "/avatars/user4.jpg",
+      "rating": 4,
+      "title": "Great for travel",
+      "comment": "I bought these primarily for travel and they've been fantastic. The noise cancellation makes flights so much more comfortable. Sound quality is excellent for both music and calls. Only issue is that they can get a bit warm during extended use in hot weather.",
+      "helpful": 12,
+      "verified": true,
+      "images": [],
+      "pros": [
+        "Perfect for travel",
+        "Great call quality",
+        "Foldable design"
+      ],
+      "cons": [
+        "Can get warm",
+        "Learning curve for controls"
+      ],
+      "createdAt": "2024-01-17T11:20:00Z",
+      "updatedAt": "2024-01-17T11:20:00Z"
+    },
+    {
+      "id": "rev-005",
+      "productId": "samsung-galaxy-watch-4-44mm",
+      "storeId": "brilliant-channel-001",
+      "userId": "user-005",
+      "userName": "Mark Delgado",
+      "userAvatar": "/avatars/user5.jpg",
+      "rating": 4,
+      "title": "Excellent fitness tracking",
+      "comment": "This watch has really helped me stay on top of my fitness goals. The body composition feature is amazing and surprisingly accurate. Sleep tracking is detailed and helpful. Battery life is good but not great - usually need to charge every 1.5 days with heavy use. Overall very happy with it!",
+      "helpful": 18,
+      "verified": true,
+      "images": [
+        "/reviews/galaxy-watch-review-1.jpg"
+      ],
+      "pros": [
+        "Accurate fitness tracking",
+        "Body composition analysis",
+        "Great health features",
+        "Fast charging"
+      ],
+      "cons": [
+        "Battery life could be better",
+        "Limited app selection"
+      ],
+      "createdAt": "2024-01-19T09:30:00Z",
+      "updatedAt": "2024-01-19T09:30:00Z"
+    },
+    {
+      "id": "rev-006",
+      "productId": "macbook-pro-13-m2-256gb",
+      "storeId": "brilliant-channel-001",
+      "userId": "user-006",
+      "userName": "Sofia Garcia",
+      "userAvatar": "/avatars/user6.jpg",
+      "rating": 5,
+      "title": "Perfect for developers",
+      "comment": "As a software developer, this MacBook Pro M2 has been incredible. The performance is blazing fast, especially for compilation and running multiple IDEs. Battery life easily gets me through a full workday. The display is crisp and colors are accurate. Build quality is top-notch as expected from Apple. Highly recommend for any professional work!",
+      "helpful": 27,
+      "verified": true,
+      "images": [],
+      "pros": [
+        "Incredible performance",
+        "Excellent battery life",
+        "Beautiful display",
+        "Silent operation"
+      ],
+      "cons": [
+        "Limited ports",
+        "Expensive",
+        "Only 256GB storage"
+      ],
+      "createdAt": "2024-01-21T13:15:00Z",
+      "updatedAt": "2024-01-21T13:15:00Z"
+    },
+    {
+      "id": "rev-007",
+      "productId": "ipad-air-5th-gen-64gb",
+      "storeId": "brilliant-channel-001",
+      "userId": "user-007",
+      "userName": "David Tan",
+      "userAvatar": "/avatars/user7.jpg",
+      "rating": 4,
+      "title": "Great tablet for creativity",
+      "comment": "I use this iPad primarily for digital art and note-taking. The M1 chip handles Procreate and other creative apps without any issues. Display is gorgeous and Apple Pencil support is excellent. Only wish it had more storage as 64GB fills up quickly with large art files. Still a fantastic tablet overall!",
+      "helpful": 14,
+      "verified": true,
+      "images": [
+        "/reviews/ipad-review-1.jpg",
+        "/reviews/ipad-review-2.jpg"
+      ],
+      "pros": [
+        "Powerful M1 chip",
+        "Beautiful display",
+        "Great for digital art",
+        "Apple Pencil support"
+      ],
+      "cons": [
+        "Limited storage",
+        "No headphone jack",
+        "Accessories sold separately"
+      ],
+      "createdAt": "2024-01-22T15:40:00Z",
+      "updatedAt": "2024-01-22T15:40:00Z"
+    },
+    {
+      "id": "rev-008",
+      "productId": "razer-deathadder-v3-pro",
+      "storeId": "tech-haven-ph",
+      "userId": "user-008",
+      "userName": "Kevin Lim",
+      "userAvatar": "/avatars/user8.jpg",
+      "rating": 5,
+      "title": "Best gaming mouse I've ever used!",
+      "comment": "Upgraded from my old mouse and wow, what a difference! The sensor is incredibly precise and responsive. Perfect for FPS games like Valorant and CS2. The wireless connection is rock solid with zero lag. Battery life is insane - I've been using it for weeks and still haven't charged it. Ergonomics are perfect for palm grip. Worth every peso!",
+      "helpful": 42,
+      "verified": true,
+      "images": [
+        "/reviews/razer-review-1.jpg"
+      ],
+      "pros": [
+        "Incredible sensor accuracy",
+        "Amazing battery life",
+        "Perfect ergonomics",
+        "Zero wireless lag"
+      ],
+      "cons": [
+        "Price is steep",
+        "RGB could be brighter"
+      ],
+      "createdAt": "2024-01-23T18:25:00Z",
+      "updatedAt": "2024-01-23T18:25:00Z"
+    },
+    {
+      "id": "rev-009",
+      "productId": "nvidia-rtx-4070-super",
+      "storeId": "tech-haven-ph",
+      "userId": "user-009",
+      "userName": "Alex Rivera",
+      "userAvatar": "/avatars/user9.jpg",
+      "rating": 5,
+      "title": "1440p gaming beast!",
+      "comment": "This graphics card is absolutely phenomenal for 1440p gaming. Running Cyberpunk 2077 with ray tracing on high settings and getting 80+ FPS with DLSS 3. The card runs cool and quiet thanks to the excellent cooling design. VRAM is plenty for modern games. Installation was straightforward. Definitely recommend for anyone wanting high-end 1440p gaming performance!",
+      "helpful": 35,
+      "verified": true,
+      "images": [
+        "/reviews/rtx-review-1.jpg",
+        "/reviews/rtx-review-2.jpg"
+      ],
+      "pros": [
+        "Excellent 1440p performance",
+        "Great ray tracing",
+        "16GB VRAM",
+        "Runs cool and quiet"
+      ],
+      "cons": [
+        "Very expensive",
+        "Large size",
+        "High power consumption"
+      ],
+      "createdAt": "2024-01-24T20:10:00Z",
+      "updatedAt": "2024-01-24T20:10:00Z"
+    }
+  ],
+  "storeReviews": [
+    {
+      "id": "store-rev-001",
+      "storeId": "brilliant-channel-001",
+      "userId": "user-010",
+      "userName": "Rachel Torres",
+      "userAvatar": "/avatars/user10.jpg",
+      "rating": 5,
+      "title": "Excellent service and genuine products",
+      "comment": "I've bought multiple items from Brilliant Channel and they never disappoint. All products are genuine, packaging is always perfect, and shipping is incredibly fast. Customer service is also top-notch - they answered all my questions promptly. Definitely my go-to store for electronics!",
+      "helpful": 28,
+      "verified": true,
+      "orderIds": ["order-001", "order-002", "order-003"],
+      "createdAt": "2024-01-20T12:30:00Z",
+      "updatedAt": "2024-01-20T12:30:00Z"
+    },
+    {
+      "id": "store-rev-002",
+      "storeId": "tech-haven-ph",
+      "userId": "user-011",
+      "userName": "Jason Dela Cruz",
+      "userAvatar": "/avatars/user11.jpg",
+      "rating": 5,
+      "title": "Best gaming store in the Philippines",
+      "comment": "Tech Haven PH is hands down the best gaming store I've encountered. Their product selection is amazing, prices are competitive, and they really know their stuff. The staff helped me build my dream gaming PC and provided excellent recommendations. Shipping was fast and everything was perfectly packaged. Will definitely buy again!",
+      "helpful": 22,
+      "verified": true,
+      "orderIds": ["order-004", "order-005"],
+      "createdAt": "2024-01-22T16:45:00Z",
+      "updatedAt": "2024-01-22T16:45:00Z"
+    },
+    {
+      "id": "store-rev-003",
+      "storeId": "fashion-forward-boutique",
+      "userId": "user-012",
+      "userName": "Maria Gonzales",
+      "userAvatar": "/avatars/user12.jpg",
+      "rating": 4,
+      "title": "Great Korean fashion finds",
+      "comment": "Love the Korean fashion selection here! Prices are very reasonable and quality is good for the price point. Sizing guide is accurate which is important for online shopping. Delivery was on time. Only wish they had more variety in plus sizes. Overall a great shopping experience!",
+      "helpful": 16,
+      "verified": true,
+      "orderIds": ["order-006"],
+      "createdAt": "2024-01-19T14:20:00Z",
+      "updatedAt": "2024-01-19T14:20:00Z"
+    }
+  ]
+}

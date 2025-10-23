@@ -1,0 +1,12 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" rx="16" fill="#F8FAFC"/>
+  <rect x="20" y="40" width="160" height="100" rx="8" fill="#E2E8F0" stroke="#CBD5E1" stroke-width="2"/>
+  <circle cx="100" cy="90" r="25" fill="#3B82F6" opacity="0.1"/>
+  <rect x="40" y="60" width="120" height="60" rx="4" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <rect x="50" y="70" width="20" height="3" rx="1.5" fill="#64748B"/>
+  <rect x="50" y="80" width="30" height="3" rx="1.5" fill="#64748B"/>
+  <rect x="50" y="90" width="15" height="3" rx="1.5" fill="#64748B"/>
+  <circle cx="140" cy="85" r="8" fill="#10B981"/>
+  <rect x="30" y="150" width="140" height="20" rx="10" fill="#CBD5E1"/>
+  <text x="100" y="170" text-anchor="middle" font-family="system-ui" font-size="12" fill="#64748B">Electronic Device</text>
+</svg>
