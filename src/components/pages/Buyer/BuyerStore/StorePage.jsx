@@ -81,7 +81,27 @@ const StorePage = () => {
         // Load products for this store
         const productsResult = await storeService.getStoreProducts(storeId);
         if (productsResult.success) {
-          setProducts(productsResult.data || []);
+          const productsData = productsResult.data || [];
+          console.log('🔍 [StorePage] Loaded products:', productsData);
+          console.log('🔍 [StorePage] Product structure sample:', productsData[0]);
+          
+          // Debug each product's classification
+          productsData.forEach((product, index) => {
+            const isPreloved = product.selling_mode !== 'barter' && product.product_type !== 'barter' && !product.is_barter_only && product.collection !== 'seller_addBarterItem';
+            const isBarter = product.selling_mode === 'barter' || product.product_type === 'barter' || product.is_barter_only === true || product.collection === 'seller_addBarterItem';
+            
+            console.log(`🔍 [StorePage] Product ${index + 1} (${product.name}):`, {
+              product_type: product.product_type,
+              selling_mode: product.selling_mode,
+              is_sell_only: product.is_sell_only,
+              is_barter_only: product.is_barter_only,
+              collection: product.collection,
+              category: product.category,
+              classification: isPreloved ? 'PRELOVED (Add to Cart - no Make Offer)' : isBarter ? 'BARTER (Make Offer button)' : 'UNKNOWN'
+            });
+          });
+          
+          setProducts(productsData);
         } else {
           console.warn('Failed to load store products:', productsResult.error);
           setProducts([]);
@@ -119,6 +139,21 @@ const StorePage = () => {
   // Filtered and sorted products
   const filteredProducts = (products || []).filter(product => {
     if (selectedCategory === 'all') return true;
+    if (selectedCategory === 'preloved') {
+      // Preloved = Items for Sale (NO Make Offer button - has Add to Cart instead)
+      // These are items that can be purchased directly, not bartered
+      return product.selling_mode !== 'barter' && 
+             product.product_type !== 'barter' && 
+             !product.is_barter_only &&
+             product.collection !== 'seller_addBarterItem';
+    }
+    if (selectedCategory === 'barter') {
+      // Barter = Items for Trade (has Make Offer button)
+      return product.selling_mode === 'barter' || 
+             product.product_type === 'barter' || 
+             product.is_barter_only === true ||
+             product.collection === 'seller_addBarterItem';
+    }
     return product.category === selectedCategory;
   }).sort((a, b) => {
     switch (sortBy) {
@@ -447,23 +482,29 @@ const StorePage = () => {
                   >
                     All Products ({products?.length || 0})
                   </button>
-                  {/* Get unique categories from products */}
-                  {products && products.length > 0 && [...new Set(products.map(p => p.category))].map(category => {
-                    const count = products.filter(p => p.category === category).length;
-                    return (
-                      <button
-                        key={category}
-                        onClick={() => setSelectedCategory(category)}
-                        className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200"
-                        style={{
-                          backgroundColor: selectedCategory === category ? theme.colors.primary[600] : theme.colors.gray[100],
-                          color: selectedCategory === category ? theme.colors.white : theme.colors.gray[700]
-                        }}
-                      >
-                        {category} ({count})
-                      </button>
-                    );
-                  })}
+                  
+                  {/* Fixed categories: Preloved and Barter */}
+                  <button
+                    onClick={() => setSelectedCategory('preloved')}
+                    className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200"
+                    style={{
+                      backgroundColor: selectedCategory === 'preloved' ? theme.colors.primary[600] : theme.colors.gray[100],
+                      color: selectedCategory === 'preloved' ? theme.colors.white : theme.colors.gray[700]
+                    }}
+                  >
+                    Preloved ({products?.filter(p => p.selling_mode !== 'barter' && p.product_type !== 'barter' && !p.is_barter_only && p.collection !== 'seller_addBarterItem').length || 0})
+                  </button>
+                  
+                  <button
+                    onClick={() => setSelectedCategory('barter')}
+                    className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200"
+                    style={{
+                      backgroundColor: selectedCategory === 'barter' ? theme.colors.primary[600] : theme.colors.gray[100],
+                      color: selectedCategory === 'barter' ? theme.colors.white : theme.colors.gray[700]
+                    }}
+                  >
+                    Barter ({products?.filter(p => p.product_type === 'barter' || p.selling_mode === 'barter' || p.is_barter_only === true || p.collection === 'seller_addBarterItem').length || 0})
+                  </button>
                 </div>
               </div>
 
