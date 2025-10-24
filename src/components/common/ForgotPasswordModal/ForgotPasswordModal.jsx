@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { 
   FiX, 
   FiMail, 
@@ -12,6 +13,7 @@ import {
 } from 'react-icons/fi';
 
 const ForgotPasswordModal = ({ isOpen, onClose }) => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1); // 1: Email, 2: Code, 3: New Password, 4: Success
   const [email, setEmail] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
@@ -50,6 +52,12 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
   const handleClose = () => {
     resetModal();
     onClose();
+  };
+
+  const handleContinueToLogin = () => {
+    resetModal();
+    onClose();
+    navigate('/login');
   };
 
   const handleEmailSubmit = async (e) => {
@@ -387,7 +395,7 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
             </div>
 
             <button
-              onClick={handleClose}
+              onClick={handleContinueToLogin}
               className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
             >
               Continue to Login
