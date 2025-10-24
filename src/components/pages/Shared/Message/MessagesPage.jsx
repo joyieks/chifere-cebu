@@ -9,6 +9,10 @@ const MessagesPage = ({ onConversationSelect }) => {
   const { conversations, isLoading, error } = useMessaging();
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Debug logging
+  console.log('🔄 [MessagesPage] Conversations loaded:', conversations);
+  console.log('🔄 [MessagesPage] User ID:', user?.id);
+
   // Filter conversations based on search term
   const filteredConversations = (conversations || []).filter(conv => {
     if (!searchTerm) return true;
@@ -40,8 +44,25 @@ const MessagesPage = ({ onConversationSelect }) => {
   const getOtherParticipant = (conversation) => {
     if (!conversation.participants || !Array.isArray(conversation.participants)) return { name: 'Unknown User', avatar: null };
     
-    const otherId = conversation.participants.find(id => id !== user?.id);
-    return conversation.participantInfo?.[otherId] || { name: 'Unknown User', avatar: null };
+    // Filter out undefined/null participants and current user
+    const validParticipants = conversation.participants.filter(id => id && id !== user?.id);
+    const otherId = validParticipants[0]; // Get the first valid other participant
+    
+    console.log('🔄 [MessagesPage] Getting other participant for conversation:', conversation.id);
+    console.log('🔄 [MessagesPage] All participants:', conversation.participants);
+    console.log('🔄 [MessagesPage] Valid participants:', validParticipants);
+    console.log('🔄 [MessagesPage] Other ID:', otherId);
+    console.log('🔄 [MessagesPage] All participant info:', conversation.participantInfo);
+    
+    if (!otherId) {
+      console.log('🔄 [MessagesPage] No valid other participant found, using fallback');
+      return { name: 'Unknown User', avatar: null };
+    }
+    
+    const participantInfo = conversation.participantInfo?.[otherId];
+    console.log('🔄 [MessagesPage] Participant info for', otherId, ':', participantInfo);
+    
+    return participantInfo || { name: 'Unknown User', avatar: null };
   };
 
   if (isLoading) {

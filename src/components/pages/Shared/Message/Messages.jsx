@@ -13,7 +13,7 @@ const Messages = ({
   userRole = 'buyer' 
 }) => {
   const { user } = useAuth();
-  const { createConversation } = useMessaging();
+  const { createConversation, fetchParticipantDetails } = useMessaging();
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [showMobileChat, setShowMobileChat] = useState(false);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
@@ -40,6 +40,11 @@ const Messages = ({
           if (conversations.success) {
             const newConversation = conversations.data.find(conv => conv.id === result.conversationId);
             if (newConversation) {
+              // Ensure participant details are fetched for the new conversation
+              if (fetchParticipantDetails && newConversation.participants) {
+                await fetchParticipantDetails(newConversation.participants);
+              }
+              
               setSelectedConversation(newConversation);
               setShowMobileChat(true);
             }

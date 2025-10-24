@@ -36,7 +36,7 @@ import { useToast } from '../../../../../components/Toast';
 import BuyerLayout from '../Buyer_Layout/Buyer_layout';
 import theme from '../../../../../styles/designSystem';
 
-const CartSection = ({ title, cart, selected, setSelected, handleRemove, handleSelectAll, handleSelect, allSelected, total, isBarter, navigate, handleMessageStore, updateQuantity }) => (
+const CartSection = ({ title, cart, selected, setSelected, handleRemove, handleSelectAll, handleSelect, allSelected, total, isBarter, navigate, updateQuantity }) => (
   <div className="mb-8">
     {/* Section Header */}
     <h3 
@@ -89,22 +89,6 @@ const CartSection = ({ title, cart, selected, setSelected, handleRemove, handleS
                   {store.store}
                 </span>
               </div>
-              <button 
-                onClick={() => handleMessageStore(store)}
-                className="px-4 py-2 rounded-xl font-medium transition-all duration-200"
-                style={{
-                  backgroundColor: theme.colors.primary[600],
-                  color: theme.colors.white
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = theme.colors.primary[700];
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = theme.colors.primary[600];
-                }}
-              >
-                💬 Message Store
-              </button>
             </div>
           </div>
 
@@ -392,23 +376,6 @@ const Cart = () => {
   const [prelovedSelected, setPrelovedSelected] = useState({});
   const [barterSelected, setBarterSelected] = useState({});
 
-  // Handle message store - simplified version
-  const handleMessageStore = async (store) => {
-    if (!user) {
-      showToast('Please log in to message the store', 'error');
-      navigate('/login');
-      return;
-    }
-
-    if (!store || !store.sellerId) {
-      showToast('Store information not available', 'error');
-      return;
-    }
-
-    // Simply navigate to messages page for now
-    showToast('Redirecting to messages...', 'info');
-    navigate('/buyer/messages');
-  };
 
   // Group cart items by seller and type
   const groupCartBySeller = (items, isBarter) => {
@@ -644,7 +611,6 @@ const Cart = () => {
             total={prelovedTotal}
             isBarter={false}
             navigate={navigate}
-            handleMessageStore={handleMessageStore}
             updateQuantity={updateQuantity}
           />
         )}
@@ -661,7 +627,6 @@ const Cart = () => {
             total={barterTotal}
             isBarter={true}
             navigate={navigate}
-            handleMessageStore={handleMessageStore}
             updateQuantity={updateQuantity}
           />
         )}

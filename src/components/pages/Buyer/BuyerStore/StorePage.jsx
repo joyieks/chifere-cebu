@@ -30,6 +30,8 @@ import storeService from '../../../../services/storeService';
 import productService from '../../../../services/productService';
 import followService from '../../../../services/followService';
 import { useAuth } from '../../../../contexts/AuthContext';
+import { MessagingProvider } from '../../../../contexts/MessagingContext';
+import MessagePopup from '../../../common/MessagePopup/MessagePopup';
 
 const StorePage = () => {
   const { storeId } = useParams();
@@ -47,6 +49,7 @@ const StorePage = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('featured');
   const [viewMode, setViewMode] = useState('grid');
+  const [showMessagePopup, setShowMessagePopup] = useState(false);
 
   // Load store and products data
   useEffect(() => {
@@ -131,7 +134,7 @@ const StorePage = () => {
   const handleFollow = async () => {
     if (!user) {
       // Redirect to login or show login modal
-      navigate('/auth/login');
+      navigate('/login');
       return;
     }
 
@@ -170,18 +173,22 @@ const StorePage = () => {
   };
 
   const handleMessageStore = () => {
-    // TODO: Firebase Implementation - Open messaging interface
-    console.log('Message store:', store.business_name || store.display_name);
+    console.log('🔄 [StorePage] Message button clicked');
+    console.log('🔄 [StorePage] User:', user);
+    console.log('🔄 [StorePage] StoreId:', storeId);
+    console.log('🔄 [StorePage] Store:', store);
+    
+    if (!user) {
+      // Redirect to login if user is not authenticated
+      navigate('/login');
+      return;
+    }
+    
+    // Show message popup instead of navigating
+    console.log('🔄 [StorePage] Setting showMessagePopup to true');
+    setShowMessagePopup(true);
   };
 
-  const handleShareStore = () => {
-    // TODO: Firebase Implementation - Share store link
-    navigator.share?.({
-      title: store.business_name || store.display_name,
-      text: store.business_description || 'Check out this store!',
-      url: window.location.href
-    });
-  };
 
   const handleProductClick = (productId) => {
     navigate(`/item/${productId}`);
@@ -385,41 +392,22 @@ const StorePage = () => {
                     </button>
                   )}
                   
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleMessageStore}
-                      className="flex-1 px-4 py-2 rounded-lg transition-all duration-200"
-                      style={{
-                        backgroundColor: theme.colors.primary[600],
-                        color: theme.colors.white
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = theme.colors.primary[700];
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = theme.colors.primary[600];
-                      }}
-                    >
-                      💬 Message
-                    </button>
-                    
-                    <button
-                      onClick={handleShareStore}
-                      className="px-4 py-2 rounded-lg transition-all duration-200"
-                      style={{
-                        backgroundColor: theme.colors.gray[600],
-                        color: theme.colors.white
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = theme.colors.gray[700];
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = theme.colors.gray[600];
-                      }}
-                    >
-                      📤
-                    </button>
-                  </div>
+                  <button
+                    onClick={handleMessageStore}
+                    className="w-full px-4 py-2 rounded-lg transition-all duration-200"
+                    style={{
+                      backgroundColor: theme.colors.primary[600],
+                      color: theme.colors.white
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = theme.colors.primary[700];
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = theme.colors.primary[600];
+                    }}
+                  >
+                    💬 Message
+                  </button>
                 </div>
               </div>
             </div>
@@ -833,6 +821,19 @@ const StorePage = () => {
           animation: fadeInUp 0.6s ease-out forwards;
         }
       `}</style>
+      
+      {/* Message Popup */}
+      <MessagingProvider>
+        <MessagePopup
+          isOpen={showMessagePopup}
+          onClose={() => setShowMessagePopup(false)}
+          recipientId={storeId}
+          recipientName={store?.business_name || store?.display_name || 'Store Owner'}
+          recipientType="seller"
+          productId={null}
+          productName={null}
+        />
+      </MessagingProvider>
     </BuyerLayout>
   );
 };

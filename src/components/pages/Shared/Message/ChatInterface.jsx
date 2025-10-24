@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../../../contexts/AuthContext';
 import { useMessaging } from '../../../../contexts/MessagingContext';
-import { FiArrowLeft, FiSend, FiMoreVertical, FiPhone, FiVideo } from 'react-icons/fi';
+import { FiArrowLeft, FiSend } from 'react-icons/fi';
 import OfferMessage from './OfferMessage';
 
 const ChatInterface = ({ conversation, onBack }) => {
   const { user } = useAuth();
-  const { sendMessage, messages, markMessagesAsRead, getConversationMessages } = useMessaging();
+  const { sendMessage, messages, markMessagesAsRead, getConversationMessages, fetchParticipantDetails } = useMessaging();
   const [newMessage, setNewMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef(null);
@@ -16,6 +16,17 @@ const ChatInterface = ({ conversation, onBack }) => {
   // Debug: Log messages when they change
   useEffect(() => {
     console.log('🔄 [ChatInterface] Messages for conversation', conversation?.id, ':', conversationMessages);
+    if (conversationMessages.length > 0) {
+      console.log('🔄 [ChatInterface] First message details:', {
+        id: conversationMessages[0].id,
+        content: conversationMessages[0].content,
+        senderId: conversationMessages[0].senderId,
+        type: conversationMessages[0].type,
+        messageType: conversationMessages[0].messageType,
+        metadata: conversationMessages[0].metadata,
+        fullMessage: conversationMessages[0]
+      });
+    }
   }, [conversation?.id, conversationMessages]);
 
   // Auto-scroll to bottom when new messages arrive
@@ -30,30 +41,46 @@ const ChatInterface = ({ conversation, onBack }) => {
       getConversationMessages(conversation.id);
       // Mark messages as read
       markMessagesAsRead(conversation.id, user.id);
+      
+      // Fetch participant details if not available
+      if (conversation.participants && fetchParticipantDetails) {
+        const otherId = conversation.participants.find(id => id !== user.id);
+        if (otherId && !conversation.participantInfo?.[otherId]) {
+          console.log('🔄 [ChatInterface] Fetching participant details for:', otherId);
+          fetchParticipantDetails([otherId]);
+        }
+      }
     }
-  }, [conversation?.id, user?.id, getConversationMessages, markMessagesAsRead]);
+  }, [conversation?.id, user?.id, getConversationMessages, markMessagesAsRead, fetchParticipantDetails]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
     
     if (!newMessage.trim() || isSending || !conversation?.id) return;
 
+    const messageContent = newMessage.trim();
     setIsSending(true);
+    
     try {
+      console.log('🔄 [ChatInterface] Sending message:', messageContent);
+      console.log('🔄 [ChatInterface] Conversation ID:', conversation.id);
+      console.log('🔄 [ChatInterface] User ID:', user?.id);
+      
       const result = await sendMessage(
         conversation.id,
-        newMessage.trim(),
+        messageContent,
         'text'
       );
       
       if (result.success) {
+        console.log('🔄 [ChatInterface] Message sent successfully:', result);
         setNewMessage('');
       } else {
-        console.error('Failed to send message:', result.error);
+        console.error('🔄 [ChatInterface] Failed to send message:', result.error);
         alert('Failed to send message. Please try again.');
       }
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('🔄 [ChatInterface] Error sending message:', error);
       alert('Error sending message. Please try again.');
     } finally {
       setIsSending(false);
@@ -68,10 +95,29 @@ const ChatInterface = ({ conversation, onBack }) => {
   };
 
   const getOtherParticipant = () => {
-    if (!conversation?.participants || !Array.isArray(conversation.participants)) return { name: 'Unknown User', avatar: null };
+    if (!conversation?.participants || !Array.isArray(conversation.participants)) {
+      console.log('🔄 [ChatInterface] No participants found in conversation:', conversation);
+      return { name: 'Unknown User', avatar: null };
+    }
     
-    const otherId = conversation.participants.find(id => id !== user?.id);
-    return conversation.participantInfo?.[otherId] || { name: 'Unknown User', avatar: null };
+    // Filter out undefined/null participants and current user
+    const validParticipants = conversation.participants.filter(id => id && id !== user?.id);
+    const otherId = validParticipants[0]; // Get the first valid other participant
+    
+    console.log('🔄 [ChatInterface] All participants:', conversation.participants);
+    console.log('🔄 [ChatInterface] Valid participants:', validParticipants);
+    console.log('🔄 [ChatInterface] Other participant ID:', otherId);
+    console.log('🔄 [ChatInterface] Participant info:', conversation.participantInfo);
+    
+    if (!otherId) {
+      console.log('🔄 [ChatInterface] No valid other participant found, using fallback');
+      return { name: 'Unknown User', avatar: null };
+    }
+    
+    const participantDetails = conversation.participantInfo?.[otherId];
+    console.log('🔄 [ChatInterface] Other participant details:', participantDetails);
+    
+    return participantDetails || { name: 'Unknown User', avatar: null };
   };
 
   if (!conversation) {
@@ -91,7 +137,7 @@ const ChatInterface = ({ conversation, onBack }) => {
     return (
     <div className="flex flex-col h-full bg-white">
       {/* Chat Header */}
-      <div className="border-b border-gray-200 p-4">
+      <div className="border-b border-gray-200 p-2 flex-shrink-0">
         <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
             {onBack && (
@@ -104,12 +150,12 @@ const ChatInterface = ({ conversation, onBack }) => {
             )}
             
             {/* Avatar */}
-            <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+            <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
               {otherParticipant?.avatar ? (
                 <img 
                   src={otherParticipant.avatar} 
                   alt={otherParticipant.name}
-                  className="h-10 w-10 rounded-full object-cover"
+                  className="h-8 w-8 rounded-full object-cover"
                 />
               ) : (
                 <span className="text-gray-600 font-medium">
@@ -126,26 +172,15 @@ const ChatInterface = ({ conversation, onBack }) => {
             </div>
           </div>
           
-          <div className="flex items-center space-x-2">
-            <button className="p-2 hover:bg-gray-100 rounded-full">
-              <FiPhone className="h-5 w-5 text-gray-500" />
-            </button>
-            <button className="p-2 hover:bg-gray-100 rounded-full">
-              <FiVideo className="h-5 w-5 text-gray-500" />
-          </button>
-            <button className="p-2 hover:bg-gray-100 rounded-full">
-              <FiMoreVertical className="h-5 w-5 text-gray-500" />
-          </button>
-          </div>
         </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-2 space-y-2 min-h-0">
         {conversationMessages.length === 0 ? (
-          <div className="text-center py-8">
-            <div className="text-gray-400 text-4xl mb-2">💬</div>
-            <p className="text-gray-500">No messages yet. Start the conversation!</p>
+          <div className="text-center py-4">
+            <div className="text-gray-400 text-2xl mb-1">💬</div>
+            <p className="text-gray-500 text-sm">No messages yet. Start the conversation!</p>
           </div>
         ) : (
           conversationMessages.map((message) => {
@@ -179,7 +214,17 @@ const ChatInterface = ({ conversation, onBack }) => {
             
             // Check if this is an offer message
             const isOfferMessage = message.type === 'offer' || 
+              message.messageType === 'offer' ||
               (message.content && message.content.includes('**MAKE OFFER REQUEST**'));
+            
+            // Debug: Log message type detection
+            console.log('🔄 [ChatInterface] Message type detection:', {
+              messageId: message.id,
+              type: message.type,
+              messageType: message.messageType,
+              content: message.content?.substring(0, 50),
+              isOfferMessage
+            });
 
             // Render offer message with special component
             if (isOfferMessage) {
@@ -196,6 +241,16 @@ const ChatInterface = ({ conversation, onBack }) => {
               );
             }
 
+            // Debug: Log message content before rendering
+            console.log('🔄 [ChatInterface] Rendering message:', {
+              id: message.id,
+              content: message.content,
+              senderId: message.senderId,
+              type: message.type,
+              messageType: message.messageType,
+              metadata: message.metadata
+            });
+
             // Render regular message
             return (
               <div
@@ -211,7 +266,7 @@ const ChatInterface = ({ conversation, onBack }) => {
                       : 'bg-gray-100 text-gray-900' // Fallback for unknown roles
                   }`}
                 >
-                  <p className="text-sm">{message.content}</p>
+                  <p className="text-sm">{message.content || 'No content'}</p>
                   <p className={`text-xs mt-1 ${
                     (isBuyerMessage || otherParticipantIsBuyer) 
                       ? 'text-blue-100' 
@@ -228,20 +283,20 @@ const ChatInterface = ({ conversation, onBack }) => {
             </div>
 
             {/* Message Input */}
-      <div className="border-t border-gray-200 p-4">
+      <div className="border-t border-gray-200 p-2 flex-shrink-0">
         <form onSubmit={handleSendMessage} className="flex items-center space-x-2">
           <input
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Type a message..."
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             disabled={isSending}
           />
           <button
             type="submit"
             disabled={!newMessage.trim() || isSending}
-            className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSending ? (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>

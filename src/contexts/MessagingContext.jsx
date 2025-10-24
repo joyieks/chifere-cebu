@@ -17,9 +17,18 @@ import { supabase } from '../config/supabase';
 const normalizeConversation = (conv) => {
   console.log('🔄 [MessagingContext] Normalizing conversation:', conv);
   
+  // Create participants array, filtering out null/undefined values
+  const participants = [];
+  if (conv.buyer_id && conv.buyer_id !== 'null' && conv.buyer_id !== 'undefined') {
+    participants.push(conv.buyer_id);
+  }
+  if (conv.seller_id && conv.seller_id !== 'null' && conv.seller_id !== 'undefined') {
+    participants.push(conv.seller_id);
+  }
+  
   const normalized = {
     ...conv,
-    participants: [conv.buyer_id, conv.seller_id].filter(Boolean), // Convert buyer_id/seller_id to participants array
+    participants: participants, // Convert buyer_id/seller_id to participants array
     unreadCount: conv.unread_count || {},
     lastMessage: conv.last_message,
     updatedAt: conv.updated_at || conv.last_message_at,
@@ -29,6 +38,7 @@ const normalizeConversation = (conv) => {
   };
   
   console.log('🔄 [MessagingContext] Normalized conversation result:', normalized);
+  console.log('🔄 [MessagingContext] Participants array:', participants);
   return normalized;
 };
 
@@ -76,69 +86,151 @@ export const MessagingProvider = ({ children }) => {
 
   // Fetch participant details from database
   const fetchParticipantDetails = useCallback(async (userIds) => {
+    console.log('🔄 [MessagingContext] fetchParticipantDetails called with:', userIds);
+    console.log('🔄 [MessagingContext] Current user:', user);
+    console.log('🔄 [MessagingContext] Current user type:', user?.user_type);
+    console.log('🔄 [MessagingContext] Current user ID:', user?.id);
     const details = {};
     
-    for (const userId of userIds) {
-      if (participantDetailsRef.current[userId]) {
+    // Filter out already cached users
+    const uncachedUserIds = userIds.filter(userId => !participantDetailsRef.current[userId]);
+    console.log('🔄 [MessagingContext] Cached users:', Object.keys(participantDetailsRef.current));
+    console.log('🔄 [MessagingContext] Uncached user IDs:', uncachedUserIds);
+    
+    if (uncachedUserIds.length === 0) {
+      // All users are already cached
+      console.log('🔄 [MessagingContext] All users are cached, returning cached data');
+      userIds.forEach(userId => {
         details[userId] = participantDetailsRef.current[userId];
-        continue;
+      });
+      console.log('🔄 [MessagingContext] Returning cached details:', details);
+      return details;
+    }
+    
+    console.log('🔄 [MessagingContext] Fetching details for uncached users:', uncachedUserIds);
+    
+    // Test if we can access the tables at all
+    console.log('🔄 [MessagingContext] Testing table access...');
+    try {
+      const { data: testData, error: testError } = await supabase
+        .from('user_profiles')
+        .select('id')
+        .limit(1);
+      console.log('🔄 [MessagingContext] user_profiles access test:', { testData, testError });
+    } catch (testErr) {
+      console.error('🔄 [MessagingContext] user_profiles access test failed:', testErr);
+    }
+    
+    try {
+      const { data: testData2, error: testError2 } = await supabase
+        .from('buyer_users')
+        .select('id')
+        .limit(1);
+      console.log('🔄 [MessagingContext] buyer_users access test:', { testData2, testError2 });
+    } catch (testErr2) {
+      console.error('🔄 [MessagingContext] buyer_users access test failed:', testErr2);
+    }
+    
+    try {
+      // Try to get all users from user_profiles table in one query
+      console.log('🔄 [MessagingContext] Querying user_profiles for IDs:', uncachedUserIds);
+      const { data: profileData, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('id, display_name, profile_image, user_type')
+        .in('id', uncachedUserIds);
+
+      console.log('🔄 [MessagingContext] user_profiles batch query result:', { profileData, profileError });
+      console.log('🔄 [MessagingContext] profileData length:', profileData?.length);
+      if (profileError) {
+        console.error('🔄 [MessagingContext] user_profiles error details:', profileError);
       }
-      
-      try {
-        console.log('🔄 [MessagingContext] Fetching details for user:', userId);
-        
-        // Try to get user from user_profiles table first (most common)
-        const { data: profileData, error: profileError } = await supabase
-          .from('user_profiles')
-          .select('display_name, profile_image, user_type')
-          .eq('id', userId)
-          .single();
 
-        console.log('🔄 [MessagingContext] user_profiles result:', { profileData, profileError });
-
-        if (!profileError && profileData) {
-          details[userId] = {
-            name: profileData.display_name || 'ChiFere User',
-            avatar: profileData.profile_image || null,
-            userType: profileData.user_type
+      if (!profileError && profileData) {
+        profileData.forEach(user => {
+          details[user.id] = {
+            name: user.display_name || 'ChiFere User',
+            avatar: user.profile_image || null,
+            userType: user.user_type
           };
-          console.log('🔄 [MessagingContext] Found in user_profiles:', details[userId]);
-          continue;
-        }
+        });
+        console.log('🔄 [MessagingContext] Found in user_profiles:', details);
+        console.log('🔄 [MessagingContext] Raw profileData:', profileData);
+      } else {
+        console.log('🔄 [MessagingContext] No data from user_profiles or error:', { profileError, profileData });
+      }
 
-        // Fallback: try buyer_users table
+      // Find users not found in user_profiles
+      const foundInProfiles = new Set(profileData?.map(u => u.id) || []);
+      const notFoundInProfiles = uncachedUserIds.filter(id => !foundInProfiles.has(id));
+      
+      if (notFoundInProfiles.length > 0) {
+        console.log('🔄 [MessagingContext] Users not found in user_profiles, trying alternative approach:', notFoundInProfiles);
+        
+        // Try buyer_users table for remaining users
+        console.log('🔄 [MessagingContext] Querying buyer_users for IDs:', notFoundInProfiles);
         const { data: buyerData, error: buyerError } = await supabase
           .from('buyer_users')
-          .select('display_name, profile_image')
-          .eq('id', userId)
-          .single();
+          .select('id, display_name, profile_image')
+          .in('id', notFoundInProfiles);
 
-        console.log('🔄 [MessagingContext] buyer_users result:', { buyerData, buyerError });
-
-        if (!buyerError && buyerData) {
-          details[userId] = {
-            name: buyerData.display_name || 'ChiFere User',
-            avatar: buyerData.profile_image || null,
-            userType: 'buyer'
-          };
-          console.log('🔄 [MessagingContext] Found in buyer_users:', details[userId]);
-          continue;
+        console.log('🔄 [MessagingContext] buyer_users batch query result:', { buyerData, buyerError });
+        console.log('🔄 [MessagingContext] buyerData length:', buyerData?.length);
+        if (buyerError) {
+          console.error('🔄 [MessagingContext] buyer_users error details:', buyerError);
         }
 
-        // If all else fails, use default
-        details[userId] = {
-          name: 'ChiFere User',
-          avatar: null,
-          userType: 'unknown'
-        };
-      } catch (error) {
-        console.error('Error fetching participant details for', userId, error);
-        details[userId] = {
-          name: 'ChiFere User',
-          avatar: null,
-          userType: 'unknown'
-        };
+        if (!buyerError && buyerData) {
+          buyerData.forEach(user => {
+            details[user.id] = {
+              name: user.display_name || 'ChiFere User',
+              avatar: user.profile_image || null,
+              userType: 'buyer'
+            };
+          });
+          console.log('🔄 [MessagingContext] Found in buyer_users:', buyerData);
+          console.log('🔄 [MessagingContext] Raw buyerData:', buyerData);
+        } else {
+          console.log('🔄 [MessagingContext] No data from buyer_users or error:', { buyerError, buyerData });
+        }
       }
+
+      // Set fallback for any remaining users
+      uncachedUserIds.forEach(userId => {
+        if (!details[userId]) {
+          // Try to determine if this is a buyer or seller based on the user type
+          // If the current user is a seller, then the other participant is likely a buyer
+          // If the current user is a buyer, then the other participant is likely a seller
+          const userType = user?.user_type === 'seller' ? 'buyer' : 'seller';
+          
+          details[userId] = {
+            name: userType === 'buyer' ? 'Buyer' : 'Seller',
+            avatar: null,
+            userType: userType
+          };
+          console.log('🔄 [MessagingContext] Using fallback for user:', userId, 'with type:', userType);
+        }
+      });
+
+      // Add cached users
+      userIds.forEach(userId => {
+        if (participantDetailsRef.current[userId]) {
+          details[userId] = participantDetailsRef.current[userId];
+        }
+      });
+      
+      console.log('🔄 [MessagingContext] Final details object before return:', details);
+    console.log('🔄 [MessagingContext] fetchParticipantDetails completed for user IDs:', userIds);
+      
+    } catch (error) {
+      console.error('Error fetching participant details:', error);
+      // Set fallback for all users
+      uncachedUserIds.forEach(userId => {
+        details[userId] = {
+          name: 'ChiFere User',
+          avatar: null,
+          userType: 'unknown'
+        };
+      });
     }
     
     setParticipantDetails(prev => ({ ...prev, ...details }));
@@ -169,11 +261,17 @@ export const MessagingProvider = ({ children }) => {
           timeoutPromise
         ]);
         console.log('🔄 [MessagingContext] Conversations result:', result);
+        console.log('🔄 [MessagingContext] Raw conversation data:', result.data);
+        console.log('🔄 [MessagingContext] About to process conversations...');
+        console.log('🔄 [MessagingContext] Result success:', result.success);
+        console.log('🔄 [MessagingContext] Result error:', result.error);
 
         if (result.success) {
+        console.log('🔄 [MessagingContext] Conversation loading successful, processing...');
         // Normalize conversation data from Supabase
         const normalizedConversations = result.data.map(normalizeConversation);
         console.log('🔄 [MessagingContext] Normalized conversations:', normalizedConversations);
+        console.log('🔄 [MessagingContext] Raw conversation data:', result.data);
         
         // If no conversations, set empty array and continue
         if (!normalizedConversations || normalizedConversations.length === 0) {
@@ -195,10 +293,14 @@ export const MessagingProvider = ({ children }) => {
         });
 
         console.log('🔄 [MessagingContext] Participant IDs to fetch:', Array.from(allParticipantIds));
+        console.log('🔄 [MessagingContext] All participant IDs count:', allParticipantIds.size);
         let fetchedParticipantDetails = {};
         if (allParticipantIds.size > 0) {
+          console.log('🔄 [MessagingContext] Calling fetchParticipantDetails with:', Array.from(allParticipantIds));
           fetchedParticipantDetails = await fetchParticipantDetails(Array.from(allParticipantIds));
           console.log('🔄 [MessagingContext] Fetched participant details:', fetchedParticipantDetails);
+        } else {
+          console.log('🔄 [MessagingContext] No participant IDs to fetch, skipping fetchParticipantDetails');
         }
 
         // Fetch last message for each conversation if not present
@@ -252,6 +354,8 @@ export const MessagingProvider = ({ children }) => {
                 avatar: null
               };
               conv.participantInfo[participantId] = details;
+              console.log('🔄 [MessagingContext] (First load) Attached participant info for', participantId, ':', details);
+              console.log('🔄 [MessagingContext] (First load) Available fetched details:', fetchedParticipantDetails);
             }
           });
         });
@@ -274,6 +378,7 @@ export const MessagingProvider = ({ children }) => {
         })));
         } else {
           console.error('🔄 [MessagingContext] Failed to load conversations:', result.error);
+          console.error('🔄 [MessagingContext] Result details:', result);
           setError(result.error);
         }
       } catch (error) {
@@ -316,9 +421,12 @@ export const MessagingProvider = ({ children }) => {
           });
         });
 
+        console.log('🔄 [MessagingContext] All participant IDs to fetch:', Array.from(allParticipantIds));
+
         let fetchedParticipantDetails = {};
         if (allParticipantIds.size > 0) {
           fetchedParticipantDetails = await fetchParticipantDetails(Array.from(allParticipantIds));
+          console.log('🔄 [MessagingContext] Fetched participant details:', fetchedParticipantDetails);
         }
 
         // Attach participant info to conversations
@@ -330,16 +438,20 @@ export const MessagingProvider = ({ children }) => {
         // Populate participant info for each conversation
         conversationsWithInfo.forEach(conv => {
           conv.participants.forEach(participantId => {
-            if (participantId !== user.uid) {
+            if (participantId !== user.id) {
               const details = fetchedParticipantDetails[participantId] || {
                 name: 'ChiFere User',
                 avatar: null
               };
               conv.participantInfo[participantId] = details;
+              console.log('🔄 [MessagingContext] Attached participant info for', participantId, ':', details);
+              console.log('🔄 [MessagingContext] Available fetched details:', fetchedParticipantDetails);
+              console.log('🔄 [MessagingContext] Looking for participantId:', participantId, 'in:', Object.keys(fetchedParticipantDetails));
             }
           });
         });
 
+        console.log('🔄 [MessagingContext] Final conversations with participant info:', conversationsWithInfo);
         setConversations(conversationsWithInfo);
 
         // Calculate unread
@@ -364,9 +476,24 @@ export const MessagingProvider = ({ children }) => {
     
     setIsLoading(true);
     try {
+      console.log('🔄 [MessagingContext] Fetching messages for conversation:', conversationId);
       const result = await messagingService.getConversationMessages(conversationId);
       
       if (result.success) {
+        console.log('🔄 [MessagingContext] Successfully fetched messages:', result.data?.length || 0);
+        if (result.data && result.data.length > 0) {
+          console.log('🔄 [MessagingContext] Sample message data:', {
+            firstMessage: result.data[0],
+            allMessages: result.data.map(msg => ({
+              id: msg.id,
+              content: msg.content,
+              senderId: msg.senderId,
+              type: msg.type,
+              messageType: msg.messageType,
+              metadata: msg.metadata
+            }))
+          });
+        }
         console.log('🔄 [MessagingContext] Setting messages for conversation', conversationId, ':', result.data);
         setMessages(prev => ({
           ...prev,
@@ -378,6 +505,7 @@ export const MessagingProvider = ({ children }) => {
       
       return result;
     } catch (error) {
+      console.error('🔄 [MessagingContext] Error fetching messages:', error);
       setError(error.message);
       return { success: false, error: error.message };
     } finally {
@@ -571,9 +699,22 @@ ${offerData.message ? `**Additional Message:** ${offerData.message}` : ''}
     if (!user?.id) return { success: false, error: 'User not authenticated' };
     
     try {
+      // Extract buyer and seller IDs from participants array
+      const [buyerId, sellerId] = participants;
+      
+      console.log('🔄 [MessagingContext] Creating conversation:', {
+        participants,
+        buyerId,
+        sellerId,
+        itemId,
+        initialMessage,
+        userId: user.id
+      });
+      
       // Check if conversation already exists
       const existingResult = await messagingService.getConversationByParticipants(
-        [...participants, user.id],
+        buyerId,
+        sellerId,
         itemId
       );
       
@@ -582,10 +723,12 @@ ${offerData.message ? `**Additional Message:** ${offerData.message}` : ''}
         return { success: true, conversationId: existingResult.data.id };
       }
 
-      // Create new conversation
+      // Create new conversation using the correct messaging service signature
       const result = await messagingService.createConversation(
-        [...participants, user.uid],
+        buyerId,
+        sellerId,
         itemId,
+        null, // offerId
         initialMessage
       );
 

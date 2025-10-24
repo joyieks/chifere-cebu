@@ -10,7 +10,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
-import cartService from '../services/cartServiceNew';
+import cartService from '../services/cartServiceUnified';
 
 const CartContext = createContext();
 
@@ -50,10 +50,13 @@ export const CartProvider = ({ children }) => {
         
         // DATABASE ONLY - No guest cart merge
         // Just load user's cart from database
-        console.log('🛒 [CartContext] Loading user cart from database');
+        console.log('🛒 [CartContext] Loading user cart from database for user:', user.id);
         const result = await cartService.getUserCart(user.id);
+        console.log('🛒 [CartContext] Cart service result:', result);
+        
         if (result.success) {
-          console.log('🛒 [CartContext] User cart loaded:', result.data.items.length, 'items');
+          console.log('🛒 [CartContext] User cart loaded successfully:', result.data.items.length, 'items');
+          console.log('🛒 [CartContext] Cart items:', result.data.items);
           setCart(result.data.items || []);
         } else {
           console.error('🛒 [CartContext] Failed to load user cart:', result.error);
@@ -125,6 +128,7 @@ export const CartProvider = ({ children }) => {
         
         if (result.success) {
           console.log('🛒 [CartContext] Item added to database successfully');
+          console.log('🛒 [CartContext] Updated cart items:', result.data.items);
           setCart(result.data.items);
         } else {
           console.error('🛒 [CartContext] Failed to add to database:', result.error);

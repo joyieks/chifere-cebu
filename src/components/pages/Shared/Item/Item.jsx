@@ -719,31 +719,6 @@ const Item = () => {
                       Make Offer
                     </button>
                     
-                    <button
-                      onClick={() => {
-                        // Navigate to messages with this seller
-                        navigate(`/messages?conversation=${product.sellerId}&product=${product.id}`);
-                      }}
-                      style={{
-                        ...theme.components.button.size.lg,
-                        backgroundColor: theme.colors.success[500],
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: theme.borderRadius.xl,
-                        fontWeight: theme.typography.fontWeight.semibold,
-                        cursor: 'pointer',
-                        transition: theme.animations.transition.all,
-                        width: '100%'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = theme.colors.success[600];
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = theme.colors.success[500];
-                      }}
-                    >
-                      Message Seller
-                    </button>
                   </>
                 ) : (
                   // Regular product buttons
@@ -805,31 +780,6 @@ const Item = () => {
                       Buy Now
                     </button>
                     
-                    <button
-                      onClick={() => {
-                        // Navigate to messages with this seller
-                        navigate(`/messages?conversation=${product.sellerId}&product=${product.id}`);
-                      }}
-                      style={{
-                        ...theme.components.button.size.lg,
-                        backgroundColor: theme.colors.success[500],
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: theme.borderRadius.xl,
-                        fontWeight: theme.typography.fontWeight.semibold,
-                        cursor: 'pointer',
-                        transition: theme.animations.transition.all,
-                        width: '100%'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = theme.colors.success[600];
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = theme.colors.success[500];
-                      }}
-                    >
-                      Message Seller
-                    </button>
                   </>
                 )}
               </div>
