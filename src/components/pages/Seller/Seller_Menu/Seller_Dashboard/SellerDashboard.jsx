@@ -95,13 +95,71 @@ const SellerDashboard = () => {
     try {
       console.log('🔄 [SellerDashboard] Loading orders for seller:', user.id);
       
-      // Query buyer_orders table for seller's orders
-      const { data: orders, error } = await supabase
-        .from('buyer_orders')
-        .select('*')
-        .eq('seller_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(10);
+      // Query both tables for seller's orders to ensure we don't miss any
+      const [buyerOrdersResult, ordersResult, allOrdersResult] = await Promise.all([
+        supabase
+          .from('buyer_orders')
+          .select('*')
+          .eq('seller_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(10),
+        supabase
+          .from('orders')
+          .select('*')
+          .eq('seller_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(10),
+        // Also check for orders where seller_id might be null or different
+        supabase
+          .from('orders')
+          .select('*')
+          .is('seller_id', null)
+          .order('created_at', { ascending: false })
+          .limit(10)
+      ]);
+
+      console.log('🔍 [SellerDashboard] Buyer orders result:', {
+        data: buyerOrdersResult.data,
+        error: buyerOrdersResult.error,
+        count: buyerOrdersResult.data?.length || 0
+      });
+
+      console.log('🔍 [SellerDashboard] Orders result:', {
+        data: ordersResult.data,
+        error: ordersResult.error,
+        count: ordersResult.data?.length || 0
+      });
+
+      console.log('🔍 [SellerDashboard] All orders result (null seller_id):', {
+        data: allOrdersResult.data,
+        error: allOrdersResult.error,
+        count: allOrdersResult.data?.length || 0
+      });
+
+      // Combine orders from all sources
+      const allOrders = [
+        ...(buyerOrdersResult.data || []),
+        ...(ordersResult.data || []),
+        ...(allOrdersResult.data || [])
+      ];
+      
+      console.log('🔍 [SellerDashboard] Combined orders before deduplication:', {
+        totalCount: allOrders.length,
+        orders: allOrders
+      });
+      
+      // Remove duplicates based on order_number
+      const uniqueOrders = allOrders.filter((order, index, self) => 
+        index === self.findIndex(o => o.order_number === order.order_number)
+      );
+      
+      console.log('🔍 [SellerDashboard] Final unique orders:', {
+        uniqueCount: uniqueOrders.length,
+        orders: uniqueOrders
+      });
+      
+      const orders = uniqueOrders;
+      const error = buyerOrdersResult.error || ordersResult.error || allOrdersResult.error;
 
       if (error) {
         console.error('❌ [SellerDashboard] Orders query error:', error);

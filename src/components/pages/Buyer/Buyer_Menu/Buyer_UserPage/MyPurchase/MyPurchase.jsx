@@ -38,6 +38,8 @@ import {
 import { useAuth } from '../../../../../../contexts/AuthContext';
 import { useToast } from '../../../../../../components/Toast';
 import orderService from '../../../../../../services/orderService';
+import checkoutService from '../../../../../../services/checkoutService';
+import { supabase } from '../../../../../../config/supabase';
 
 const MyPurchase = () => {
   const { user } = useAuth();
@@ -110,13 +112,77 @@ const MyPurchase = () => {
         fullUser: user
       });
       
+      // First, let's see what orders exist in the database at all
+      const { data: allBuyerOrders, error: allBuyerOrdersError } = await supabase
+        .from('buyer_orders')
+        .select('*')
+        .limit(10);
+      
+      const { data: allOrdersData, error: allOrdersError } = await supabase
+        .from('orders')
+        .select('*')
+        .limit(10);
+      
+      console.log('🔍 [MyPurchase] ALL orders in buyer_orders table:', {
+        count: allBuyerOrders?.length || 0,
+        orders: allBuyerOrders,
+        error: allBuyerOrdersError
+      });
+      
+      console.log('🔍 [MyPurchase] ALL orders in orders table:', {
+        count: allOrdersData?.length || 0,
+        orders: allOrdersData,
+        error: allOrdersError
+      });
+      
       if (!user?.id) {
         console.warn('⚠️ [MyPurchase] No user ID available');
         setLoading(false);
         return;
       }
 
-      const result = await orderService.getOrders(user.id, 'buyer');
+      // Try to get orders from both tables to ensure we don't miss any
+      const [buyerOrdersResult, ordersResult] = await Promise.all([
+        orderService.getOrders(user.id, 'buyer'), // buyer_orders table
+        checkoutService.getUserOrders(user.id, 'buyer') // orders table
+      ]);
+      
+      console.log('🔍 [MyPurchase] Buyer orders result:', {
+        success: buyerOrdersResult.success,
+        orders: buyerOrdersResult.orders,
+        count: buyerOrdersResult.orders?.length || 0,
+        error: buyerOrdersResult.error
+      });
+
+      console.log('🔍 [MyPurchase] Orders result:', {
+        success: ordersResult.success,
+        orders: ordersResult.orders,
+        count: ordersResult.orders?.length || 0,
+        error: ordersResult.error
+      });
+      
+      // Combine orders from both sources
+      const allOrders = [
+        ...(buyerOrdersResult.success ? buyerOrdersResult.orders || [] : []),
+        ...(ordersResult.success ? ordersResult.orders || [] : [])
+      ];
+      
+      console.log('🔍 [MyPurchase] Combined orders before deduplication:', {
+        totalCount: allOrders.length,
+        orders: allOrders
+      });
+      
+      // Remove duplicates based on order_number
+      const uniqueOrders = allOrders.filter((order, index, self) => 
+        index === self.findIndex(o => o.order_number === order.order_number)
+      );
+      
+      console.log('🔍 [MyPurchase] Final unique orders:', {
+        uniqueCount: uniqueOrders.length,
+        orders: uniqueOrders
+      });
+      
+      const result = { success: true, orders: uniqueOrders };
       console.log('🔍 [MyPurchase] OrderService result:', result);
 
       if (result.success) {

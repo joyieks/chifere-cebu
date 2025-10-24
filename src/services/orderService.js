@@ -64,10 +64,17 @@ class OrderService {
         throw new Error('Buyer ID is required to create an order');
       }
 
+      // Determine seller_id from the first item if not provided
+      let sellerId = orderData.sellerId;
+      if (!sellerId && items.length > 0) {
+        sellerId = items[0].sellerId;
+        console.log('🔍 [OrderService] Auto-detected seller_id from first item:', sellerId);
+      }
+
       const order = {
         order_number: this.generateOrderNumber(),
         buyer_id: buyerId,
-        seller_id: orderData.sellerId || null, // Will be set from first item
+        seller_id: sellerId,
         status: 'pending',
         payment_status: orderData.paymentStatus || 'pending',
         delivery_status: 'pending',

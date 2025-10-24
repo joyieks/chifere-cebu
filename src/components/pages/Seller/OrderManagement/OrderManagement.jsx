@@ -35,6 +35,7 @@ import {
 import { useAuth } from '../../../../contexts/AuthContext';
 import { useToast } from '../../../../components/Toast';
 import orderService from '../../../../services/orderService';
+import { supabase } from '../../../../config/supabase';
 import notificationService from '../../../../services/notificationService';
 import OrderStatusModal from './OrderStatusModal';
 import OrderDetailsModal from './OrderDetailsModal';
@@ -82,17 +83,212 @@ const OrderManagement = () => {
       setLoading(true);
       setError(null);
       
-      console.log('🔍 [OrderManagement] Loading orders for seller:', { userId: user.id, userEmail: user.email });
+      console.log('🔍 [OrderManagement] Loading orders for seller:', { 
+        userId: user.id, 
+        userEmail: user.email,
+        userType: user.user_type,
+        sellerStatus: user.seller_status,
+        fullUser: user
+      });
       
-      const result = await orderService.getSellerOrders(user.id);
+      // Debug: Check what addresses exist in buyer_addresses table
+      const { data: allAddresses, error: allAddressesError } = await supabase
+        .from('buyer_addresses')
+        .select('*')
+        .limit(10);
       
-      if (result.success) {
-        setOrders(result.data);
-        console.log('📦 [OrderManagement] Orders loaded:', result.data.length);
-      } else {
-        setError(result.error);
-        showToast('Failed to load orders', 'error');
+      console.log('🔍 [OrderManagement] All addresses in buyer_addresses table:', {
+        count: allAddresses?.length || 0,
+        addresses: allAddresses,
+        error: allAddressesError
+      });
+      
+      // First, let's see what orders exist in the database at all
+      const { data: allBuyerOrders, error: allBuyerOrdersError } = await supabase
+        .from('buyer_orders')
+        .select('*')
+        .limit(10);
+      
+      const { data: allOrdersData, error: allOrdersError } = await supabase
+        .from('orders')
+        .select('*')
+        .limit(10);
+      
+      console.log('🔍 [OrderManagement] ALL orders in buyer_orders table:', {
+        count: allBuyerOrders?.length || 0,
+        orders: allBuyerOrders,
+        error: allBuyerOrdersError
+      });
+      
+      console.log('🔍 [OrderManagement] ALL orders in orders table:', {
+        count: allOrdersData?.length || 0,
+        orders: allOrdersData,
+        error: allOrdersError
+      });
+      
+      // Show what seller_ids exist in the orders
+      if (allOrdersData && allOrdersData.length > 0) {
+        const sellerIds = [...new Set(allOrdersData.map(order => order.seller_id))];
+        console.log('🔍 [OrderManagement] Seller IDs found in orders table:', sellerIds);
       }
+      
+      if (allBuyerOrders && allBuyerOrders.length > 0) {
+        const sellerIds = [...new Set(allBuyerOrders.map(order => order.seller_id))];
+        console.log('🔍 [OrderManagement] Seller IDs found in buyer_orders table:', sellerIds);
+      }
+      
+      // Query both tables for seller's orders to ensure we don't miss any
+      console.log('🔍 [OrderManagement] Looking for orders with seller_id:', user.id);
+      
+      const [buyerOrdersResult, ordersResult, allOrdersResult] = await Promise.all([
+        supabase
+          .from('buyer_orders')
+          .select(`
+            *,
+            buyer_order_items (
+              id,
+              product_id,
+              product_name,
+              product_image,
+              product_type,
+              quantity,
+              unit_price,
+              total_price
+            )
+          `)
+          .eq('seller_id', user.id)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('orders')
+          .select(`
+            *,
+            order_items (
+              id,
+              product_id,
+              product_name,
+              product_image,
+              product_type,
+              quantity,
+              unit_price,
+              total_price
+            )
+          `)
+          .eq('seller_id', user.id)
+          .order('created_at', { ascending: false }),
+        // Also check for orders where seller_id might be null or different
+        supabase
+          .from('orders')
+          .select(`
+            *,
+            order_items (
+              id,
+              product_id,
+              product_name,
+              product_image,
+              product_type,
+              quantity,
+              unit_price,
+              total_price
+            )
+          `)
+          .is('seller_id', null)
+          .order('created_at', { ascending: false })
+      ]);
+
+      console.log('🔍 [OrderManagement] Buyer orders result:', {
+        data: buyerOrdersResult.data,
+        error: buyerOrdersResult.error,
+        count: buyerOrdersResult.data?.length || 0
+      });
+
+      console.log('🔍 [OrderManagement] Orders result:', {
+        data: ordersResult.data,
+        error: ordersResult.error,
+        count: ordersResult.data?.length || 0
+      });
+
+      console.log('🔍 [OrderManagement] All orders result (null seller_id):', {
+        data: allOrdersResult.data,
+        error: allOrdersResult.error,
+        count: allOrdersResult.data?.length || 0
+      });
+
+      // Combine orders from all sources
+      const allOrders = [
+        ...(buyerOrdersResult.data || []),
+        ...(ordersResult.data || []),
+        ...(allOrdersResult.data || [])
+      ];
+      
+      console.log('🔍 [OrderManagement] Combined orders before deduplication:', {
+        totalCount: allOrders.length,
+        orders: allOrders
+      });
+      
+      // Remove duplicates based on order_number
+      const uniqueOrders = allOrders.filter((order, index, self) => 
+        index === self.findIndex(o => o.order_number === order.order_number)
+      );
+      
+      console.log('🔍 [OrderManagement] Final unique orders:', {
+        uniqueCount: uniqueOrders.length,
+        orders: uniqueOrders
+      });
+      
+      // Fetch customer information and shipping addresses for each order
+      const ordersWithCustomerInfo = await Promise.all(
+        uniqueOrders.map(async (order) => {
+          try {
+            // Try to fetch customer data from user_profiles
+            const { data: customerData, error: customerError } = await supabase
+              .from('user_profiles')
+              .select('id, display_name, email, phone')
+              .eq('id', order.buyer_id)
+              .maybeSingle(); // Use maybeSingle instead of single to avoid errors when no data found
+            
+            // Try to fetch shipping address from buyer_addresses (get all addresses and use the first one)
+            const { data: addressDataArray, error: addressError } = await supabase
+              .from('buyer_addresses')
+              .select('id, name, address_line_1, address_line_2, city, province, postal_code, phone')
+              .eq('user_id', order.buyer_id)
+              .limit(1); // Get only the first address
+            
+            const addressData = addressDataArray && addressDataArray.length > 0 ? addressDataArray[0] : null;
+            
+            if (customerError) {
+              console.warn('⚠️ [OrderManagement] Customer fetch error for order:', order.order_number, customerError);
+            }
+            
+            if (addressError) {
+              console.warn('⚠️ [OrderManagement] Address fetch error for order:', order.order_number, addressError);
+            }
+            
+            console.log('🔍 [OrderManagement] Customer data for order', order.order_number, ':', {
+              customerData,
+              addressData,
+              addressDataArray,
+              buyer_id: order.buyer_id
+            });
+            
+            return {
+              ...order,
+              user_profiles: customerData || null,
+              buyer_addresses: addressData || null
+            };
+          } catch (error) {
+            console.warn('⚠️ [OrderManagement] Customer fetch error for order:', order.order_number, error);
+            return {
+              ...order,
+              user_profiles: null,
+              buyer_addresses: null
+            };
+          }
+        })
+      );
+      
+      setOrders(ordersWithCustomerInfo);
+      console.log('📦 [OrderManagement] Orders loaded with customer info:', ordersWithCustomerInfo.length);
+      
     } catch (error) {
       console.error('❌ [OrderManagement] Load orders error:', error);
       setError(error.message);
@@ -457,21 +653,21 @@ const OrderManagement = () => {
                             </div>
                             <div className="ml-4">
                               <div className="text-sm font-medium text-gray-900">
-                                {order.user_profiles?.display_name || 'Unknown Customer'}
+                                {order.user_profiles?.display_name || order.buyer_addresses?.name || 'Unknown Customer'}
                               </div>
                               <div className="text-sm text-gray-500">
-                                {order.user_profiles?.phone || order.shipping_contact?.phone || 'No phone'}
+                                {order.user_profiles?.phone || order.buyer_addresses?.phone || order.shipping_contact?.phone || 'No phone'}
                               </div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
-                            {order.order_items?.length || 0} item(s)
+                            {(order.order_items?.length || order.buyer_order_items?.length || 0)} item(s)
                           </div>
                           <div className="text-sm text-gray-500">
-                            {order.order_items?.[0]?.product_name || 'No items'}
-                            {order.order_items?.length > 1 && ` +${order.order_items.length - 1} more`}
+                            {(order.order_items?.[0]?.product_name || order.buyer_order_items?.[0]?.product_name) || 'No items'}
+                            {((order.order_items?.length || order.buyer_order_items?.length || 0) > 1) && ` +${(order.order_items?.length || order.buyer_order_items?.length || 0) - 1} more`}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">

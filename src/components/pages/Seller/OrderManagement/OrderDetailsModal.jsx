@@ -142,22 +142,22 @@ const OrderDetailsModal = ({ order, isOpen, onClose }) => {
                 <div className="bg-gray-50 rounded-lg p-4">
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">Customer Information</h3>
                   <div className="space-y-3">
-                    <div className="flex items-center space-x-3">
-                      <FiUser className="w-5 h-5 text-gray-500" />
-                      <div>
-                        <div className="font-medium text-gray-900">
-                          {order.user_profiles?.display_name || 'Unknown Customer'}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          {order.user_profiles?.email || 'No email provided'}
+                      <div className="flex items-center space-x-3">
+                        <FiUser className="w-5 h-5 text-gray-500" />
+                        <div>
+                          <div className="font-medium text-gray-900">
+                            {order.user_profiles?.display_name || order.buyer_addresses?.name || 'Unknown Customer'}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            {order.user_profiles?.email || 'No email provided'}
+                          </div>
                         </div>
                       </div>
-                    </div>
                     
-                    {order.shipping_contact?.phone && (
+                    {(order.shipping_contact?.phone || order.user_profiles?.phone || order.buyer_addresses?.phone) && (
                       <div className="flex items-center space-x-3">
                         <FiPhone className="w-5 h-5 text-gray-500" />
-                        <span className="text-gray-900">{order.shipping_contact.phone}</span>
+                        <span className="text-gray-900">{order.shipping_contact?.phone || order.user_profiles?.phone || order.buyer_addresses?.phone}</span>
                       </div>
                     )}
                     
@@ -176,23 +176,23 @@ const OrderDetailsModal = ({ order, isOpen, onClose }) => {
                   <div className="flex items-start space-x-3">
                     <FiMapPin className="w-5 h-5 text-gray-500 mt-0.5" />
                     <div className="text-gray-900">
-                      {order.shipping_contact?.name && (
-                        <div className="font-medium">{order.shipping_contact.name}</div>
+                      {(order.shipping_contact?.name || order.buyer_addresses?.name) && (
+                        <div className="font-medium">{order.shipping_contact?.name || order.buyer_addresses?.name}</div>
                       )}
-                      {order.shipping_address?.street && (
-                        <div>{order.shipping_address.street}</div>
+                      {(order.shipping_address?.street || order.buyer_addresses?.address_line_1) && (
+                        <div>{order.shipping_address?.street || order.buyer_addresses?.address_line_1}</div>
                       )}
-                      {order.shipping_address?.street2 && (
-                        <div>{order.shipping_address.street2}</div>
+                      {(order.shipping_address?.street2 || order.buyer_addresses?.address_line_2) && (
+                        <div>{order.shipping_address?.street2 || order.buyer_addresses?.address_line_2}</div>
                       )}
                       {order.shipping_address?.barangay && (
                         <div>{order.shipping_address.barangay}</div>
                       )}
-                      {order.shipping_address?.city && order.shipping_address?.province && (
-                        <div>{order.shipping_address.city}, {order.shipping_address.province}</div>
+                      {((order.shipping_address?.city && order.shipping_address?.province) || (order.buyer_addresses?.city && order.buyer_addresses?.province)) && (
+                        <div>{order.shipping_address?.city || order.buyer_addresses?.city}, {order.shipping_address?.province || order.buyer_addresses?.province}</div>
                       )}
-                      {order.shipping_address?.postal_code && (
-                        <div>{order.shipping_address.postal_code}</div>
+                      {(order.shipping_address?.postal_code || order.buyer_addresses?.postal_code) && (
+                        <div>{order.shipping_address?.postal_code || order.buyer_addresses?.postal_code}</div>
                       )}
                       {order.shipping_address?.country && (
                         <div>{order.shipping_address.country}</div>
@@ -204,7 +204,7 @@ const OrderDetailsModal = ({ order, isOpen, onClose }) => {
                           </span>
                         </div>
                       )}
-                      {!order.shipping_address?.street && !order.shipping_address?.city && (
+                      {!order.shipping_address?.street && !order.shipping_address?.city && !order.buyer_addresses?.address_line_1 && !order.buyer_addresses?.city && (
                         <div className="text-gray-500 italic">No shipping address provided</div>
                       )}
                     </div>
@@ -243,7 +243,7 @@ const OrderDetailsModal = ({ order, isOpen, onClose }) => {
                 <div className="bg-gray-50 rounded-lg p-4">
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">Order Items</h3>
                   <div className="space-y-3">
-                    {order.order_items?.map((item, index) => (
+                    {(order.order_items || order.buyer_order_items || []).map((item, index) => (
                       <div key={index} className="flex items-center space-x-3 p-3 bg-white rounded-lg">
                         <div className="flex-shrink-0 w-12 h-12 bg-gray-200 rounded-lg overflow-hidden">
                           {item.product_image ? (
@@ -263,7 +263,7 @@ const OrderDetailsModal = ({ order, isOpen, onClose }) => {
                             {item.product_name}
                           </div>
                           <div className="text-sm text-gray-600">
-                            {item.product_type.charAt(0).toUpperCase() + item.product_type.slice(1)}
+                            {item.product_type?.charAt(0).toUpperCase() + item.product_type?.slice(1) || 'Product'}
                           </div>
                           <div className="text-sm text-gray-600">
                             Qty: {item.quantity} × ₱{parseFloat(item.unit_price).toLocaleString()}
@@ -276,6 +276,11 @@ const OrderDetailsModal = ({ order, isOpen, onClose }) => {
                         </div>
                       </div>
                     ))}
+                    {(!order.order_items?.length && !order.buyer_order_items?.length) && (
+                      <div className="text-center py-4 text-gray-500">
+                        No items found for this order
+                      </div>
+                    )}
                   </div>
                 </div>
 
