@@ -1,11 +1,11 @@
     import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiArrowRight, FiMail, FiLock, FiEye, FiEyeOff, FiArrowLeft } from 'react-icons/fi';
+import { FiArrowRight, FiMail, FiLock, FiEye, FiEyeOff, FiArrowLeft, FiShield } from 'react-icons/fi';
 import shoppingGirl from '../../../assets/shoppinggirl.png';
-import googleIcon from '../../../assets/googleicon.png';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useToast } from '../../../components/Toast';
+import ForgotPasswordModal from '../../common/ForgotPasswordModal/ForgotPasswordModal';
 
     const shoppingSVG = `
 <svg width="350" height="350" viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -38,17 +38,23 @@ import { useToast } from '../../../components/Toast';
         rememberMe: false
     });
     const [loading, setLoading] = useState(false);
+    const [showForgotPassword, setShowForgotPassword] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
     const { login } = useAuth();
     const { showToast } = useToast();
     
-    // Get the intended destination based on user type
-    const getDefaultPath = (userType) => {
-        if (userType === 'admin') return '/admin/dashboard';
-        if (userType === 'seller') return '/seller/dashboard';
-        return '/buyer/dashboard';
+    // Debug forgot password state
+    React.useEffect(() => {
+        console.log('showForgotPassword state changed:', showForgotPassword);
+    }, [showForgotPassword]);
+    
+    // Get the intended destination based on role
+    const getDefaultPath = (role) => {
+        if (role === 'admin') return '/admin/dashboard';
+        return role === 'seller' ? '/seller/dashboard' : '/buyer/dashboard';
     };
+
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -62,35 +68,60 @@ import { useToast } from '../../../components/Toast';
         e.preventDefault();
         setLoading(true);
         
+        console.log('🔐 [Login] Submitting with form data:', formData);
+        
         try {
-            console.log('🔐 [Login] Attempting login for:', formData.email);
-            
-            // Call login without role - it will auto-detect from database
+            // Use AuthContext login function which handles admin, seller, and buyer login
             const result = await login(formData.email, formData.password);
             
-            console.log('🔐 [Login] Login result:', result);
-            console.log('🔐 [Login] User type:', result.user_type);
-            console.log('🔐 [Login] Actual role:', result.actualRole);
-            
             if (result.success) {
-                const userType = result.user_type || result.actualRole || 'buyer';
-                
-                console.log('✅ [Login] Login successful! User type:', userType);
-                console.log('✅ [Login] Redirecting to:', getDefaultPath(userType));
+                // Get the user type from the result
+                const userType = result.user_type || 'buyer';
+                const sellerStatus = result.seller_status;
+                const actualRole = result.actualRole || userType;
                 
                 showToast('Login successful!', 'success', 1000);
                 
+                // Handle admin login
+                if (actualRole === 'admin') {
+                    setTimeout(() => {
+                        navigate('/admin/dashboard', { replace: true });
+                    }, 1000);
+                    return;
+                }
+                
+                // Handle seller status
+                if (userType === 'seller') {
+                    if (sellerStatus === 'pending') {
+                        // Redirect to pending approval page
+                        setTimeout(() => {
+                            navigate('/seller/pending', { replace: true });
+                        }, 800);
+                        return;
+                    } else if (sellerStatus === 'rejected') {
+                        showToast('Your seller application was rejected. Please contact support for more information.', 'error', 5000);
+                        setTimeout(() => {
+                            navigate('/seller/pending', { replace: true });
+                        }, 1000);
+                        return;
+                    } else if (sellerStatus === 'approved') {
+                        // Redirect to seller dashboard
+                        setTimeout(() => {
+                            navigate('/seller/dashboard', { replace: true });
+                        }, 800);
+                        return;
+                    }
+                }
+                
                 // Add a small delay to ensure toast is visible before redirect
-                const redirectPath = location.state?.from?.pathname || getDefaultPath(userType);
+                const redirectPath = location.state?.from?.pathname || getDefaultPath(actualRole);
                 setTimeout(() => {
                     navigate(redirectPath, { replace: true });
                 }, 800);
             } else {
-                console.error('❌ [Login] Login failed:', result.error);
                 showToast(result.error || 'Login failed. Please try again.', 'error');
             }
         } catch (error) {
-            console.error('❌ [Login] Exception:', error);
             showToast('An error occurred. Please try again.', 'error');
         } finally {
             setLoading(false);
@@ -132,6 +163,14 @@ import { useToast } from '../../../components/Toast';
             <div className="text-center mb-8 w-full">
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">WELCOME BACK</h1>
                 <p className="text-gray-600">Welcome back! Please enter your details.</p>
+                
+                {/* Admin Login Indicator */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4 flex items-center justify-center space-x-2">
+                    <FiShield className="text-blue-600" size={16} />
+                    <span className="text-sm text-blue-800">
+                        <strong>Admin:</strong> Use admin@gmail.com / admin123
+                    </span>
+                </div>
             </div>
 
             {/* Login Form */}
@@ -148,6 +187,7 @@ import { useToast } from '../../../components/Toast';
                     placeholder="Enter your email"
                 />
                 </div>
+
 
                 {/* Password Field */}
                 <div>
@@ -171,6 +211,7 @@ import { useToast } from '../../../components/Toast';
                 </div>
                 </div>
 
+
                 {/* Remember Me and Forgot Password */}
                 <div className="flex items-center justify-between">
                 <label className="flex items-center space-x-2">
@@ -183,9 +224,21 @@ import { useToast } from '../../../components/Toast';
                     />
                     <span className="text-gray-700">Remember me</span>
                 </label>
-                <a href="#" className="text-gray-700 hover:text-blue-600 font-medium">
-                    Forgot password
-                </a>
+                <button 
+                    type="button"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Forgot password button clicked');
+                        console.log('showForgotPassword state:', showForgotPassword);
+                        alert('Forgot password button clicked!'); // Temporary alert for testing
+                        setShowForgotPassword(true);
+                    }}
+                    className="text-blue-600 hover:text-blue-800 font-medium cursor-pointer transition-colors duration-200 focus:outline-none focus:underline px-3 py-2 rounded hover:bg-blue-50 border border-blue-200 hover:border-blue-300 relative z-10 bg-yellow-100"
+                    style={{ pointerEvents: 'auto' }}
+                >
+                    Forgot password?
+                </button>
                 </div>
 
                 {/* Sign In Button */}
@@ -203,6 +256,7 @@ import { useToast } from '../../../components/Toast';
                     </>
                 )}
                 </button>
+
             </form>
 
             {/* Sign Up Link */}
@@ -237,6 +291,12 @@ import { useToast } from '../../../components/Toast';
             </div>
             </motion.div>
         </div>
+
+        {/* Forgot Password Modal */}
+        <ForgotPasswordModal
+            isOpen={showForgotPassword}
+            onClose={() => setShowForgotPassword(false)}
+        />
         </div>
     );
     };

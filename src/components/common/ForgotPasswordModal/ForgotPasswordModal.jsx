@@ -14,6 +14,9 @@ import {
 
 const ForgotPasswordModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
+  
+  // Debug logging
+  console.log('ForgotPasswordModal rendered with isOpen:', isOpen);
   const [currentStep, setCurrentStep] = useState(1); // 1: Email, 2: Code, 3: New Password, 4: Success
   const [email, setEmail] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
