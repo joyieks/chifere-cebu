@@ -46,3 +46,4 @@ Removed the OTP verification step from the seller signup flow to simplify the re
 - Admin approval process remains the same
 - No email verification required anymore
 
+

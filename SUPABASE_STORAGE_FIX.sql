@@ -39,3 +39,4 @@ ORDER BY policyname;
 -- Success message
 SELECT 'Storage policies created successfully!' as status;
 
+

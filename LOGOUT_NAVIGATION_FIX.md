@@ -76,3 +76,4 @@ const handleLogout = async () => {
 ## Notes
 The logout process now properly waits for the session to be cleared before navigating, ensuring the user is properly logged out and redirected to the landing page.
 
+

@@ -151,3 +151,4 @@ if (!user?.id || user.id === 'undefined' || user.id === 'null') {
 
 **The messaging system will now work reliably without UUID-related errors!** 💬✨
 
+

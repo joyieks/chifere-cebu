@@ -1,27 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../../../../config/supabase';
 
 const OfferMessage = ({ message, isOwnMessage }) => {
+  const [productData, setProductData] = useState(null);
+  const [isLoadingProduct, setIsLoadingProduct] = useState(false);
+  const [productError, setProductError] = useState(null);
+  
   // Parse the offer data from message metadata or content
   const metadata = message.metadata || {};
   
-  // Extract offer information
-  const productName = metadata.productName || 'Unknown Product';
-  // Be resilient: try several possible fields for the image
-  const productImage = metadata.productImage || metadata.image_url || metadata.image || metadata.thumbnailUrl || metadata.thumbnail;
+  // Extract offer information from metadata (fallback values)
+  const fallbackProductName = metadata.productName || 'Unknown Product';
+  const fallbackProductImage = metadata.productImage || metadata.image_url || metadata.image || metadata.thumbnailUrl || metadata.thumbnail;
+  const fallbackProductPrice = metadata.productPrice || 0;
   
-  // Debug: Log image data
-  console.log('🔄 [OfferMessage] Image debugging:', {
-    metadata,
-    productImage,
-    allImageFields: {
-      productImage: metadata.productImage,
-      image_url: metadata.image_url,
-      image: metadata.image,
-      thumbnailUrl: metadata.thumbnailUrl,
-      thumbnail: metadata.thumbnail
-    }
-  });
-  const productPrice = metadata.productPrice || 0;
   const offerType = metadata.offerType || 'offer';
   const offerValue = metadata.offerValue;
   const offerItems = metadata.offerItems;
@@ -29,6 +21,134 @@ const OfferMessage = ({ message, isOwnMessage }) => {
   const additionalMessage = message.content?.includes('Additional Message:') 
     ? message.content.split('Additional Message:')[1]?.trim() 
     : '';
+
+  // Helper function to get full image URL from Supabase Storage
+  const getProductImageUrl = (product) => {
+    if (!product) return null;
+    
+    // Check all possible image field names
+    const imagePath = product.primary_image || 
+                      product.images?.[0] || 
+                      product.image_url || 
+                      product.image || 
+                      product.product_image || 
+                      product.photo || 
+                      product.photos?.[0] || 
+                      product.thumbnail;
+    
+    if (!imagePath) return null;
+    
+    // If it's already a full URL (starts with http), return as is
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return imagePath;
+    }
+    
+    // Otherwise, construct Supabase Storage URL
+    const { data } = supabase.storage
+      .from('product-images')
+      .getPublicUrl(imagePath);
+    
+    return data?.publicUrl || null;
+  };
+
+  // Fetch real product data from database
+  useEffect(() => {
+    const fetchProductData = async () => {
+      const productId = metadata.productId;
+      
+      if (!productId) {
+        console.log('🔄 [OfferMessage] No product ID found in metadata');
+        return;
+      }
+
+      setIsLoadingProduct(true);
+      setProductError(null);
+
+      try {
+        console.log('🔄 [OfferMessage] Fetching product data for ID:', productId);
+        
+        // Try to find product in old products table first
+        const { data: oldProduct, error: oldError } = await supabase
+          .from('products')
+          .select(`
+            *,
+            user_profiles!products_seller_id_fkey (
+              id,
+              display_name,
+              business_name,
+              profile_image
+            )
+          `)
+          .eq('id', productId)
+          .single();
+
+        if (!oldError && oldProduct) {
+          console.log('✅ [OfferMessage] Product found in old products table:', oldProduct);
+          setProductData(oldProduct);
+          return;
+        }
+
+        // Try to find in preloved items table
+        const { data: prelovedProduct, error: prelovedError } = await supabase
+          .from('seller_add_item_preloved')
+          .select(`
+            *,
+            user_profiles!seller_add_item_preloved_seller_id_fkey (
+              id,
+              display_name,
+              business_name,
+              profile_image
+            )
+          `)
+          .eq('id', productId)
+          .single();
+
+        if (!prelovedError && prelovedProduct) {
+          console.log('✅ [OfferMessage] Product found in preloved items table:', prelovedProduct);
+          setProductData(prelovedProduct);
+          return;
+        }
+
+        // Try to find in barter items table
+        const { data: barterProduct, error: barterError } = await supabase
+          .from('seller_add_barter_item')
+          .select(`
+            *,
+            user_profiles!seller_add_barter_item_seller_id_fkey (
+              id,
+              display_name,
+              business_name,
+              profile_image
+            )
+          `)
+          .eq('id', productId)
+          .single();
+
+        if (!barterError && barterProduct) {
+          console.log('✅ [OfferMessage] Product found in barter items table:', barterProduct);
+          setProductData(barterProduct);
+          return;
+        }
+
+        // Product not found in any table
+        console.warn('⚠️ [OfferMessage] Product not found in any table for ID:', productId);
+        setProductError('Product not found');
+        
+      } catch (error) {
+        console.error('❌ [OfferMessage] Error fetching product data:', error);
+        setProductError(error.message);
+      } finally {
+        setIsLoadingProduct(false);
+      }
+    };
+
+    fetchProductData();
+  }, [metadata.productId]);
+
+  // Use real product data if available, otherwise fallback to metadata
+  const productName = productData?.name || fallbackProductName;
+  const productImage = productData ? getProductImageUrl(productData) : fallbackProductImage;
+  const productPrice = productData?.price || fallbackProductPrice;
 
   // Format offer type for display
   const formatOfferType = (type) => {
@@ -62,7 +182,11 @@ const OfferMessage = ({ message, isOwnMessage }) => {
           <div className="flex gap-3">
             {/* Product Image */}
             <div className="flex-shrink-0">
-              {productImage && productImage !== 'null' && productImage !== 'undefined' ? (
+              {isLoadingProduct ? (
+                <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center border border-gray-200">
+                  <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              ) : productImage && productImage !== 'null' && productImage !== 'undefined' ? (
                 <img 
                   src={productImage} 
                   alt={productName}
@@ -89,6 +213,14 @@ const OfferMessage = ({ message, isOwnMessage }) => {
             <div className="flex-1 min-w-0">
               <h4 className="font-semibold text-sm truncate">{productName}</h4>
               <p className="text-xs text-gray-600">₱{productPrice.toLocaleString()}</p>
+              
+              {/* Debug info - show data source */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="text-xs text-gray-400 mt-1">
+                  {productData ? '✅ Live data' : '⚠️ Fallback data'}
+                  {productError && ` (Error: ${productError})`}
+                </div>
+              )}
               
               {/* Offer Type Badge */}
               <div className="mt-2">

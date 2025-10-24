@@ -122,3 +122,4 @@ COMMENT ON FUNCTION get_user_documents(UUID) IS 'Get all documents for a specifi
 COMMENT ON FUNCTION cleanup_temp_files() IS 'Clean up temporary files older than 24 hours';
 
 
+

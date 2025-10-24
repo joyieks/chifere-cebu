@@ -31,3 +31,4 @@ WHERE tablename = 'objects'
 -- Success message
 SELECT 'Storage RLS disabled - uploads should now work!' as status;
 
+

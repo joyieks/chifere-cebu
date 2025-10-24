@@ -116,3 +116,4 @@ const logout = async () => {
 ## Notes
 The logout process now properly clears all session data and prevents race conditions that were causing the user to appear still logged in after logout.
 
+

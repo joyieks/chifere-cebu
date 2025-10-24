@@ -138,3 +138,4 @@ const InfoItem = ({ icon: Icon, label, value }) => (
 
 export default UserProfileModal;
 
+

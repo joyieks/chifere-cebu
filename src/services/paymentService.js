@@ -23,7 +23,7 @@
 
 class PaymentService {
   /**
-   * Create a payment intent for an order (Mock implementation)
+   * Create a payment intent for an order (Testing Implementation)
    * @param {Object} paymentData - Payment details
    * @param {number} paymentData.amount - Amount in PHP (not centavos)
    * @param {string} paymentData.currency - Currency code (default: 'PHP')
@@ -50,30 +50,65 @@ class PaymentService {
         };
       }
 
-      // Mock payment intent creation
-      const paymentIntentId = `pi_mock_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      const clientKey = `pk_mock_${Math.random().toString(36).substr(2, 20)}`;
+      // Generate payment intent ID for testing
+      const timestamp = Date.now();
+      const randomId = Math.random().toString(36).substr(2, 9);
+      const paymentIntentId = `pi_${timestamp}_${randomId}`;
+      
+      // Generate transaction number for tracking
+      const transactionNumber = `TXN${timestamp}${randomId.toUpperCase()}`;
+      
+      // Calculate fee based on payment method
+      const fee = this.calculateFee(paymentMethod, amount);
+      const totalAmount = amount + fee.total;
 
-      // Store payment intent in localStorage for demo
+      // Store payment intent in localStorage for demo/testing
       const paymentIntents = JSON.parse(localStorage.getItem('payment_intents') || '{}');
       paymentIntents[paymentIntentId] = {
         id: paymentIntentId,
+        transactionNumber: transactionNumber,
         amount: amount * 100, // Convert to centavos
+        totalAmount: totalAmount * 100,
         currency,
         orderId,
         paymentMethod,
         metadata,
         status: 'requires_payment_method',
-        createdAt: new Date().toISOString()
+        fee: fee,
+        createdAt: new Date().toISOString(),
+        // For e-wallets, simulate immediate success
+        requiresAction: ['gcash', 'maya'].includes(paymentMethod),
+        nextActionUrl: ['gcash', 'maya'].includes(paymentMethod) 
+          ? `https://payment-test.com/checkout/${paymentIntentId}` 
+          : null
       };
       localStorage.setItem('payment_intents', JSON.stringify(paymentIntents));
 
+      console.log('🧪 [PaymentService] Created payment intent for testing:', {
+        paymentIntentId,
+        transactionNumber,
+        paymentMethod,
+        amount,
+        totalAmount,
+        fee
+      });
+
       return {
         success: true,
-        clientKey,
-        paymentIntentId,
-        amount: amount * 100, // Return in centavos
-        currency,
+        data: {
+          paymentIntentId,
+          transactionNumber,
+          clientSecret: `pi_client_secret_${paymentIntentId}`,
+          amount: totalAmount * 100, // Return total amount in centavos
+          currency,
+          paymentMethod,
+          fee: fee,
+          // For e-wallets, simulate redirect requirement
+          requiresAction: ['gcash', 'maya'].includes(paymentMethod),
+          nextActionUrl: ['gcash', 'maya'].includes(paymentMethod) 
+            ? `https://payment-test.com/checkout/${paymentIntentId}` 
+            : null
+        },
         message: 'Payment intent created successfully'
       };
     } catch (error) {
@@ -86,7 +121,66 @@ class PaymentService {
   }
 
   /**
-   * Confirm a payment intent (Mock implementation)
+   * Confirm a payment intent (Testing Implementation)
+   * @param {string} paymentIntentId - Payment intent ID
+   * @param {Object} confirmationData - Payment confirmation data
+   * @returns {Promise<Object>} - Payment confirmation result
+   */
+  async confirmPaymentIntent(paymentIntentId, confirmationData = {}) {
+    try {
+      // Get payment intent from localStorage
+      const paymentIntents = JSON.parse(localStorage.getItem('payment_intents') || '{}');
+      const paymentIntent = paymentIntents[paymentIntentId];
+
+      if (!paymentIntent) {
+        return {
+          success: false,
+          error: 'Payment intent not found'
+        };
+      }
+
+      // Simulate successful payment confirmation
+      const updatedPaymentIntent = {
+        ...paymentIntent,
+        status: 'succeeded',
+        confirmedAt: new Date().toISOString(),
+        confirmationData: confirmationData
+      };
+
+      // Update localStorage
+      paymentIntents[paymentIntentId] = updatedPaymentIntent;
+      localStorage.setItem('payment_intents', JSON.stringify(paymentIntents));
+
+      console.log('🧪 [PaymentService] Payment confirmed for testing:', {
+        paymentIntentId,
+        transactionNumber: paymentIntent.transactionNumber,
+        status: 'succeeded'
+      });
+
+      return {
+        success: true,
+        data: {
+          paymentIntentId,
+          transactionNumber: paymentIntent.transactionNumber,
+          status: 'succeeded',
+          amount: paymentIntent.totalAmount,
+          currency: paymentIntent.currency,
+          paymentMethod: paymentIntent.paymentMethod,
+          confirmedAt: updatedPaymentIntent.confirmedAt
+        },
+        message: 'Payment confirmed successfully'
+      };
+    } catch (error) {
+      console.error('Error confirming payment intent:', error);
+      return {
+        success: false,
+        error: 'Failed to confirm payment intent'
+      };
+    }
+  }
+
+  /**
+   * Confirm a payment intent (Mock implementation) - Legacy method
    * @param {string} paymentIntentId - Payment intent ID
    * @param {Object} confirmationData - Payment confirmation data
    * @returns {Promise<Object>} - Payment confirmation result
@@ -213,9 +307,6 @@ class PaymentService {
       'card': { rate: 0.035, fixed: 15, min: 0 },
       'gcash': { rate: 0.025, fixed: 0, min: 0 },
       'maya': { rate: 0.022, fixed: 0, min: 0 },
-      'grabpay': { rate: 0.020, fixed: 0, min: 0 },
-      'online_banking': { rate: 0, fixed: 15, min: 0 },
-      'qr_ph': { rate: 0.015, fixed: 0, min: 0 },
       'cod': { rate: 0, fixed: 0, min: 0 }
     };
 
@@ -256,13 +347,6 @@ class PaymentService {
         fee: 'No fee'
       },
       {
-        key: 'card',
-        label: 'Credit/Debit Card',
-        icon: '💳',
-        description: 'Visa, Mastercard accepted',
-        fee: '3.5% + ₱15'
-      },
-      {
         key: 'gcash',
         label: 'GCash',
         icon: '📱',
@@ -275,27 +359,6 @@ class PaymentService {
         icon: '💙',
         description: 'Pay with Maya wallet',
         fee: '2.2%'
-      },
-      {
-        key: 'grabpay',
-        label: 'GrabPay',
-        icon: '🚗',
-        description: 'Pay with GrabPay wallet',
-        fee: '2.0%'
-      },
-      {
-        key: 'online_banking',
-        label: 'Online Banking',
-        icon: '🏦',
-        description: 'Direct bank transfer',
-        fee: '₱15 flat'
-      },
-      {
-        key: 'qr_ph',
-        label: 'QR Ph',
-        icon: '📱',
-        description: 'Scan QR code to pay',
-        fee: '1.5%'
       }
     ];
   }

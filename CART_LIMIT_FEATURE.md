@@ -208,3 +208,4 @@ The cart limit feature successfully:
 
 **The cart limit is now active and will prevent users from adding more than 20 items to their cart!** 🛒
 
+

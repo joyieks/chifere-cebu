@@ -198,3 +198,4 @@ display_name: "Juan Cruz"  // .trim() removes extra spaces
 ## Summary
 The buyer registration form now automatically generates the `display_name` by combining the `firstName` and `lastName` fields, eliminating the need for a separate input field while ensuring the database receives the required `display_name` field.
 
+

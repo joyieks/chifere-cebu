@@ -123,3 +123,4 @@ With your actual API key if needed.
 The Google Maps integration is now ready! Just add your API key and users can pin their exact location for accurate delivery addresses.
 
 
+

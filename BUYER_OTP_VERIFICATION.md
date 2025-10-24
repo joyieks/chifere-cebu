@@ -170,3 +170,4 @@ if (userType === 'buyer') {
 - **Resend functionality** available if code not received
 - **Back navigation** allows returning to registration form
 
+

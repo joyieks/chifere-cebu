@@ -3,8 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import BuyerLayout from '../../Buyer/Buyer_Menu/Buyer_Layout/Buyer_layout';
 import { theme } from '../../../../styles/designSystem';
 import productService from '../../../../services/productService';
+import reviewService from '../../../../services/reviewService';
 import { useCart } from '../../../../contexts/CartContext';
 import OfferModal from '../OfferModal/OfferModal';
+import { MessagingProvider } from '../../../../contexts/MessagingContext';
 
 const Item = () => {
   const { id, itemId } = useParams(); // Support both parameter names
@@ -112,9 +114,11 @@ const Item = () => {
           }
         }
 
-        // For now, set empty reviews and related products
-        // TODO: Implement reviews and related products services
-        setReviews([]);
+        // Load reviews for this product
+        await loadProductReviews(targetItemId);
+        
+        // For now, set empty related products
+        // TODO: Implement related products service
         setRelatedProducts([]);
 
       } catch (err) {
@@ -127,6 +131,25 @@ const Item = () => {
 
     loadProductData();
   }, [id, itemId]);
+
+  // Load reviews for the product
+  const loadProductReviews = async (productId) => {
+    try {
+      console.log('🔍 [Item] Loading reviews for product:', productId);
+      const result = await reviewService.getProductReviews(productId, 20, 0);
+      
+      if (result.success) {
+        setReviews(result.reviews || []);
+        console.log('✅ [Item] Reviews loaded:', result.reviews?.length || 0);
+      } else {
+        console.warn('⚠️ [Item] Failed to load reviews:', result.error);
+        setReviews([]);
+      }
+    } catch (error) {
+      console.error('❌ [Item] Load reviews error:', error);
+      setReviews([]);
+    }
+  };
 
   // Loading state
   if (loading) {
@@ -461,7 +484,7 @@ const Item = () => {
                     fontSize: theme.typography.fontSize.sm,
                     color: theme.colors.gray[500]
                   }}>
-                    ({product.total_ratings || 0} reviews)
+                    ({reviews.length} reviews)
                   </span>
                 </div>
               </div>
@@ -957,8 +980,10 @@ const Item = () => {
                       borderBottom: activeTab === tab 
                         ? `2px solid ${theme.colors.primary[500]}` 
                         : '2px solid transparent',
+                      borderTop: 'none',
+                      borderLeft: 'none',
+                      borderRight: 'none',
                       backgroundColor: 'transparent',
-                      border: 'none',
                       cursor: 'pointer',
                       transition: theme.animations.transition.all,
                       textTransform: 'capitalize'
@@ -1119,7 +1144,7 @@ const Item = () => {
                         fontSize: theme.typography.fontSize.sm,
                         color: theme.colors.gray[600]
                       }}>
-                        ({product.total_ratings || 0} reviews)
+                        ({reviews.length} reviews)
                       </span>
                     </div>
                   </div>
@@ -1127,7 +1152,15 @@ const Item = () => {
                   {/* Reviews List */}
                   {reviews.length > 0 ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing[6] }}>
-                      {reviews.slice(0, 3).map((review) => (
+                      {reviews.slice(0, 3).map((review) => {
+                        console.log('🔍 [Item] Rendering review:', {
+                          id: review.id,
+                          rating: review.rating,
+                          comment: review.comment,
+                          created_at: review.created_at,
+                          fullReview: review
+                        });
+                        return (
                         <div key={review.id} style={{
                           padding: theme.spacing[4],
                           border: `1px solid ${theme.colors.gray[200]}`,
@@ -1190,7 +1223,7 @@ const Item = () => {
                                   fontSize: theme.typography.fontSize.xs,
                                   color: theme.colors.gray[500]
                                 }}>
-                                  {new Date(review.createdAt).toLocaleDateString()}
+                                  {new Date(review.created_at).toLocaleDateString()}
                                 </span>
                               </div>
                             </div>
@@ -1278,7 +1311,8 @@ const Item = () => {
                             <span>👍 {review.helpful} found this helpful</span>
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
                       {reviews.length > 3 && (
                         <button
                           style={{
@@ -1432,25 +1466,27 @@ const Item = () => {
       </div>
       
       {/* Offer Modal */}
-      <OfferModal
-        isOpen={isOfferModalOpen}
-        onClose={() => setIsOfferModalOpen(false)}
-        product={product}
-        store={store || (product ? {
-          id: product.seller_id || 'unknown',
-          name: 'Unknown Store',
-          business_name: 'Unknown Store',
-          display_name: 'Unknown Store',
-          rating: 4.5,
-          location: { city: 'Cebu' },
-          verified: false,
-          policies: {
-            shipping: 'Standard shipping',
-            returns: '30-day returns',
-            payment: 'All major cards accepted'
-          }
-        } : null)}
-      />
+      <MessagingProvider>
+        <OfferModal
+          isOpen={isOfferModalOpen}
+          onClose={() => setIsOfferModalOpen(false)}
+          product={product}
+          store={store || (product ? {
+            id: product.seller_id || 'unknown',
+            name: 'Unknown Store',
+            business_name: 'Unknown Store',
+            display_name: 'Unknown Store',
+            rating: 4.5,
+            location: { city: 'Cebu' },
+            verified: false,
+            policies: {
+              shipping: 'Standard shipping',
+              returns: '30-day returns',
+              payment: 'All major cards accepted'
+            }
+          } : null)}
+        />
+      </MessagingProvider>
     </BuyerLayout>
   );
 };

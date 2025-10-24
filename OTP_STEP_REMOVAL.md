@@ -131,3 +131,4 @@ const [userType, setUserType] = useState(null);
 ## Summary
 The buyer registration flow is now simplified to show a success message after registration, instructing users to check their email and confirm it. The OTP is still sent via email, but users don't need to enter it in the app interface.
 
+

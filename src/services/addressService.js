@@ -24,7 +24,13 @@ class AddressService {
    */
   async getAddresses(userId, role = 'buyer') {
     try {
-      const tableName = role === 'buyer' ? 'buyer_addresses' : 'seller_addresses';
+      // Validate userId before making query
+      if (!userId || userId === 'undefined' || userId === 'null') {
+        console.warn('AddressService: Invalid userId provided:', userId);
+        return { success: true, data: [] };
+      }
+
+      const tableName = 'buyer_addresses'; // Use buyer_addresses for all users for now
       
       const { data, error } = await supabase
         .from(tableName)
@@ -62,7 +68,13 @@ class AddressService {
    */
   async getDefaultAddress(userId, role = 'buyer') {
     try {
-      const tableName = role === 'buyer' ? 'buyer_addresses' : 'seller_addresses';
+      // Validate userId before making query
+      if (!userId || userId === 'undefined' || userId === 'null') {
+        console.warn('AddressService: Invalid userId provided for default address:', userId);
+        return { success: true, data: null };
+      }
+
+      const tableName = 'buyer_addresses'; // Use buyer_addresses for all users for now
       
       const { data, error } = await supabase
         .from(tableName)
@@ -81,8 +93,8 @@ class AddressService {
     } catch (error) {
       console.error('Get default address error:', error);
       return {
-        success: false,
-        error: handleSupabaseError(error)
+        success: true,
+        data: null
       };
     }
   }
@@ -94,35 +106,66 @@ class AddressService {
    * @param {string} role - User role (buyer/seller)
    * @returns {Promise<Object>} - Result
    */
-  async addAddress(userId, addressData, role = 'buyer') {
+  async addAddress(addressData, role = 'buyer') {
     try {
-      const tableName = role === 'buyer' ? 'buyer_addresses' : 'seller_addresses';
+      // Validate addressData parameter
+      if (!addressData || typeof addressData !== 'object') {
+        console.error('❌ [AddressService] Invalid addressData:', addressData);
+        throw new Error('Address data is required');
+      }
+
+      // Get user ID from auth
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        console.error('❌ [AddressService] Auth error:', authError);
+        throw new Error('User not authenticated');
+      }
+      
+      const userId = user.id;
+      console.log('🏠 [AddressService] Adding address for user:', userId);
+      console.log('🏠 [AddressService] Address data received:', addressData);
+      
+      const tableName = 'buyer_addresses'; // Use buyer_addresses for all users for now
       
       // If this is set as default, unset other default addresses
       if (addressData.isDefault) {
         await this.unsetDefaultAddresses(userId, role);
       }
 
+      // Build address object with comprehensive field support
+      const streetAddress = addressData.address || addressData.street_address || '';
+      
       const address = {
         user_id: userId,
-        type: addressData.type || 'home',
-        name: addressData.name || addressData.recipient_name,
-        phone: addressData.phone || addressData.phone_number,
-        address_line_1: addressData.address_line_1 || addressData.street_address,
-        address_line_2: addressData.address_line_2 || '',
-        barangay: addressData.barangay,
-        city: addressData.city,
-        province: addressData.province,
-        zip_code: addressData.zip_code,
-        country: addressData.country || 'Philippines',
-        is_default: addressData.isDefault || false,
-        is_active: true,
-        lat: addressData.lat || null,
-        lng: addressData.lng || null,
-        is_confirmed: addressData.isConfirmed || false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        name: addressData.name || addressData.recipient_name || 'Default Name',
+        phone: addressData.phone || addressData.phone_number || '',
+        address: streetAddress, // Simple address field
+        address_line_1: streetAddress, // Keep for compatibility
+        city: addressData.city || '',
+        province: addressData.province || '',
+        postal_code: addressData.postal_code || addressData.zip_code || '',
+        is_default: addressData.isDefault || false
       };
+
+      // Add optional fields only if they exist in the table
+      if (addressData.type) address.type = addressData.type;
+      if (addressData.barangay) address.barangay = addressData.barangay;
+      if (addressData.country) address.country = addressData.country;
+      if (addressData.lat) address.lat = addressData.lat;
+      if (addressData.lng) address.lng = addressData.lng;
+      if (addressData.isConfirmed !== undefined) address.is_confirmed = addressData.isConfirmed;
+      if (addressData.isActive !== undefined) address.is_active = addressData.isActive;
+
+      console.log('🏠 [AddressService] Adding address to table:', tableName);
+      console.log('🏠 [AddressService] Address data:', address);
+
+      // Validate required fields
+      if (!address.name || address.name.trim() === '') {
+        throw new Error('Name is required for address');
+      }
+      if (!streetAddress || streetAddress.trim() === '') {
+        throw new Error('Street address is required');
+      }
 
       const { data, error } = await supabase
         .from(tableName)
@@ -130,7 +173,12 @@ class AddressService {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('🏠 [AddressService] Supabase error:', error);
+        throw error;
+      }
+
+      console.log('✅ [AddressService] Address added successfully:', data);
 
       return {
         success: true,
@@ -138,10 +186,25 @@ class AddressService {
         message: 'Address added successfully'
       };
     } catch (error) {
-      console.error('Add address error:', error);
+      console.error('❌ [AddressService] Add address error:', error);
+      
+      // Return a more user-friendly error message
+      let errorMessage = 'Failed to add address';
+      if (error.message?.includes('User not authenticated')) {
+        errorMessage = 'Please log in to add an address.';
+      } else if (error.message?.includes('seller_addresses')) {
+        errorMessage = 'Address table not found. Please contact support.';
+      } else if (error.message?.includes('permission')) {
+        errorMessage = 'You do not have permission to add addresses.';
+      } else if (error.message?.includes('PGRST205')) {
+        errorMessage = 'Database table not found. Please contact support.';
+      } else if (error.message?.includes('Cannot read properties of undefined')) {
+        errorMessage = 'Authentication error. Please refresh the page and try again.';
+      }
+      
       return {
         success: false,
-        error: handleSupabaseError(error)
+        error: errorMessage
       };
     }
   }
@@ -155,7 +218,7 @@ class AddressService {
    */
   async updateAddress(addressId, addressData, role = 'buyer') {
     try {
-      const tableName = role === 'buyer' ? 'buyer_addresses' : 'seller_addresses';
+      const tableName = 'buyer_addresses'; // Use buyer_addresses for all users for now
       
       // If this is set as default, unset other default addresses
       if (addressData.isDefault) {
@@ -219,7 +282,7 @@ class AddressService {
    */
   async deleteAddress(addressId, role = 'buyer') {
     try {
-      const tableName = role === 'buyer' ? 'buyer_addresses' : 'seller_addresses';
+      const tableName = 'buyer_addresses'; // Use buyer_addresses for all users for now
       
       // Soft delete by setting is_active to false
       const { error } = await supabase
@@ -254,7 +317,7 @@ class AddressService {
    */
   async setDefaultAddress(addressId, userId, role = 'buyer') {
     try {
-      const tableName = role === 'buyer' ? 'buyer_addresses' : 'seller_addresses';
+      const tableName = 'buyer_addresses'; // Use buyer_addresses for all users for now
       
       // First, unset all default addresses for this user
       await this.unsetDefaultAddresses(userId, role);
@@ -291,7 +354,7 @@ class AddressService {
    * @returns {Promise<void>}
    */
   async unsetDefaultAddresses(userId, role = 'buyer') {
-    const tableName = role === 'buyer' ? 'buyer_addresses' : 'seller_addresses';
+    const tableName = 'buyer_addresses'; // Use buyer_addresses for all users for now
     
     await supabase
       .from(tableName)
@@ -311,7 +374,7 @@ class AddressService {
    */
   async getAddressById(addressId, role = 'buyer') {
     try {
-      const tableName = role === 'buyer' ? 'buyer_addresses' : 'seller_addresses';
+      const tableName = 'buyer_addresses'; // Use buyer_addresses for all users for now
       
       const { data, error } = await supabase
         .from(tableName)

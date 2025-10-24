@@ -65,3 +65,4 @@ Removed the duplicate admin login logic from the login component and simplified 
 ## Notes
 The AuthContext already had robust admin login functionality. The issue was that the login component wasn't using it properly. Now it's simplified and should work correctly.
 
+

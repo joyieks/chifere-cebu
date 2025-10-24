@@ -117,3 +117,4 @@ SELECT
   (SELECT COUNT(*) FROM pg_policies WHERE tablename = 'buyer_add_to_cart') as policy_count,
   (SELECT COUNT(*) FROM buyer_add_to_cart) as record_count;
 
+

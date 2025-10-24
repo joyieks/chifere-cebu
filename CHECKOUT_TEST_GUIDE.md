@@ -97,3 +97,4 @@ If you're still experiencing issues:
 The checkout should now work properly with the theme color fixes!
 
 
+

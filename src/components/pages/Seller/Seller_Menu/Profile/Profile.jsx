@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import SellerLayout from '../Seller_Layout/SellerLayout';
 import { theme } from '../../../../../styles/designSystem';
+import { useAuth } from '../../../../../contexts/AuthContext';
+import { supabase } from '../../../../../config/supabase';
+import ProfilePictureModal from '../../../../../components/common/ProfilePictureModal/ProfilePictureModal';
 import { 
   FiUser, 
   FiMail, 
@@ -17,30 +20,128 @@ import {
 } from 'react-icons/fi';
 
 const Profile = () => {
+  const { user, updateProfile } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState({
-    name: 'Miguel Torres',
-    email: 'test@gmail.com',
-    phone: '+63 912 345 6789',
-    address: '123 Colon Street, Cebu City, 6000',
-    businessName: 'Miguel\'s Vintage Store',
-    businessDescription: 'Specializing in vintage and pre-loved items with a focus on quality and authenticity. Serving the Cebu community for over 3 years.',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    businessName: '',
+    businessDescription: '',
+    avatar: '/default-avatar.png',
     coverImage: '/placeholder-store.svg',
-    isVerified: true,
-    joinDate: '2022-03-15',
-    rating: 4.8,
-    totalSales: 156,
-    totalRevenue: 287340,
-    responseRate: 95,
-    responseTime: '2 hours'
+    isVerified: false,
+    joinDate: '',
+    rating: 0,
+    totalSales: 0,
+    totalRevenue: 0,
+    responseRate: 0,
+    responseTime: 'N/A'
   });
 
   const [editedProfile, setEditedProfile] = useState({ ...profile });
+  const [saving, setSaving] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const fileInputRef = useRef();
 
-  const handleSave = () => {
-    setProfile({ ...editedProfile });
-    setIsEditing(false);
+  // Load user data from AuthContext and database
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      if (user) {
+        try {
+          // Fetch additional seller data from user_profiles table
+          const { data: profileData, error } = await supabase
+            .from('user_profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+
+          if (error) {
+            console.error('Error fetching profile:', error);
+          }
+
+          const userProfile = {
+            name: user.display_name || user.first_name || 'User',
+            email: user.email || '',
+            phone: profileData?.phone || user.phone || '',
+            address: profileData?.address || user.address || '',
+            businessName: profileData?.business_name || '',
+            businessDescription: profileData?.business_description || '',
+            avatar: user.profile_image || user.avatar || '/default-avatar.png',
+            coverImage: '/placeholder-store.svg',
+            isVerified: profileData?.is_verified || user.is_verified || false,
+            joinDate: user.created_at || profileData?.created_at || '',
+            rating: profileData?.rating || 0,
+            totalSales: profileData?.total_sales || 0,
+            totalRevenue: 0, // This would need to be calculated from orders
+            responseRate: 95, // This would need to be calculated
+            responseTime: '2 hours' // This would need to be calculated
+          };
+
+          setProfile(userProfile);
+          setEditedProfile(userProfile);
+        } catch (error) {
+          console.error('Error loading profile:', error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadUserProfile();
+  }, [user]);
+
+  const handleSave = async () => {
+    // Basic validation
+    if (!editedProfile.name.trim()) {
+      alert('Please enter your name');
+      return;
+    }
+    
+    if (!editedProfile.email.trim()) {
+      alert('Please enter your email');
+      return;
+    }
+
+    if (!editedProfile.businessName.trim()) {
+      alert('Please enter your business name');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      // Update the user profile in the database
+      const updateData = {
+        display_name: editedProfile.name,
+        phone: editedProfile.phone,
+        address: editedProfile.address,
+        business_name: editedProfile.businessName,
+        business_description: editedProfile.businessDescription,
+        profile_image: editedProfile.avatar !== '/default-avatar.png' ? editedProfile.avatar : null
+      };
+
+      const { error } = await supabase
+        .from('user_profiles')
+        .update(updateData)
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Error updating profile:', error);
+        alert('Error updating profile. Please try again.');
+        return;
+      }
+
+      setProfile({ ...editedProfile });
+      setIsEditing(false);
+      alert('Profile updated successfully!');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert('Error updating profile. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleCancel = () => {
@@ -50,6 +151,21 @@ const Profile = () => {
 
   const handleInputChange = (field, value) => {
     setEditedProfile({ ...editedProfile, [field]: value });
+  };
+
+  const handleProfilePictureUpdate = async (newImageUrl) => {
+    setEditedProfile({ ...editedProfile, avatar: newImageUrl });
+    // Update the user data in AuthContext to sync across all components
+    if (user) {
+      try {
+        await updateProfile({ 
+          profile_image: newImageUrl,
+          avatar: newImageUrl 
+        });
+      } catch (error) {
+        console.error('Error updating user profile:', error);
+      }
+    }
   };
 
   const StatCard = ({ icon: Icon, title, value, color = 'blue' }) => (
@@ -91,6 +207,21 @@ const Profile = () => {
       )}
     </div>
   );
+
+  if (loading) {
+    return (
+      <SellerLayout>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading profile...</p>
+            </div>
+          </div>
+        </div>
+      </SellerLayout>
+    );
+  }
 
   return (
     <SellerLayout>
@@ -158,10 +289,20 @@ const Profile = () => {
                       </button>
                       <button
                         onClick={handleSave}
-                        className="btn-base btn-md btn-primary"
+                        disabled={saving}
+                        className="btn-base btn-md btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <FiSave className="w-4 h-4 mr-2" />
-                        Save Changes
+                        {saving ? (
+                          <div className="flex items-center">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Saving...
+                          </div>
+                        ) : (
+                          <>
+                            <FiSave className="w-4 h-4 mr-2" />
+                            Save Changes
+                          </>
+                        )}
                       </button>
                     </div>
                   )}
@@ -228,12 +369,15 @@ const Profile = () => {
                 <div className="text-center">
                   <div className="relative inline-block mb-4">
                     <img
-                      src={profile.avatar}
+                      src={isEditing ? editedProfile.avatar : profile.avatar}
                       alt={profile.name}
                       className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
                     />
                     {isEditing && (
-                      <button className="absolute bottom-0 right-0 p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors">
+                      <button 
+                        onClick={() => setShowProfileModal(true)}
+                        className="absolute bottom-0 right-0 p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+                      >
                         <FiCamera className="w-4 h-4" />
                       </button>
                     )}
@@ -315,6 +459,17 @@ const Profile = () => {
               </div>
             </div>
         </div>
+
+        {/* Profile Picture Modal */}
+        <ProfilePictureModal
+          isOpen={showProfileModal}
+          onClose={() => setShowProfileModal(false)}
+          currentImage={isEditing ? editedProfile.avatar : profile.avatar}
+          onImageUpdate={handleProfilePictureUpdate}
+          userId={user?.id}
+          userType="seller"
+          userName={profile.name || 'User'}
+        />
       </div>
     </SellerLayout>
   );

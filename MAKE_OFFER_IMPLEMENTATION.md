@@ -166,3 +166,4 @@ When an offer is sent, it creates a structured message like this:
 
 **The Make Offer functionality is now fully integrated and ready for use!** 🎉✨
 
+

@@ -29,3 +29,4 @@ ORDER BY ordinal_position;
 -- Success message
 SELECT 'OTP verifications table updated successfully!' as status;
 
+

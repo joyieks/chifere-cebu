@@ -83,3 +83,4 @@ FROM pg_policies
 WHERE tablename = 'buyer_add_to_cart'
 ORDER BY policyname;
 
+

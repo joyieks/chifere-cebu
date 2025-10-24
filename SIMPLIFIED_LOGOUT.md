@@ -103,3 +103,4 @@ This approach is much more reliable because:
 - **Consistent behavior**: Same for all user types
 - **Easier to debug**: Clear, simple code
 
+

@@ -4,8 +4,10 @@ import { AuthProvider } from './contexts/AuthContext';
 import { AdminProvider } from './contexts/AdminContext';
 import { CartProvider } from './contexts/CartContext';
 import { MessageProvider } from './contexts/MessageContext';
-import { MessagingProvider } from './contexts/MessagingContext';
+import { NotificationProvider } from './contexts/NotificationContext';
+// import { MessagingProvider } from './contexts/MessagingContextFix'; // Temporarily disabled to fix timeout
 import { ToastProvider } from './components/Toast';
+import NotificationManager from './components/common/NotificationManager';
 import ProtectedRoute from './components/ProtectedRoute';
 import Error404 from './components/pages/Error404';
 import { ProductGridSkeleton } from './components/Skeleton';
@@ -21,11 +23,8 @@ const BuyerDashboard = lazy(() => import('./components/pages/Buyer/Buyer_Menu/Bu
 const UserPageLayout = lazy(() => import('./components/pages/Buyer/Buyer_Menu/Buyer_UserPage/UserPageLayout/UserPageLayout.jsx'));
 const MyAccount = lazy(() => import('./components/pages/Buyer/Buyer_Menu/Buyer_UserPage/MyAccount/MyAccount.jsx'));
 const MyPurchase = lazy(() => import('./components/pages/Buyer/Buyer_Menu/Buyer_UserPage/MyPurchase/MyPurchase.jsx'));
+const OrderDetails = lazy(() => import('./components/pages/Buyer/Buyer_Menu/Buyer_UserPage/MyPurchase/OrderDetails.jsx'));
 const Settings = lazy(() => import('./components/pages/Buyer/Buyer_Menu/Buyer_UserPage/Settings/Settings.jsx'));
-const Notifications = lazy(() => import('./components/pages/Buyer/Buyer_Menu/Buyer_UserPage/Notifications/Notifications.jsx'));
-const BankAndCards = lazy(() => import('./components/pages/Buyer/Buyer_Menu/Buyer_UserPage/MyAccount/BankAndCards.jsx'));
-const Address = lazy(() => import('./components/pages/Buyer/Buyer_Menu/Buyer_UserPage/MyAccount/Address.jsx'));
-const ChangePassword = lazy(() => import('./components/pages/Buyer/Buyer_Menu/Buyer_UserPage/MyAccount/ChangePassword.jsx'));
 const Wishlists = lazy(() => import('./components/pages/Buyer/Buyer_Menu/Buyer_Wishlist/Wishlists.jsx'));
 const Cart = lazy(() => import('./components/pages/Buyer/Buyer_Menu/Buyer_Cart/Cart.jsx'));
 const TrackOrder = lazy(() => import('./components/pages/Buyer/Buyer_Menu/Buyer_UserPage/MyPurchase/TrackOrder.jsx'));
@@ -125,34 +124,18 @@ function AppRoutes() {
           } 
         />
         <Route 
-          path="/buyer/account/bank-cards" 
-          element={
-            <ProtectedRoute>
-              <UserPageLayout><BankAndCards /></UserPageLayout>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/buyer/account/address" 
-          element={
-            <ProtectedRoute>
-              <UserPageLayout><Address /></UserPageLayout>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/buyer/account/change-password" 
-          element={
-            <ProtectedRoute>
-              <UserPageLayout><ChangePassword /></UserPageLayout>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
           path="/buyer/purchase" 
           element={
             <ProtectedRoute>
               <UserPageLayout><MyPurchase /></UserPageLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/buyer/purchase/order/:orderId" 
+          element={
+            <ProtectedRoute>
+              <UserPageLayout><OrderDetails /></UserPageLayout>
             </ProtectedRoute>
           } 
         />
@@ -169,14 +152,6 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <UserPageLayout><Settings /></UserPageLayout>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/buyer/notifications" 
-          element={
-            <ProtectedRoute>
-              <UserPageLayout><Notifications /></UserPageLayout>
             </ProtectedRoute>
           } 
         />
@@ -351,15 +326,18 @@ function App() {
         <AdminProvider>
           <CartProvider>
             <MessageProvider>
-              <ErrorBoundary>
-                <MessagingProvider>
-                  <ToastProvider>
-                    <Router>
-                      <AppRoutes />
-                    </Router>
-                  </ToastProvider>
-                </MessagingProvider>
-              </ErrorBoundary>
+              <NotificationProvider>
+                <ErrorBoundary>
+                  {/* <MessagingProvider> */}
+                    <ToastProvider>
+                      <Router>
+                        <AppRoutes />
+                        <NotificationManager />
+                      </Router>
+                    </ToastProvider>
+                  {/* </MessagingProvider> */}
+                </ErrorBoundary>
+              </NotificationProvider>
             </MessageProvider>
           </CartProvider>
         </AdminProvider>

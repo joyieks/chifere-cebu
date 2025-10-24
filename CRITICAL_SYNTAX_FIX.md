@@ -85,3 +85,4 @@ export default MessagingContext;  // ✅ Single export
 
 This was a critical fix that restored the entire application functionality. The duplicate export was preventing the module from being processed correctly, which cascaded into multiple errors throughout the app.
 
+

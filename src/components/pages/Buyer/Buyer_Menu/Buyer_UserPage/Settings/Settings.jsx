@@ -10,18 +10,6 @@ const Settings = () => {
       emailNotifications: false,
       smsNotifications: true,
     },
-    privacy: {
-      profileVisibility: 'public',
-      showOnlineStatus: true,
-      dataSharing: false,
-      locationAccess: true,
-    },
-    preferences: {
-      language: 'English',
-      currency: 'PHP',
-      theme: 'light',
-      autoPlayVideos: false,
-    },
     security: {
       twoFactorAuth: false,
       loginAlerts: true,
@@ -59,8 +47,6 @@ const Settings = () => {
 
   const tabs = [
     { id: 'notifications', label: 'Notifications', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' },
-    { id: 'privacy', label: 'Privacy', icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z' },
-    { id: 'preferences', label: 'Preferences', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
     { id: 'security', label: 'Security', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' }
   ];
 
@@ -183,96 +169,6 @@ const Settings = () => {
               </div>
             )}
 
-            {activeTab === 'privacy' && (
-              <div className="space-y-6">
-                <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-gray-800 mb-2">Privacy Settings</h2>
-                  <p className="text-gray-600">Control your privacy and data sharing preferences</p>
-                </div>
-                
-                <div className="space-y-4">
-                  <SelectOption
-                    label="Profile Visibility"
-                    value={settings.privacy.profileVisibility}
-                    onChange={(value) => handleSelect('privacy', 'profileVisibility', value)}
-                    description="Who can see your profile information"
-                    options={[
-                      { value: 'public', label: 'Public' },
-                      { value: 'friends', label: 'Friends Only' },
-                      { value: 'private', label: 'Private' }
-                    ]}
-                  />
-                  <ToggleSwitch
-                    checked={settings.privacy.showOnlineStatus}
-                    onChange={() => handleToggle('privacy', 'showOnlineStatus')}
-                    label="Show Online Status"
-                    description="Let others see when you're online"
-                  />
-                  <ToggleSwitch
-                    checked={settings.privacy.dataSharing}
-                    onChange={() => handleToggle('privacy', 'dataSharing')}
-                    label="Data Sharing"
-                    description="Share anonymous usage data to improve the service"
-                  />
-                  <ToggleSwitch
-                    checked={settings.privacy.locationAccess}
-                    onChange={() => handleToggle('privacy', 'locationAccess')}
-                    label="Location Access"
-                    description="Allow location access for better recommendations"
-                  />
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'preferences' && (
-              <div className="space-y-6">
-                <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-gray-800 mb-2">App Preferences</h2>
-                  <p className="text-gray-600">Customize your app experience</p>
-                </div>
-                
-                <div className="space-y-4">
-                  <SelectOption
-                    label="Language"
-                    value={settings.preferences.language}
-                    onChange={(value) => handleSelect('preferences', 'language', value)}
-                    description="Choose your preferred language"
-                    options={[
-                      { value: 'English', label: 'English' },
-                      { value: 'Filipino', label: 'Filipino' },
-                      { value: 'Cebuano', label: 'Cebuano' }
-                    ]}
-                  />
-                  <SelectOption
-                    label="Currency"
-                    value={settings.preferences.currency}
-                    onChange={(value) => handleSelect('preferences', 'currency', value)}
-                    description="Select your preferred currency"
-                    options={[
-                      { value: 'PHP', label: 'Philippine Peso (₱)' },
-                      { value: 'USD', label: 'US Dollar ($)' }
-                    ]}
-                  />
-                  <SelectOption
-                    label="Theme"
-                    value={settings.preferences.theme}
-                    onChange={(value) => handleSelect('preferences', 'theme', value)}
-                    description="Choose your app theme"
-                    options={[
-                      { value: 'light', label: 'Light' },
-                      { value: 'dark', label: 'Dark' },
-                      { value: 'auto', label: 'Auto' }
-                    ]}
-                  />
-                  <ToggleSwitch
-                    checked={settings.preferences.autoPlayVideos}
-                    onChange={() => handleToggle('preferences', 'autoPlayVideos')}
-                    label="Auto-play Videos"
-                    description="Automatically play videos in your feed"
-                  />
-                </div>
-              </div>
-            )}
 
             {activeTab === 'security' && (
               <div className="space-y-6">

@@ -39,3 +39,4 @@ WHERE table_name = 'buyer_users'
   AND column_name IN ('is_active', 'disabled_at', 'disabled_by', 'disabled_reason')
 ORDER BY column_name;
 
+

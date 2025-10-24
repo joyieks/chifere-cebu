@@ -139,3 +139,4 @@ COMMENT ON COLUMN public.seller_add_barter_item.seller_id IS 'Reference to the s
 COMMENT ON COLUMN public.seller_add_barter_item.images IS 'Array of image URLs for the product';
 COMMENT ON COLUMN public.seller_add_barter_item.barter_requests IS 'JSON array of barter requests for this item';
 
+

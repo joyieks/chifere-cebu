@@ -376,38 +376,46 @@ class AdminService {
   async disableUser(userId, adminId, reason = 'Account disabled by admin') {
     try {
       // Try to disable in user_profiles first (sellers)
-      let { error } = await supabase
+      let { data: sellerData, error: sellerError } = await supabase
         .from('user_profiles')
         .update({
           is_active: false,
           disabled_at: new Date().toISOString(),
-          disabled_by: adminId,
           disabled_reason: reason
+          // Note: Not setting disabled_by to avoid foreign key constraint issues
         })
-        .eq('id', userId);
+        .eq('id', userId)
+        .select();
 
       // If not found in user_profiles, try buyer_users table
-      if (error && error.code === 'PGRST116') { // No rows found
-        const { error: buyerError } = await supabase
+      if (sellerError && sellerError.code === 'PGRST116') { // No rows found
+        const { data: buyerData, error: buyerError } = await supabase
           .from('buyer_users')
           .update({
             is_active: false,
             disabled_at: new Date().toISOString(),
-            disabled_by: adminId,
             disabled_reason: reason
+            // Note: Not setting disabled_by to avoid foreign key constraint issues
           })
-          .eq('id', userId);
+          .eq('id', userId)
+          .select();
         
-        error = buyerError;
-      }
-
-      if (error) {
-        console.error('Disable user error:', error);
+        if (buyerError) {
+          console.error('Disable user error:', buyerError);
+          return { success: false, error: 'Failed to disable user' };
+        }
+      } else if (sellerError) {
+        console.error('Disable user error:', sellerError);
         return { success: false, error: 'Failed to disable user' };
       }
 
-      // Log activity
-      await this.logActivity(adminId, 'disable_user', `Disabled user ${userId}: ${reason}`, 'user', userId);
+      // Log activity (this will still work as it uses admin_sessions table)
+      try {
+        await this.logActivity(adminId, 'disable_user', `Disabled user ${userId}: ${reason}`, 'user', userId);
+      } catch (logError) {
+        console.warn('Failed to log activity:', logError);
+        // Don't fail the main operation if logging fails
+      }
 
       return { success: true };
     } catch (error) {
@@ -430,8 +438,8 @@ class AdminService {
         .update({
           is_active: true,
           disabled_at: null,
-          disabled_by: null,
           disabled_reason: null
+          // Note: Not setting disabled_by to null to avoid foreign key constraint issues
         })
         .eq('id', userId);
 
@@ -442,8 +450,8 @@ class AdminService {
           .update({
             is_active: true,
             disabled_at: null,
-            disabled_by: null,
             disabled_reason: null
+            // Note: Not setting disabled_by to null to avoid foreign key constraint issues
           })
           .eq('id', userId);
         
@@ -456,7 +464,12 @@ class AdminService {
       }
 
       // Log activity
-      await this.logActivity(adminId, 'enable_user', `Enabled user ${userId}`, 'user', userId);
+      try {
+        await this.logActivity(adminId, 'enable_user', `Enabled user ${userId}`, 'user', userId);
+      } catch (logError) {
+        console.warn('Failed to log activity:', logError);
+        // Don't fail the main operation if logging fails
+      }
 
       return { success: true };
     } catch (error) {

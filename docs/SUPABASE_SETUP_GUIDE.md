@@ -211,3 +211,5 @@ Your ChiFere app is now connected to Supabase and ready for development!
 
 
 
+
+

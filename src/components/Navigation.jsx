@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FiShoppingCart, FiHeart, FiUser, FiLogOut, FiMenu, FiX, FiBell, FiPhone, FiMessageCircle, FiSettings, FiPackage, FiHome, FiBarChart2 } from 'react-icons/fi';
+import { FiShoppingCart, FiHeart, FiUser, FiLogOut, FiMenu, FiX, FiBell, FiPhone, FiMessageCircle, FiSettings, FiPackage, FiHome, FiBarChart2, FiAlertTriangle } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { useMessages } from '../contexts/MessageContext';
+import { useNotifications } from '../contexts/NotificationContext';
 import { useToast } from './Toast';
 import theme from '../styles/designSystem';
 import SearchAutocomplete from './SearchAutocomplete';
+import NotificationBell from './common/NotificationBell';
+import ReportIssueModal from './common/ReportIssueModal/ReportIssueModal';
 
 const Navigation = ({ showPromotionalBar = false }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
   const { user, logout, switchRole } = useAuth();
   const { cart } = useCart();
   const { unreadCount } = useMessages();
@@ -196,6 +200,9 @@ const Navigation = ({ showPromotionalBar = false }) => {
                       <span className="text-sm">Dashboard</span>
                     </Link>
 
+                    {/* Notifications */}
+                    <NotificationBell showLabel={true} />
+
                     <Link
                       to="/seller/products"
                       className="text-gray-700 hover:text-blue-600 flex items-center gap-2"
@@ -272,6 +279,14 @@ const Navigation = ({ showPromotionalBar = false }) => {
                       <FiSettings className="inline mr-2 w-4 h-4" />
                       Settings
                     </Link>
+
+                    <button
+                      onClick={() => setShowReportModal(true)}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <FiAlertTriangle className="inline mr-2 w-4 h-4" />
+                      Report an Issue
+                    </button>
 
                     {/* Role Switching */}
                     {user.canSwitchRoles && (
@@ -424,6 +439,16 @@ const Navigation = ({ showPromotionalBar = false }) => {
                       <FiSettings className="inline mr-2 w-4 h-4" />
                       Settings
                     </Link>
+                    <button
+                      onClick={() => {
+                        setShowReportModal(true);
+                        setIsMenuOpen(false);
+                      }}
+                      className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                    >
+                      <FiAlertTriangle className="inline mr-2 w-4 h-4" />
+                      Report an Issue
+                    </button>
                   </>
                 ) : (
                   <>
@@ -435,6 +460,12 @@ const Navigation = ({ showPromotionalBar = false }) => {
                       <FiHome className="inline mr-2 w-4 h-4" />
                       Dashboard
                     </Link>
+                    
+                    {/* Notifications for Mobile */}
+                    <div className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                      <NotificationBell showLabel={true} />
+                    </div>
+                    
                     <Link
                       to="/seller/products"
                       className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
@@ -481,6 +512,16 @@ const Navigation = ({ showPromotionalBar = false }) => {
                     >
                       Settings
                     </Link>
+                    <button
+                      onClick={() => {
+                        setShowReportModal(true);
+                        setIsMenuOpen(false);
+                      }}
+                      className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                    >
+                      <FiAlertTriangle className="inline mr-2 w-4 h-4" />
+                      Report an Issue
+                    </button>
                   </>
                 )}
                 <button
@@ -515,6 +556,14 @@ const Navigation = ({ showPromotionalBar = false }) => {
         </motion.div>
       )}
       </nav>
+
+      {/* Report Issue Modal */}
+      <ReportIssueModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        user={user}
+        userType={user?.role || 'buyer'}
+      />
     </div>
   );
 };

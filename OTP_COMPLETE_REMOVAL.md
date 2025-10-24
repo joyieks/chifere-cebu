@@ -128,3 +128,4 @@ import otpService from '../../../services/otpService';
 ## Summary
 The buyer registration flow is now completely simplified with no OTP sending or email verification. Buyers can register and login immediately without any email confirmation steps.
 
+

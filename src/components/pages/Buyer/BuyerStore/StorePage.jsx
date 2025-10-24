@@ -28,10 +28,13 @@ import BuyerLayout from '../Buyer_Menu/Buyer_Layout/Buyer_layout';
 import theme from '../../../../styles/designSystem';
 import storeService from '../../../../services/storeService';
 import productService from '../../../../services/productService';
+import followService from '../../../../services/followService';
+import { useAuth } from '../../../../contexts/AuthContext';
 
 const StorePage = () => {
   const { storeId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   // State management
   const [store, setStore] = useState(null);
@@ -40,6 +43,7 @@ const StorePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [isFollowLoading, setIsFollowLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('featured');
   const [viewMode, setViewMode] = useState('grid');
@@ -91,6 +95,24 @@ const StorePage = () => {
     loadStoreData();
   }, [storeId]);
 
+  // Check follow status when user and store are loaded
+  useEffect(() => {
+    const checkFollowStatus = async () => {
+      if (user && storeId && user.id !== storeId) {
+        try {
+          const result = await followService.isFollowing(user.id, storeId);
+          if (result.success) {
+            setIsFollowing(result.isFollowing);
+          }
+        } catch (error) {
+          console.error('Error checking follow status:', error);
+        }
+      }
+    };
+
+    checkFollowStatus();
+  }, [user, storeId]);
+
   // Filtered and sorted products
   const filteredProducts = (products || []).filter(product => {
     if (selectedCategory === 'all') return true;
@@ -106,9 +128,45 @@ const StorePage = () => {
     }
   });
 
-  const handleFollow = () => {
-    setIsFollowing(!isFollowing);
-    // TODO: Firebase Implementation - Update follow status in database
+  const handleFollow = async () => {
+    if (!user) {
+      // Redirect to login or show login modal
+      navigate('/auth/login');
+      return;
+    }
+
+    if (user.id === storeId) {
+      // User can't follow themselves
+      return;
+    }
+
+    setIsFollowLoading(true);
+
+    try {
+      const result = await followService.toggleFollow(user.id, storeId);
+      
+      if (result.success) {
+        setIsFollowing(result.isFollowing);
+        
+        // Update the follower count in storeStats
+        setStoreStats(prevStats => ({
+          ...prevStats,
+          totalFollowers: result.isFollowing 
+            ? (prevStats?.totalFollowers || 0) + 1 
+            : Math.max((prevStats?.totalFollowers || 0) - 1, 0)
+        }));
+
+        // Show success message
+        const action = result.isFollowing ? 'following' : 'unfollowed';
+        console.log(`Successfully ${action} store`);
+      } else {
+        console.error('Follow toggle failed:', result.error);
+      }
+    } catch (error) {
+      console.error('Follow toggle error:', error);
+    } finally {
+      setIsFollowLoading(false);
+    }
   };
 
   const handleMessageStore = () => {
@@ -280,6 +338,12 @@ const StorePage = () => {
                     </div>
                     <div className="flex items-center gap-1">
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" clipRule="evenodd" />
+                      </svg>
+                      <span>{storeStats?.totalFollowers || 0} followers</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                       </svg>
                       <span>{store.business_address || store.address || 'Cebu, Philippines'}</span>
@@ -295,17 +359,31 @@ const StorePage = () => {
 
                 {/* Store Actions */}
                 <div className="flex flex-col gap-3 md:ml-auto">
-                  <button
-                    onClick={handleFollow}
-                    className="px-6 py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105"
-                    style={{
-                      backgroundColor: isFollowing ? theme.colors.gray[200] : theme.colors.white,
-                      color: isFollowing ? theme.colors.gray[700] : theme.colors.primary[600],
-                      boxShadow: theme.shadows.lg
-                    }}
-                  >
-                    {isFollowing ? '✓ Following' : '+ Follow Store'}
-                  </button>
+                  {/* Only show follow button if user is logged in and not the store owner */}
+                  {user && user.id !== storeId && (
+                    <button
+                      onClick={handleFollow}
+                      disabled={isFollowLoading}
+                      className="px-6 py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{
+                        backgroundColor: isFollowing ? theme.colors.gray[200] : theme.colors.white,
+                        color: isFollowing ? theme.colors.gray[700] : theme.colors.primary[600],
+                        boxShadow: theme.shadows.lg
+                      }}
+                    >
+                      {isFollowLoading ? (
+                        <span className="flex items-center gap-2">
+                          <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          {isFollowing ? 'Unfollowing...' : 'Following...'}
+                        </span>
+                      ) : (
+                        isFollowing ? '✓ Following' : '+ Follow Store'
+                      )}
+                    </button>
+                  )}
                   
                   <div className="flex gap-2">
                     <button

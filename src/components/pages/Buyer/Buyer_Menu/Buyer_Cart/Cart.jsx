@@ -31,12 +31,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../../contexts/AuthContext';
 import { useCart } from '../../../../../contexts/CartContext';
-import { useMessaging } from '../../../../../contexts/MessagingContext';
+// import { useMessaging } from '../../../../../contexts/MessagingContext'; // Removed to fix cart loading
 import { useToast } from '../../../../../components/Toast';
 import BuyerLayout from '../Buyer_Layout/Buyer_layout';
 import theme from '../../../../../styles/designSystem';
 
-const CartSection = ({ title, cart, selected, setSelected, handleRemove, handleSelectAll, handleSelect, allSelected, total, isBarter, navigate, handleMessageStore }) => (
+const CartSection = ({ title, cart, selected, setSelected, handleRemove, handleSelectAll, handleSelect, allSelected, total, isBarter, navigate, handleMessageStore, updateQuantity }) => (
   <div className="mb-8">
     {/* Section Header */}
     <h3 
@@ -184,9 +184,13 @@ const CartSection = ({ title, cart, selected, setSelected, handleRemove, handleS
                         style={{ borderColor: theme.colors.gray[300] }}
                       >
                         <button 
-                          className="p-2 transition-colors duration-200"
-                          style={{ color: theme.colors.gray[400] }}
-                          disabled
+                          className="p-2 transition-colors duration-200 hover:bg-gray-100"
+                          style={{ color: theme.colors.gray[600] }}
+                          onClick={() => {
+                            if (item.quantity > 1) {
+                              updateQuantity(item.id, item.quantity - 1);
+                            }
+                          }}
                         >
                           −
                         </button>
@@ -197,9 +201,11 @@ const CartSection = ({ title, cart, selected, setSelected, handleRemove, handleS
                           {item.quantity}
                         </span>
                         <button 
-                          className="p-2 transition-colors duration-200"
-                          style={{ color: theme.colors.gray[400] }}
-                          disabled
+                          className="p-2 transition-colors duration-200 hover:bg-gray-100"
+                          style={{ color: theme.colors.gray[600] }}
+                          onClick={() => {
+                            updateQuantity(item.id, item.quantity + 1);
+                          }}
                         >
                           +
                         </button>
@@ -233,23 +239,6 @@ const CartSection = ({ title, cart, selected, setSelected, handleRemove, handleS
               </div>
                     
                     <div className="flex space-x-2">
-                      <button 
-                        className="px-3 py-2 rounded-lg font-medium transition-all duration-200"
-                        style={{
-                          color: theme.colors.secondary[600],
-                          backgroundColor: 'transparent',
-                          border: `1px solid ${theme.colors.secondary[200]}`
-                        }}
-                        onMouseEnter={(e) => {
-                          e.target.style.backgroundColor = theme.colors.secondary[50];
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.backgroundColor = 'transparent';
-                        }}
-                        onClick={() => navigate(`/barter/${item.id}`)}
-                      >
-                        🔄 Barter
-                      </button>
                       <button 
                         className="px-3 py-2 rounded-lg font-medium transition-all duration-200"
                         style={{
@@ -388,15 +377,22 @@ const Cart = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { cart, loading, removeFromCart, updateQuantity } = useCart();
-  const { createConversation } = useMessaging();
+  // const { createConversation } = useMessaging(); // Removed to fix cart loading
   const { showToast } = useToast();
   const [tab, setTab] = useState('all'); // 'all', 'preloved', 'barter'
+
+  // Debug cart data
+  useEffect(() => {
+    console.log('🛒 [Cart] Cart data received:', cart);
+    console.log('🛒 [Cart] Cart loading:', loading);
+    console.log('🛒 [Cart] Cart length:', cart?.length || 0);
+  }, [cart, loading]);
 
   // Selection state
   const [prelovedSelected, setPrelovedSelected] = useState({});
   const [barterSelected, setBarterSelected] = useState({});
 
-  // Handle message store
+  // Handle message store - simplified version
   const handleMessageStore = async (store) => {
     if (!user) {
       showToast('Please log in to message the store', 'error');
@@ -409,21 +405,9 @@ const Cart = () => {
       return;
     }
 
-    try {
-      // Create a general conversation with the store
-      const firstItem = store.items[0];
-      const productId = firstItem?.id || null;
-      
-      const message = `Hi! I'm interested in your store "${store.store}". I have some items in my cart and would like to discuss them.`;
-      
-      await createConversation(productId, store.sellerId, message);
-      
-      // Navigate to messages page
-      navigate('/buyer/messages');
-    } catch (error) {
-      console.error('Error creating conversation:', error);
-      showToast('Failed to start conversation. Please try again.', 'error');
-    }
+    // Simply navigate to messages page for now
+    showToast('Redirecting to messages...', 'info');
+    navigate('/buyer/messages');
   };
 
   // Group cart items by seller and type
@@ -661,6 +645,7 @@ const Cart = () => {
             isBarter={false}
             navigate={navigate}
             handleMessageStore={handleMessageStore}
+            updateQuantity={updateQuantity}
           />
         )}
           {(tab === 'all' || tab === 'barter') && barterCart.length > 0 && (
@@ -677,6 +662,7 @@ const Cart = () => {
             isBarter={true}
             navigate={navigate}
             handleMessageStore={handleMessageStore}
+            updateQuantity={updateQuantity}
           />
         )}
         </div>

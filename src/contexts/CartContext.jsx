@@ -10,7 +10,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
-import cartService from '../services/cartService';
+import cartService from '../services/cartServiceNew';
 
 const CartContext = createContext();
 
@@ -82,17 +82,10 @@ export const CartProvider = ({ children }) => {
       return;
     }
 
-    // Subscribe to Supabase realtime channel for cart updates
-    const unsubscribe = cartService.listenToCart(user.id, (result) => {
-      if (result.success) {
-        setCart(result.data.items || []);
-      } else {
-        console.error('Cart update error:', result.error);
-      }
-    });
-
+    // Note: Simplified cart service doesn't have real-time updates
+    // Cart will be refreshed when user performs actions
     return () => {
-      if (unsubscribe) unsubscribe();
+      // No cleanup needed for simplified service
     };
   }, [user, cartSynced]);
 
@@ -189,7 +182,7 @@ export const CartProvider = ({ children }) => {
       // Authenticated user: DATABASE ONLY
       setLoading(true);
       try {
-        const result = await cartService.updateQuantity(user.id, itemId, quantity);
+        const result = await cartService.updateCartItemQuantity(user.id, itemId, quantity);
         if (result.success) {
           setCart(result.data.items);
         } else {

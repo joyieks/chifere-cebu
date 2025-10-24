@@ -129,3 +129,4 @@ if (userType === 'buyer') {
 ## Summary
 The buyer registration flow now consistently shows the OTP verification step after successful registration, regardless of OTP service issues. This ensures all buyers go through the email verification process as intended.
 
+

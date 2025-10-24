@@ -209,6 +209,15 @@ export const AuthProvider = ({ children }) => {
       console.log('👤 [AuthContext] First name from DB:', profile.first_name);
       console.log('👤 [AuthContext] Display name from DB:', profile.display_name);
       console.log('👤 [AuthContext] Seller status from DB:', profile.seller_status);
+      console.log('👤 [AuthContext] Is active from DB:', profile.is_active);
+      
+      // Check if user account is disabled
+      if (profile.is_active === false || profile.is_active === null) {
+        console.log('❌ [AuthContext] User account is disabled, logging out');
+        await supabase.auth.signOut();
+        setUser(null);
+        return;
+      }
       
       // Merge profile data with existing user (don't replace, update!)
       setUser(prevUser => ({
@@ -327,6 +336,12 @@ export const AuthProvider = ({ children }) => {
       if (!sellerError && sellerUser) {
         console.log('✅ [AuthContext] Found seller user:', sellerUser.email);
         
+        // Check if seller account is disabled
+        if (sellerUser.is_active === false || sellerUser.is_active === null) {
+          console.log('❌ [AuthContext] Seller account is disabled');
+          return { success: false, error: 'Your account has been disabled. Please contact support.' };
+        }
+        
         // Try Supabase auth for seller
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
@@ -348,7 +363,25 @@ export const AuthProvider = ({ children }) => {
         }
       }
 
-      // 3. Try regular auth for buyers
+      // 3. Check buyer_users table for buyers
+      console.log('🔍 [AuthContext] Checking buyer_users table...');
+      const { data: buyerUser, error: buyerError } = await supabase
+        .from('buyer_users')
+        .select('*')
+        .eq('email', email)
+        .single();
+
+      if (!buyerError && buyerUser) {
+        console.log('✅ [AuthContext] Found buyer user:', buyerUser.email);
+        
+        // Check if buyer account is disabled
+        if (buyerUser.is_active === false || buyerUser.is_active === null) {
+          console.log('❌ [AuthContext] Buyer account is disabled');
+          return { success: false, error: 'Your account has been disabled. Please contact support.' };
+        }
+      }
+
+      // 4. Try regular auth for buyers
       console.log('🔍 [AuthContext] Checking for buyer user...');
       const { data, error } = await supabase.auth.signInWithPassword({
         email,

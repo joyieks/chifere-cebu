@@ -37,6 +37,7 @@ import orderService from '../../../../../../services/orderService';
 import paymentService from '../../../../../../services/paymentService';
 import addressService from '../../../../../../services/addressService';
 import AddressSelectionModal from './AddressSelectionModal';
+import PaymentModal from '../../../../Shared/PaymentModal/PaymentModal';
 
 // TODO: Firebase Implementation - Replace with real data from Firestore
 // This demo data should be replaced with actual order data from the database
@@ -67,9 +68,10 @@ const demoOrder = {
 // Get available payment methods from service
 const paymentMethods = paymentService.getAvailablePaymentMethods();
 
+
 const CheckoutForm = () => {
   const { user } = useAuth();
-  const { clearCart } = useCart();
+  const { cart, clearCart } = useCart();
   const location = useLocation();
   const navigate = useNavigate();
   const [payment, setPayment] = useState('card'); // Default to card payment
@@ -80,6 +82,7 @@ const CheckoutForm = () => {
   const [selectedFee, setSelectedFee] = useState(null);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [showAddressModal, setShowAddressModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   // Add error boundary for theme
   if (!theme || !theme.colors) {
@@ -102,8 +105,10 @@ const CheckoutForm = () => {
       if (user) {
         try {
           const result = await addressService.getAddresses(user.uid, 'buyer');
+          console.log('🏠 [Checkout] Address service result:', result);
           if (result.success && result.data.length > 0) {
             const defaultAddress = result.data.find(addr => addr.isDefault) || result.data[0];
+            console.log('🏠 [Checkout] Selected address data:', defaultAddress);
             setSelectedAddress(defaultAddress);
           }
         } catch (error) {
@@ -114,16 +119,47 @@ const CheckoutForm = () => {
     loadDefaultAddress();
   }, [user]);
 
-  // Get order data from cart navigation or use demo data
+  // Get order data from cart navigation or use real cart data
   const cartData = location.state;
+  
+  // Debug: Log cart data
+  console.log('🛒 [Checkout] Cart data:', cart);
+  console.log('🛒 [Checkout] Location state:', cartData);
+  
   const orderData = cartData ? {
     items: cartData.selectedItems,
     isBarter: cartData.isBarter,
     total: cartData.total,
-    deliveryFee: cartData.isBarter ? 0 : 150 // Demo delivery fee
-  } : demoOrder;
+    deliveryFee: cartData.isBarter ? 0 : 150
+  } : {
+    // Use real cart data if available, otherwise use demo data
+    items: cart && cart.length > 0 ? cart.map(item => {
+      console.log('🛒 [Checkout] Mapping cart item:', item);
+      return {
+        id: item.id,
+        name: item.name,
+        image: item.image,
+        price: parseFloat(item.price) || 0,
+        qty: parseInt(item.quantity) || 1
+      };
+    }) : demoOrder.items, // Fallback to demo data if cart is empty
+    isBarter: false,
+    total: cart && cart.length > 0 ? cart.reduce((sum, item) => {
+      const price = parseFloat(item.price) || 0;
+      const quantity = parseInt(item.quantity) || 1;
+      return sum + (price * quantity);
+    }, 0) : demoOrder.items.reduce((sum, item) => sum + (item.price * item.qty), 0),
+    deliveryFee: 150
+  };
+  
+  console.log('🛒 [Checkout] Final order data:', orderData);
 
-  const itemTotal = orderData.items ? orderData.items.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0) : 0;
+  const itemTotal = orderData.items ? orderData.items.reduce((sum, item) => {
+    const price = parseFloat(item.price) || 0;
+    const quantity = parseInt(item.qty || item.quantity) || 1;
+    console.log('🛒 [Checkout] Calculating item total:', { price, quantity, total: price * quantity });
+    return sum + (price * quantity);
+  }, 0) : 0;
   const grandTotal = orderData.isBarter ? 0 : itemTotal + orderData.deliveryFee;
 
   // Calculate fee when payment method changes
@@ -150,15 +186,23 @@ const CheckoutForm = () => {
 
     try {
       // Prepare order data
+      console.log('🛒 [Checkout] User data for order:', {
+        user: user,
+        userId: user?.id,
+        userUid: user?.uid,
+        userEmail: user?.email
+      });
+      
       const newOrderData = {
-        buyerId: user.uid,
+        buyerId: user.id || user.uid, // Use user.id first, fallback to user.uid
         items: orderData.items.map(item => ({
           id: item.id || item.itemId,
           name: item.name,
           price: item.price,
           quantity: item.quantity || item.qty || 1,
+          qty: item.quantity || item.qty || 1, // Add both for compatibility
           image: item.image || '',
-          sellerId: item.sellerId || 'demo_seller' // TODO: Get actual seller ID
+          sellerId: item.sellerId || null // Will be set to null, then updated from first item
         })),
         deliveryAddress: selectedAddress ? {
           name: selectedAddress.recipient_name,
@@ -177,14 +221,23 @@ const CheckoutForm = () => {
         buyerMessage: message
       };
 
-      // Create order in Firestore
+      // Create order in database
+      console.log('🛒 [Checkout] Creating order with data:', newOrderData);
+      console.log('🛒 [Checkout] Order items data:', newOrderData.items);
+      console.log('🛒 [Checkout] Buyer ID:', newOrderData.buyerId);
+      console.log('🛒 [Checkout] Payment method:', newOrderData.paymentMethod);
+      
       const result = await orderService.createOrder(newOrderData);
+      console.log('🛒 [Checkout] Order creation result:', result);
+      console.log('🛒 [Checkout] Order ID created:', result.orderId);
 
       if (result.success) {
+        console.log('✅ [Checkout] Order created successfully with ID:', result.orderId);
         // Clear cart after successful order
         await clearCart();
         return result.orderId;
       } else {
+        console.error('❌ [Checkout] Order creation failed:', result.error);
         setError(result.error || 'Failed to create order');
         return null;
       }
@@ -206,80 +259,81 @@ const CheckoutForm = () => {
       return;
     }
 
-    setLoading(true);
-    setError('');
+    // For COD, create order directly
+    if (payment === 'cod') {
+      console.log('💰 [Checkout] Creating COD order...');
+      setLoading(true);
+      setError('');
 
-    try {
-      // For COD, create order directly
-      if (payment === 'cod') {
+      try {
         const orderId = await createOrder(null, 'pending');
+        console.log('💰 [Checkout] COD order creation result:', orderId);
 
         if (orderId) {
+          console.log('✅ [Checkout] COD order created successfully, clearing cart and navigating...');
           await clearCart();
-          navigate('/buyer/orders', {
+          navigate('/buyer/purchase', {
             state: {
               orderSuccess: true,
               orderId: orderId,
               paymentMethod: 'cod'
             }
           });
+        } else {
+          console.error('❌ [Checkout] COD order creation failed');
         }
-        return;
+      } catch (error) {
+        console.error('❌ [Checkout] COD order error:', error);
+        setError('Failed to place order. Please try again.');
+      } finally {
+        setLoading(false);
       }
+      return;
+    }
 
-      // For online payments (PayMongo), create order first then payment intent
-      const orderId = await createOrder(null, 'pending');
+    // For online payments, show payment modal
+    setShowPaymentModal(true);
+  };
 
-      if (!orderId) {
-        setError('Failed to create order. Please try again.');
-        return;
-      }
+  // Handle successful payment
+  const handlePaymentSuccess = async (paymentData) => {
+    console.log('💳 [Checkout] Payment successful, creating order:', paymentData);
+    setLoading(true);
+    setError('');
 
-      // Create payment intent with PayMongo
-      const paymentResult = await paymentService.createPaymentIntent({
-        amount: grandTotal,
-        currency: 'PHP',
-        orderId: orderId,
-        paymentMethod: payment,
-        metadata: {
-          buyerId: user.uid,
-          itemCount: orderData.items.length
-        }
-      });
+    try {
+      // Create order with payment confirmation
+      console.log('💳 [Checkout] Creating order with payment data...');
+      const orderId = await createOrder(paymentData.transactionId, 'paid');
+      console.log('💳 [Checkout] Order creation result:', orderId);
 
-      if (!paymentResult.success) {
-        setError(paymentResult.error || 'Failed to initialize payment');
-        return;
-      }
-
-      // Check if payment requires redirect (e-wallets, banking)
-      if (paymentResult.data.requiresAction && paymentResult.data.nextActionUrl) {
-        // Redirect to PayMongo checkout page
-        window.location.href = paymentResult.data.nextActionUrl;
-      } else {
-        // For card payments, would show card form here
-        // For now, just show success message
-        setPaymentStatus('processing');
-        console.log('Payment intent created:', paymentResult.data.paymentIntentId);
-
-        // In production, you'd show a card form or wait for webhook confirmation
-        // For demo purposes, navigate to orders page
+      if (orderId) {
+        console.log('✅ [Checkout] Order created successfully, clearing cart and navigating...');
         await clearCart();
-        navigate('/buyer/orders', {
+        setShowPaymentModal(false);
+        navigate('/buyer/purchase', {
           state: {
             orderSuccess: true,
             orderId: orderId,
-            paymentMethod: payment,
-            processing: true
+            paymentMethod: paymentData.paymentMethod,
+            transactionNumber: paymentData.transactionId
           }
         });
+      } else {
+        console.error('❌ [Checkout] Order creation failed after payment');
       }
-    } catch (err) {
-      console.error('Place order error:', err);
-      setError('Failed to place order. Please try again.');
+    } catch (error) {
+      console.error('❌ [Checkout] Payment success error:', error);
+      setError('Failed to create order after payment. Please contact support.');
     } finally {
       setLoading(false);
     }
+  };
+
+  // Handle payment error
+  const handlePaymentError = (errorMessage) => {
+    setError(errorMessage);
+    setShowPaymentModal(false);
   };
 
   return (
@@ -336,17 +390,17 @@ const CheckoutForm = () => {
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <h3 className="font-semibold text-lg mb-1" style={{ color: theme.colors.gray[800] }}>
-                  {selectedAddress ? selectedAddress.recipient_name : 'Select Delivery Address'}
+                  {selectedAddress ? (selectedAddress.name || selectedAddress.recipient_name || 'Unknown') : 'Select Delivery Address'}
                 </h3>
                 {selectedAddress ? (
                   <div>
                     <div className="flex items-center gap-2 mb-2">
                       <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        selectedAddress.type === 'home' ? 'bg-green-100 text-green-700' :
-                        selectedAddress.type === 'work' ? 'bg-blue-100 text-blue-700' :
+                        (selectedAddress.type || 'home') === 'home' ? 'bg-green-100 text-green-700' :
+                        (selectedAddress.type || 'home') === 'work' ? 'bg-blue-100 text-blue-700' :
                         'bg-purple-100 text-purple-700'
                       }`}>
-                        {selectedAddress.type.charAt(0).toUpperCase() + selectedAddress.type.slice(1)}
+                        {(selectedAddress.type || 'home').charAt(0).toUpperCase() + (selectedAddress.type || 'home').slice(1)}
                       </span>
                       {selectedAddress.isDefault && (
                         <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded-full text-xs font-semibold">
@@ -354,9 +408,9 @@ const CheckoutForm = () => {
                         </span>
                       )}
                     </div>
-                    <p className="text-gray-600 mb-1">{selectedAddress.phone_number}</p>
+                    <p className="text-gray-600 mb-1">{selectedAddress.phone || selectedAddress.phone_number || 'No phone'}</p>
                     <p className="text-gray-700">
-                      {`${selectedAddress.street_address}, ${selectedAddress.barangay ? selectedAddress.barangay + ', ' : ''}${selectedAddress.city}, ${selectedAddress.province}, ${selectedAddress.zip_code}`}
+                      {`${selectedAddress.address || selectedAddress.street_address || selectedAddress.address_line_1 || 'No address'}, ${selectedAddress.barangay ? selectedAddress.barangay + ', ' : ''}${selectedAddress.city || 'No city'}, ${selectedAddress.province || 'No province'}, ${selectedAddress.postal_code || selectedAddress.zip_code || 'No postal code'}`}
                     </p>
                   </div>
                 ) : (
@@ -416,51 +470,84 @@ const CheckoutForm = () => {
               </button>
             )}
           </div>
+          {/* Product Details Header */}
           <div 
-            className="flex flex-col sm:flex-row items-center gap-4 pb-4" 
+            className="flex items-center gap-4 pb-2 mb-4" 
             style={{ 
               borderBottom: `1px solid ${theme.colors.gray[200]}`,
-              marginBottom: theme.spacing[4]
+              fontSize: theme.typography.fontSize.sm,
+              fontWeight: theme.typography.fontWeight.semibold,
+              color: theme.colors.gray[600]
             }}
           >
-            <img 
-              src={orderData.items[0].image} 
-              alt={orderData.items[0].name} 
-              className="w-20 h-20 object-contain"
-              style={{ borderRadius: theme.borderRadius.lg }}
-            />
-            <div className="flex-1 min-w-0">
-              <div 
-                style={{ 
-                  fontWeight: theme.typography.fontWeight.semibold,
-                  color: theme.colors.gray[800]
-                }}
-              >
-                {orderData.items[0].name}
-              </div>
-            </div>
+            <div className="w-20"></div> {/* Image space */}
+            <div className="flex-1 min-w-0">Product</div>
+            <div className="w-24 text-right">Price</div>
+            <div className="w-16 text-center">Qty</div>
+            <div className="w-28 text-right">Total</div>
+          </div>
+          
+          {/* Product Details */}
+          {orderData.items && orderData.items.length > 0 ? (
             <div 
-              className="w-24 text-right"
-              style={{ color: theme.colors.gray[600] }}
-            >
-              ₱{demoOrder.items[0].price.toLocaleString()}
-            </div>
-            <div 
-              className="w-16 text-center"
-              style={{ color: theme.colors.gray[600] }}
-            >
-              {demoOrder.items[0].qty}
-            </div>
-            <div 
-              className="w-28 text-right"
+              className="flex flex-col sm:flex-row items-center gap-4 pb-4" 
               style={{ 
-                fontWeight: theme.typography.fontWeight.bold,
-                color: theme.colors.primary[600]
+                borderBottom: `1px solid ${theme.colors.gray[200]}`,
+                marginBottom: theme.spacing[4]
               }}
             >
-              ₱{(demoOrder.items[0].price * demoOrder.items[0].qty).toLocaleString()}
+              <img 
+                src={orderData.items[0].image} 
+                alt={orderData.items[0].name} 
+                className="w-20 h-20 object-contain"
+                style={{ borderRadius: theme.borderRadius.lg }}
+              />
+              <div className="flex-1 min-w-0">
+                <div 
+                  style={{ 
+                    fontWeight: theme.typography.fontWeight.semibold,
+                    color: theme.colors.gray[800]
+                  }}
+                >
+                  {orderData.items[0].name}
+                </div>
+              </div>
+              <div 
+                className="w-24 text-right"
+                style={{ 
+                  color: theme.colors.gray[600],
+                  fontWeight: theme.typography.fontWeight.medium
+                }}
+              >
+                ₱{(parseFloat(orderData.items[0].price) || 0).toLocaleString()}
+              </div>
+              <div 
+                className="w-16 text-center"
+                style={{ 
+                  color: theme.colors.gray[600],
+                  fontWeight: theme.typography.fontWeight.medium
+                }}
+              >
+                {parseInt(orderData.items[0].qty || orderData.items[0].quantity) || 1}
+              </div>
+              <div 
+                className="w-28 text-right"
+                style={{ 
+                  fontWeight: theme.typography.fontWeight.bold,
+                  color: theme.colors.primary[600]
+                }}
+              >
+                ₱{((parseFloat(orderData.items[0].price) || 0) * (parseInt(orderData.items[0].qty || orderData.items[0].quantity) || 1)).toLocaleString()}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div 
+              className="text-center py-8"
+              style={{ color: theme.colors.gray[500] }}
+            >
+              No items in cart
+            </div>
+          )}
         </div>
         {/* Payment Method */}
         <div 
@@ -536,6 +623,7 @@ const CheckoutForm = () => {
               </div>
             </div>
           )}
+
         </div>
         {/* Message for Seller */}
         <div 
@@ -745,6 +833,16 @@ const CheckoutForm = () => {
           onClose={() => setShowAddressModal(false)}
           onSelectAddress={setSelectedAddress}
           selectedAddressId={selectedAddress?.id}
+        />
+
+        {/* Payment Modal */}
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          paymentMethod={payment}
+          amount={grandTotal}
+          onPaymentSuccess={handlePaymentSuccess}
+          onPaymentError={handlePaymentError}
         />
         </div>
       </div>

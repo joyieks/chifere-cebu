@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiShoppingCart, FiBell, FiMessageCircle, FiPackage, FiPhone, FiUser, FiLogOut, FiSettings, FiMenu, FiX } from 'react-icons/fi';
+import { FiShoppingCart, FiBell, FiMessageCircle, FiPackage, FiPhone, FiUser, FiLogOut, FiSettings, FiMenu, FiX, FiAlertTriangle } from 'react-icons/fi';
 import { useAuth } from '../../../../../contexts/AuthContext';
 import { useCart } from '../../../../../contexts/CartContext';
 import { useMessages } from '../../../../../contexts/MessageContext';
+import { useNotifications } from '../../../../../contexts/NotificationContext';
 import { useToast } from '../../../../Toast';
 import SearchAutocomplete from '../../../../SearchAutocomplete';
+import NotificationBell from '../../../../common/NotificationBell';
+import ReportIssueModal from '../../../../common/ReportIssueModal/ReportIssueModal';
 import theme from '../../../../../styles/designSystem';
 
 /**
@@ -17,6 +20,7 @@ const BuyerLayout = ({
   backgroundColor = theme.colors.background.accent 
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
   const { user, logout } = useAuth();
   const { getCartCount } = useCart();
   const { unreadCount } = useMessages();
@@ -42,7 +46,7 @@ const BuyerLayout = ({
           <div className="container mx-auto flex justify-between items-center text-sm">
             <div className="flex items-center space-x-2">
               <FiPhone size={14} />
-              <span>University of Cebu Banilad</span>
+              <span>ChiFere Cebu Team</span>
             </div>
             <div className="flex items-center space-x-4">
               <span>Get 50% Off on Selected Items</span>
@@ -81,13 +85,7 @@ const BuyerLayout = ({
             {/* Navigation Items - Desktop */}
             <div className="hidden md:flex items-center space-x-6">
               {/* Notifications */}
-              <Link
-                to="/buyer/notifications"
-                className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors"
-              >
-                <FiBell className="w-5 h-5" />
-                <span className="text-sm font-medium">Notifications</span>
-              </Link>
+              <NotificationBell showLabel={true} />
 
               {/* Cart */}
               <Link
@@ -130,11 +128,17 @@ const BuyerLayout = ({
               {user && (
                 <div className="relative group">
                   <button className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors">
-                    <img
-                      src={user.avatar || '/default-avatar.png'}
-                      alt={user.name}
-                      className="w-8 h-8 rounded-full"
-                    />
+                    {user.profile_image || user.avatar ? (
+                      <img
+                        src={user.profile_image || user.avatar}
+                        alt={user.name || 'User'}
+                        className="w-8 h-8 rounded-full object-cover border-2 border-gray-200"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
+                        {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                      </div>
+                    )}
                     <span className="text-sm font-medium">{user.name}</span>
                   </button>
                   
@@ -154,6 +158,13 @@ const BuyerLayout = ({
                       <FiSettings className="inline mr-2" />
                       Settings
                     </Link>
+                    <button
+                      onClick={() => setShowReportModal(true)}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <FiAlertTriangle className="inline mr-2" />
+                      Report an Issue
+                    </button>
                     <button
                       onClick={handleLogout}
                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -183,14 +194,10 @@ const BuyerLayout = ({
               <SearchAutocomplete className="w-full mb-4" />
               
               <div className="space-y-2">
-                <Link
-                  to="/buyer/notifications"
-                  className="flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <FiBell className="w-5 h-5" />
+                <div className="flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                  <NotificationBell />
                   <span>Notifications</span>
-                </Link>
+                </div>
                 
                 <Link
                   to="/buyer/cart"
@@ -249,6 +256,17 @@ const BuyerLayout = ({
                 
                 <button
                   onClick={() => {
+                    setShowReportModal(true);
+                    setIsMenuOpen(false);
+                  }}
+                  className="flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md w-full"
+                >
+                  <FiAlertTriangle className="w-5 h-5" />
+                  <span>Report an Issue</span>
+                </button>
+                
+                <button
+                  onClick={() => {
                     handleLogout();
                     setIsMenuOpen(false);
                   }}
@@ -267,6 +285,14 @@ const BuyerLayout = ({
       <main className="flex-1">
         {children}
       </main>
+
+      {/* Report Issue Modal */}
+      <ReportIssueModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        user={user}
+        userType="buyer"
+      />
     </div>
   );
 };

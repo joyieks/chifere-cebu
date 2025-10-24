@@ -22,7 +22,7 @@ const UserPageLayout = ({ children }) => {
 
   // Default user data fallback
   const displayName = user?.displayName || user?.name || 'User';
-  const userAvatar = user?.avatar || user?.profileImage || '/default-avatar.png';
+  const userInitial = displayName.charAt(0).toUpperCase();
 
   return (
     <BuyerLayout>
@@ -38,18 +38,28 @@ const UserPageLayout = ({ children }) => {
         >
           {/* Profile Section */}
           <div className="flex flex-col items-center mb-8">
-            <img 
-              src={userAvatar} 
-              alt={displayName} 
-              className="w-20 h-20 rounded-full object-cover mb-2"
-              style={{ 
-                border: `4px solid ${theme.colors.primary[800]}`,
-                borderRadius: theme.borderRadius.full
-              }}
-              onError={(e) => {
-                e.target.src = '/default-avatar.png';
-              }}
-            />
+            {user?.profile_image || user?.avatar ? (
+              <img
+                src={user.profile_image || user.avatar}
+                alt={displayName}
+                className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg mb-2"
+                style={{ 
+                  border: `4px solid ${theme.colors.primary[800]}`,
+                  borderRadius: theme.borderRadius.full
+                }}
+              />
+            ) : (
+              <div
+                className="w-20 h-20 rounded-full flex items-center justify-center text-white text-3xl font-bold mb-2"
+                style={{ 
+                  backgroundColor: theme.colors.primary[600],
+                  border: `4px solid ${theme.colors.primary[800]}`,
+                  borderRadius: theme.borderRadius.full
+                }}
+              >
+                {userInitial}
+              </div>
+            )}
             <span 
               className="font-bold text-lg"
               style={{ 
@@ -103,37 +113,12 @@ const UserPageLayout = ({ children }) => {
                 >
                   Profile
                 </button>
-                <button
-                  className={`text-left px-2 py-1 rounded ${isActive('/buyer/account/bank-cards') ? 'bg-blue-200 text-blue-900' : 'hover:bg-blue-100 text-gray-700'}`}
-                  onClick={() => navigate('/buyer/account/bank-cards')}
-                  disabled={isActive('/buyer/account/bank-cards')}
-                >
-                  E-Wallet
-                </button>
-                <button
-                  className={`text-left px-2 py-1 rounded ${isActive('/buyer/account/address') ? 'bg-blue-200 text-blue-900' : 'hover:bg-blue-100 text-gray-700'}`}
-                  onClick={() => navigate('/buyer/account/address')}
-                  disabled={isActive('/buyer/account/address')}
-                >
-                  Address
-                </button>
-                <button
-                  className={`text-left px-2 py-1 rounded ${isActive('/buyer/account/change-password') ? 'bg-blue-200 text-blue-900' : 'hover:bg-blue-100 text-gray-700'}`}
-                  onClick={() => navigate('/buyer/account/change-password')}
-                  disabled={isActive('/buyer/account/change-password')}
-                >
-                  Change Password
-                </button>
               </div>
             )}
             <button
               className={`text-left px-4 py-2 rounded font-semibold focus:outline-none ${isActive('/buyer/purchase') ? 'bg-blue-100 text-blue-800' : 'hover:bg-blue-50 text-gray-800'}`}
               onClick={() => navigate('/buyer/purchase')}
             >My Purchased</button>
-            <button
-              className={`text-left px-4 py-2 rounded font-semibold focus:outline-none ${isActive('/buyer/notifications') ? 'bg-blue-100 text-blue-800' : 'hover:bg-blue-50 text-gray-800'}`}
-              onClick={() => navigate('/buyer/notifications')}
-            >Notifications</button>
             <button
               className={`text-left px-4 py-2 rounded font-semibold focus:outline-none ${isActive('/buyer/settings') ? 'bg-blue-100 text-blue-800' : 'hover:bg-blue-50 text-gray-800'}`}
               onClick={() => navigate('/buyer/settings')}

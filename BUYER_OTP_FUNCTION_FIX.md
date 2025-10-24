@@ -146,3 +146,4 @@ if (result.success) {
 ## Summary
 The buyer OTP verification popup should now appear correctly after registration because the form is calling the proper OTP service functions (`generateAndSendOTP` and `resendOTP`) instead of the non-existent `sendOTP` function.
 
+

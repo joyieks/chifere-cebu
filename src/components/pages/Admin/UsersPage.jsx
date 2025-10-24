@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FiRefreshCw, FiUsers, FiShoppingBag, FiEye, FiCheck, FiX, FiSearch, FiUserX, FiUserCheck } from 'react-icons/fi';
 import { useToast } from '../../Toast';
+import { useAuth } from '../../../contexts/AuthContext';
 import adminService from '../../../services/adminService';
 import UserProfileModal from './UserProfileModal';
 
@@ -14,6 +15,7 @@ const UsersPage = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const { showToast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     loadAllUsers();
@@ -60,29 +62,62 @@ const UsersPage = () => {
   };
 
   const handleDisableUser = async (userId, userName) => {
+    if (!user) {
+      showToast('Admin not authenticated', 'error');
+      return;
+    }
+
+
     const reason = prompt(`Enter reason for disabling ${userName}'s account (optional):`) || 'Account disabled by admin';
     if (reason === null) return; // User cancelled
     
     setDisablingId(userId);
-    const res = await adminService.disableUser(userId, 'admin', reason);
+    const res = await adminService.disableUser(userId, user.id, reason);
     setDisablingId(null);
+    
     if (res.success) {
       showToast('User account disabled successfully', 'success');
-      loadAllUsers(); // Reload to get updated data
+      
+      // Immediately update the UI to reflect the change
+      setAllUsers(prevUsers => 
+        prevUsers.map(u => 
+          u.id === userId 
+            ? { ...u, is_active: false, disabled_at: new Date().toISOString(), disabled_reason: reason }
+            : u
+        )
+      );
+      
+      await loadAllUsers(); // Reload to get updated data from database
     } else {
       showToast(res.error || 'Failed to disable user account', 'error');
     }
   };
 
   const handleEnableUser = async (userId, userName) => {
+    if (!user) {
+      showToast('Admin not authenticated', 'error');
+      return;
+    }
+
     if (!confirm(`Are you sure you want to enable ${userName}'s account?`)) return;
     
     setDisablingId(userId);
-    const res = await adminService.enableUser(userId, 'admin');
+    const res = await adminService.enableUser(userId, user.id);
     setDisablingId(null);
+    
     if (res.success) {
       showToast('User account enabled successfully', 'success');
-      loadAllUsers(); // Reload to get updated data
+      
+      // Immediately update the UI to reflect the change
+      setAllUsers(prevUsers => 
+        prevUsers.map(u => 
+          u.id === userId 
+            ? { ...u, is_active: true, disabled_at: null, disabled_reason: null }
+            : u
+        )
+      );
+      
+      await loadAllUsers(); // Reload to get updated data from database
     } else {
       showToast(res.error || 'Failed to enable user account', 'error');
     }
@@ -128,8 +163,8 @@ const UsersPage = () => {
     pending: nonRejectedUsers.filter(u => u.seller_status === 'pending').length,
     approved: nonRejectedUsers.filter(u => u.seller_status === 'approved').length,
     rejected: allUsers.filter(u => u.seller_status === 'rejected').length, // Keep rejected count for reference
-    disabled: nonRejectedUsers.filter(u => u.is_active === false).length,
-    active: nonRejectedUsers.filter(u => u.is_active !== false).length
+    disabled: nonRejectedUsers.filter(u => u.is_active === false || u.is_active === null).length,
+    active: nonRejectedUsers.filter(u => u.is_active === true).length
   };
 
   return (
@@ -231,9 +266,9 @@ const UsersPage = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {filteredUsers.map(user => (
+                {filteredUsers.map((user, index) => (
                 <UserCard
-                  key={user.id}
+                  key={`${user.id}-${user.user_type}-${index}`}
                   user={user}
                   type={user.user_type}
                   onApprove={() => handleApprove(user.id)}
@@ -322,7 +357,7 @@ const UserCard = ({ user, type, onApprove, onReject, isRejecting, onDisable, onE
                 <h3 className="font-semibold text-gray-900">
                   {user.display_name || user.business_name || 'Unnamed User'}
                 </h3>
-                {user.is_active === false && (
+                {(user.is_active === false || user.is_active === null) && (
                   <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
                     <FiUserX className="w-3 h-3 mr-1" />
                     Disabled
@@ -341,9 +376,9 @@ const UserCard = ({ user, type, onApprove, onReject, isRejecting, onDisable, onE
             <div>
               <p className="text-xs text-gray-500 uppercase tracking-wide">Account Status</p>
               <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                user.is_active === false ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                (user.is_active === false || user.is_active === null) ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
               }`}>
-                {user.is_active === false ? 'Disabled' : 'Active'}
+                {(user.is_active === false || user.is_active === null) ? 'Disabled' : 'Active'}
               </span>
             </div>
             <div>
@@ -448,7 +483,7 @@ const UserCard = ({ user, type, onApprove, onReject, isRejecting, onDisable, onE
           </button>
           
           {/* Disable/Enable Account Button */}
-          {user.is_active === false ? (
+          {(user.is_active === false || user.is_active === null) ? (
             <button 
               onClick={() => onEnable(user.id, user.display_name || user.business_name || 'User')}
               disabled={isDisabling}

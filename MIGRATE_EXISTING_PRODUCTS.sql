@@ -177,3 +177,4 @@ SELECT 'Preloved items migrated:' as info, COUNT(*) as count FROM public.seller_
 SELECT 'Barter items migrated:' as info, COUNT(*) as count FROM public.seller_add_barter_item;
 SELECT 'Original products count:' as info, COUNT(*) as count FROM public.products;
 
+

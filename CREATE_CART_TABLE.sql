@@ -38,3 +38,4 @@ COMMENT ON COLUMN public.buyer_add_to_cart.items IS 'JSON array of cart items wi
 COMMENT ON COLUMN public.buyer_add_to_cart.created_at IS 'When the cart was first created';
 COMMENT ON COLUMN public.buyer_add_to_cart.updated_at IS 'When the cart was last updated';
 
+

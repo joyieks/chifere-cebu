@@ -269,6 +269,79 @@ class FileUploadService {
   }
 
   /**
+   * Upload profile picture
+   * @param {File} file - Image file to upload
+   * @param {string} userId - User ID
+   * @param {string} userType - User type (buyer/seller)
+   * @returns {Promise<Object>} - Upload result
+   */
+  async uploadProfilePicture(file, userId, userType = 'user') {
+    try {
+      // Validate file
+      const validation = this.validateImageFile(file);
+      if (!validation.isValid) {
+        return { success: false, error: validation.error };
+      }
+
+      // Generate unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${userId}_profile_${Date.now()}.${fileExt}`;
+      const filePath = `profile-pictures/${fileName}`;
+
+      // Upload to Supabase storage
+      console.log('📤 Uploading profile picture to bucket: profile-pictures');
+      console.log('📤 File path:', filePath);
+      console.log('📤 File size:', file.size);
+      
+      // Try profile-pictures bucket first, fallback to product-images if it doesn't exist
+      let bucketName = 'profile-pictures';
+      let { data, error } = await supabase.storage
+        .from(bucketName)
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true // Allow overwriting existing profile pictures
+        });
+
+      // If profile-pictures bucket doesn't exist, try product-images bucket
+      if (error && error.message.includes('not found')) {
+        console.log('📤 Profile-pictures bucket not found, trying product-images bucket');
+        bucketName = 'product-images';
+        filePath = `profile-pictures/${fileName}`; // Keep the same path structure
+        ({ data, error } = await supabase.storage
+          .from(bucketName)
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: true
+          }));
+      }
+
+      if (error) {
+        console.error('❌ Profile picture upload error:', error);
+        return { success: false, error: `Failed to upload profile picture: ${error.message}` };
+      }
+
+      console.log('✅ Profile picture upload successful:', data);
+
+      // Get public URL using the bucket that was actually used
+      const { data: urlData } = supabase.storage
+        .from(bucketName)
+        .getPublicUrl(filePath);
+
+      return {
+        success: true,
+        data: {
+          path: filePath,
+          url: urlData.publicUrl,
+          fileName: fileName
+        }
+      };
+    } catch (error) {
+      console.error('Upload profile picture error:', error);
+      return { success: false, error: 'Failed to upload profile picture' };
+    }
+  }
+
+  /**
    * Create storage bucket if it doesn't exist
    * @returns {Promise<Object>} - Result
    */

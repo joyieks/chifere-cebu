@@ -105,3 +105,4 @@ Should show:
 - `src/components/pages/Authentication/signup.jsx` - Sets seller_status to pending
 - `src/components/pages/Admin/AdminDashboard.jsx` - Admin approval interface
 
+

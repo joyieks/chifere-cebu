@@ -51,3 +51,4 @@ ORDER BY ordinal_position;
 -- Success message
 SELECT 'OTP verifications table fixed successfully!' as status;
 
+

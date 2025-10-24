@@ -145,3 +145,4 @@ When you refresh the page, look for these logs:
 
 **Check the console logs to see exactly what's happening with the store data!** 🔍✨
 
+

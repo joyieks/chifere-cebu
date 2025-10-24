@@ -61,3 +61,4 @@ The theme system includes these color palettes:
 
 **The Item component should now work perfectly with the Make Offer functionality!** ✨
 
+

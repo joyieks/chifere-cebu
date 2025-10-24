@@ -65,3 +65,4 @@ const handleLogout = async () => {
 ## Notes
 The seller logout now properly navigates to the landing page after logout, ensuring consistent behavior across all user types (admin, buyer, seller).
 
+

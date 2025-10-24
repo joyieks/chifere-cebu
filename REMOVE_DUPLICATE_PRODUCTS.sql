@@ -56,3 +56,4 @@ WHERE id IN (
 SELECT 'Preloved items after cleanup:' as info, COUNT(*) as count FROM public.seller_add_item_preloved;
 SELECT 'Barter items after cleanup:' as info, COUNT(*) as count FROM public.seller_add_barter_item;
 
+

@@ -117,6 +117,17 @@ class StoreService {
         console.error('❌ [StoreService] Get product count error:', productError);
       }
 
+      // Get seller stats (followers, reviews, ratings)
+      const { data: sellerStats, error: sellerStatsError } = await supabase
+        .from('seller_stats')
+        .select('*')
+        .eq('seller_id', storeId)
+        .single();
+
+      if (sellerStatsError && sellerStatsError.code !== 'PGRST116') {
+        console.error('❌ [StoreService] Get seller stats error:', sellerStatsError);
+      }
+
       // Get store profile for additional stats
       const storeResult = await this.getStoreById(storeId);
       const store = storeResult.success ? storeResult.data : null;
@@ -124,8 +135,9 @@ class StoreService {
       const stats = {
         totalProducts: productCount || 0,
         totalSales: store?.total_sales || 0,
-        rating: store?.rating || 0,
-        totalRatings: store?.total_ratings || 0,
+        rating: sellerStats?.average_rating || store?.rating || 0,
+        totalRatings: sellerStats?.total_reviews || store?.total_ratings || 0,
+        totalFollowers: sellerStats?.total_followers || 0,
         memberSince: store?.created_at || null,
         isVerified: store?.is_business_verified || false
       };

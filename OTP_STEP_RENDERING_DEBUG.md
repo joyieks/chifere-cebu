@@ -140,3 +140,4 @@ The debug button serves to:
 
 The enhanced debugging will help identify whether the issue is in state management, component rendering, or something else entirely.
 
+

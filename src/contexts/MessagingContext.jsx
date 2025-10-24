@@ -503,6 +503,9 @@ ${offerData.message ? `**Additional Message:** ${offerData.message}` : ''}
           offerItems: offerData.offerItems,
           productId: offerData.productId,
           productName: offerData.productName,
+          productImage: offerData.productImage,
+          productPrice: offerData.productPrice,
+          productCategory: offerData.productCategory,
           status: offerData.status || 'pending'
         }
       );
@@ -528,6 +531,7 @@ ${offerData.message ? `**Additional Message:** ${offerData.message}` : ''}
           productName: offerData.productName,
           productImage: offerData.productImage,
           productPrice: offerData.productPrice,
+          productCategory: offerData.productCategory,
           status: offerData.status || 'pending'
         },
               createdAt: new Date(),

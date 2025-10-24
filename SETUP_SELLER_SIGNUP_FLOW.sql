@@ -96,3 +96,4 @@ BEGIN
   RAISE NOTICE 'Functions created: cleanup_expired_otps, log_admin_activity';
 END $$;
 
+

@@ -75,3 +75,4 @@ const createCartTable = async () => {
 // Run the script
 createCartTable();
 
+

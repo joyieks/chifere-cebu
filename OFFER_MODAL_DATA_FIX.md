@@ -142,3 +142,4 @@ if (productData.user_profiles) {
 
 **Users can now successfully send offers without data validation errors!** 💬✨
 
+

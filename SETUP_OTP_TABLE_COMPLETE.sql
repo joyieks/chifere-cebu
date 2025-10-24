@@ -86,3 +86,4 @@ WHERE tablename = 'otp_verifications'
 -- Success message
 SELECT 'OTP verifications table created successfully with all required columns!' as status;
 
+

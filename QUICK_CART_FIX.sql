@@ -31,3 +31,4 @@ CREATE POLICY "Authenticated users can manage their own carts" ON public.buyer_a
 -- Verify the policy was created
 SELECT policyname, cmd, roles FROM pg_policies WHERE tablename = 'buyer_add_to_cart';
 
+

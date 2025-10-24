@@ -1,21 +1,43 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useAuth } from '../../../../../../contexts/AuthContext';
+import { supabase } from '../../../../../../config/supabase';
+import ProfilePictureModal from '../../../../../../components/common/ProfilePictureModal/ProfilePictureModal';
 
 const MyAccount = () => {
+  const { user, updateProfile } = useAuth();
   const [profile, setProfile] = useState({
-    name: 'Brent Catacutan',
-    email: 'brent@example.com',
-    phone: '+63 912 345 6789',
-    birthday: '1995-05-15',
-    address: 'Cebu City, Philippines'
+    name: '',
+    email: '',
+    phone: '',
+    birthday: '',
+    address: ''
   });
 
   const [editMode, setEditMode] = useState(false);
   const [editProfile, setEditProfile] = useState({ ...profile });
-  const [showOtp, setShowOtp] = useState(false);
-  const [otp, setOtp] = useState('');
   const [success, setSuccess] = useState(false);
   const [tempAvatar, setTempAvatar] = useState('/avatar.png');
+  const [saving, setSaving] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const fileInputRef = useRef();
+
+  // Load user data from AuthContext
+  useEffect(() => {
+    if (user) {
+      const userProfile = {
+        name: user.first_name && user.last_name 
+          ? `${user.first_name} ${user.last_name}`.trim()
+          : user.display_name || user.name || 'User',
+        email: user.email || '',
+        phone: user.phone || '',
+        birthday: user.birthday || '',
+        address: user.address || ''
+      };
+      setProfile(userProfile);
+      setEditProfile(userProfile);
+      setTempAvatar(user.profile_image || user.avatar || '/avatar.png');
+    }
+  }, [user]);
 
   const handleEdit = () => {
     setEditMode(true);
@@ -32,30 +54,79 @@ const MyAccount = () => {
     setEditProfile({ ...editProfile, [e.target.name]: e.target.value });
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    setShowOtp(true);
-  };
+    
+    // Basic validation
+    if (!editProfile.name.trim()) {
+      alert('Please enter your name');
+      return;
+    }
+    
+    if (!editProfile.email.trim()) {
+      alert('Please enter your email');
+      return;
+    }
 
-  const handleOtpSubmit = (e) => {
-    e.preventDefault();
-    if (otp === '123456') {
+    setSaving(true);
+    try {
+      // Parse the name into first_name and last_name
+      const nameParts = editProfile.name.trim().split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      // Prepare the update data for the database
+      const updateData = {
+        first_name: firstName,
+        last_name: lastName,
+        display_name: editProfile.name,
+        phone: editProfile.phone,
+        address: editProfile.address,
+        profile_image: tempAvatar !== '/avatar.png' ? tempAvatar : null
+      };
+
+      // Add birthday if it exists in the table (check if the field exists)
+      if (editProfile.birthday) {
+        updateData.birthday = editProfile.birthday;
+      }
+
+      // Update the user profile in the database
+      const { error } = await supabase
+        .from('buyer_users')
+        .update(updateData)
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Error updating profile:', error);
+        alert('Error updating profile. Please try again.');
+        return;
+      }
+
+      // Update local state
       setProfile({ ...editProfile });
-      setShowOtp(false);
       setEditMode(false);
       setSuccess(true);
-      setOtp('');
-    } else {
-      alert('Invalid OTP. Please try 123456');
+      alert('Profile updated successfully!');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert('Error updating profile. Please try again.');
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => setTempAvatar(e.target.result);
-      reader.readAsDataURL(file);
+  const handleProfilePictureUpdate = async (newImageUrl) => {
+    setTempAvatar(newImageUrl);
+    // Update the user data in AuthContext to sync across all components
+    if (user) {
+      try {
+        await updateProfile({ 
+          profile_image: newImageUrl,
+          avatar: newImageUrl 
+        });
+      } catch (error) {
+        console.error('Error updating user profile:', error);
+      }
     }
   };
 
@@ -63,7 +134,7 @@ const MyAccount = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
       <div className="max-w-4xl mx-auto">
         {/* Header Section */}
-        <div className="text-center mb-8">
+        <div className="text-left mb-8">
           <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4">
             My Account
           </h1>
@@ -92,32 +163,26 @@ const MyAccount = () => {
                 </div>
 
                 {/* Profile Info */}
-                <div className="flex-1 text-center lg:text-left">
+                <div className="flex-1 text-left">
                   <h2 className="text-4xl font-bold text-gray-800 mb-2">{profile.name}</h2>
                   <div className="space-y-4 mb-8">
-                    <div className="flex items-center justify-center lg:justify-start text-gray-600">
+                    <div className="flex items-center text-gray-600">
                       <svg className="w-5 h-5 mr-3 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                         <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                       </svg>
                       <span className="text-lg">{profile.email}</span>
                     </div>
-                    <div className="flex items-center justify-center lg:justify-start text-gray-600">
+                    <div className="flex items-center text-gray-600">
                       <svg className="w-5 h-5 mr-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                       </svg>
                       <span className="text-lg">{profile.phone}</span>
                     </div>
-                    <div className="flex items-center justify-center lg:justify-start text-gray-600">
-                      <svg className="w-5 h-5 mr-3 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-                      </svg>
+                    <div className="flex items-center text-gray-600">
                       <span className="text-lg">{profile.birthday}</span>
                     </div>
-                    <div className="flex items-center justify-center lg:justify-start text-gray-600">
-                      <svg className="w-5 h-5 mr-3 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                      </svg>
+                    <div className="flex items-center text-gray-600">
                       <span className="text-lg">{profile.address}</span>
                     </div>
                   </div>
@@ -157,7 +222,7 @@ const MyAccount = () => {
                     />
                     <button
                       type="button"
-                      onClick={() => fileInputRef.current?.click()}
+                      onClick={() => setShowProfileModal(true)}
                       className="absolute -bottom-2 -right-2 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors duration-200"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -169,13 +234,6 @@ const MyAccount = () => {
                     <h3 className="font-semibold text-gray-800">Profile Picture</h3>
                     <p className="text-sm text-gray-500">Click the + icon to change your avatar</p>
                   </div>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarChange}
-                    className="hidden"
-                  />
                 </div>
 
                 {/* Form Fields */}
@@ -236,9 +294,17 @@ const MyAccount = () => {
                 <div className="flex space-x-4 pt-6">
                   <button
                     type="submit"
-                    className="flex-1 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold transform hover:scale-105"
+                    disabled={saving}
+                    className="flex-1 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Save Changes
+                    {saving ? (
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                        Saving...
+                      </div>
+                    ) : (
+                      'Save Changes'
+                    )}
                   </button>
                   <button
                     type="button"
@@ -253,41 +319,6 @@ const MyAccount = () => {
           )}
         </div>
 
-        {/* OTP Modal */}
-        {showOtp && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
-            <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md mx-4 transform animate-slide-up">
-              <div className="text-center mb-6">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </div>
-                <h2 className="text-2xl font-bold text-gray-800">Verify Changes</h2>
-                <p className="text-gray-500">Enter the 6-digit code sent to your email</p>
-              </div>
-
-              <form onSubmit={handleOtpSubmit} className="space-y-6">
-                <div>
-                  <input
-                    type="text"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    maxLength={6}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-center text-2xl font-mono tracking-widest"
-                    placeholder="000000"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold"
-                >
-                  Verify & Save
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
 
         {/* Success Modal */}
         {success && (
@@ -309,6 +340,17 @@ const MyAccount = () => {
             </div>
           </div>
         )}
+
+        {/* Profile Picture Modal */}
+        <ProfilePictureModal
+          isOpen={showProfileModal}
+          onClose={() => setShowProfileModal(false)}
+          currentImage={tempAvatar}
+          onImageUpdate={handleProfilePictureUpdate}
+          userId={user?.id}
+          userType="buyer"
+          userName={profile.name || 'User'}
+        />
       </div>
 
       <style jsx>{`
