@@ -15,8 +15,8 @@ import ErrorBoundary from './components/ErrorBoundary';
 
 // Lazy load components for better performance
 const LandingPage = lazy(() => import('./components/pages/Landing/landingpage.jsx'));
-const Login = lazy(() => import('./components/pages/Authentication/Login.jsx'));
-const Signup = lazy(() => import('./components/pages/Authentication/signup.jsx'));
+const Login = lazy(() => import('./components/pages/Authentication/login.jsx'));
+const Signup = lazy(() => import('./components/pages/Authentication/Signup.jsx'));
 const OTPVerification = lazy(() => import('./components/pages/Authentication/OTPVerification.jsx'));
 const PendingReview = lazy(() => import('./components/pages/Authentication/PendingReview.jsx'));
 const BuyerDashboard = lazy(() => import('./components/pages/Buyer/Buyer_Menu/Buyer_Dashboard/Buyer_Dashboard.jsx'));
