@@ -82,7 +82,7 @@ const Navigation = ({ showPromotionalBar = false }) => {
           <div className="container mx-auto flex justify-between items-center text-sm">
             <div className="flex items-center space-x-2">
               <FiPhone size={14} />
-              <span>University of Cebu Banilad</span>
+              <span>ChiFere Cebu Team</span>
             </div>
             <div className="flex items-center space-x-4">
               <span>Get 50% Off on Selected Items</span>
