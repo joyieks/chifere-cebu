@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import SellerLayout from '../Seller_Layout/SellerLayout';
 import AddProductForm from './AddProductForm';
 import EditProductModal from './EditProductModal';
+import ConfirmationModal from '../../../../common/ConfirmationModal/ConfirmationModal';
 import { theme } from '../../../../../styles/designSystem';
 import {
   FiPlus,
@@ -34,6 +35,11 @@ const Products = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [error, setError] = useState(null);
+  
+  // Confirmation modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Categories
   const categories = [
@@ -128,24 +134,40 @@ const Products = () => {
     }
   };
 
-  // Delete product
-  const deleteProduct = async (product) => {
-    if (!window.confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
-      return;
-    }
+  // Show delete confirmation modal
+  const showDeleteConfirmation = (product) => {
+    setProductToDelete(product);
+    setShowDeleteModal(true);
+  };
 
+  // Confirm delete product
+  const confirmDeleteProduct = async () => {
+    if (!productToDelete) return;
+
+    setIsDeleting(true);
     try {
-      const result = await itemService.deleteItem(product.id, product.collection);
+      const result = await itemService.deleteItem(productToDelete.id, productToDelete.collection);
 
       if (result.success) {
-        setProducts(products.filter(p => p.id !== product.id));
+        setProducts(products.filter(p => p.id !== productToDelete.id));
+        setShowDeleteModal(false);
+        setProductToDelete(null);
       } else {
         alert('Failed to delete product: ' + result.error);
       }
     } catch (err) {
       console.error('Delete product error:', err);
       alert('An error occurred while deleting the product');
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  // Cancel delete
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setProductToDelete(null);
+    setIsDeleting(false);
   };
 
   // Open edit modal
@@ -226,7 +248,7 @@ const Products = () => {
                       Edit Product
                     </button>
                     <button
-                      onClick={() => deleteProduct(product)}
+                      onClick={() => showDeleteConfirmation(product)}
                       className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center"
                     >
                       <FiTrash2 className="w-4 h-4 mr-3" />
@@ -500,6 +522,20 @@ const Products = () => {
         }}
         onSuccess={handleProductSuccess}
         productData={editingProduct}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={cancelDelete}
+        onConfirm={confirmDeleteProduct}
+        title="Delete Product"
+        message="Are you sure you want to delete this product? This action cannot be undone and will permanently remove the product from your store."
+        confirmText="Delete Product"
+        cancelText="Cancel"
+        type="danger"
+        isLoading={isDeleting}
+        productName={productToDelete?.name}
       />
 
     </SellerLayout>

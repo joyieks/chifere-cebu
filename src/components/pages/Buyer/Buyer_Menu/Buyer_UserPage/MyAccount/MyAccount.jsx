@@ -15,8 +15,10 @@ const MyAccount = () => {
 
   const [editMode, setEditMode] = useState(false);
   const [editProfile, setEditProfile] = useState({ ...profile });
+  const [showOtp, setShowOtp] = useState(false);
+  const [otp, setOtp] = useState('');
   const [success, setSuccess] = useState(false);
-  const [tempAvatar, setTempAvatar] = useState('/avatar.png');
+  const [tempAvatar, setTempAvatar] = useState('/default-avatar.png');
   const [saving, setSaving] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const fileInputRef = useRef();
@@ -24,6 +26,10 @@ const MyAccount = () => {
   // Load user data from AuthContext
   useEffect(() => {
     if (user) {
+      console.log('🔍 [MyAccount] User data:', user);
+      console.log('🔍 [MyAccount] Profile image URL:', user.profile_image);
+      console.log('🔍 [MyAccount] Avatar URL:', user.avatar);
+      
       const userProfile = {
         name: user.first_name && user.last_name 
           ? `${user.first_name} ${user.last_name}`.trim()
@@ -35,7 +41,10 @@ const MyAccount = () => {
       };
       setProfile(userProfile);
       setEditProfile(userProfile);
-      setTempAvatar(user.profile_image || user.avatar || '/avatar.png');
+      
+      const imageUrl = user.profile_image || user.avatar || '/default-avatar.png';
+      console.log('🔍 [MyAccount] Setting tempAvatar to:', imageUrl);
+      setTempAvatar(imageUrl);
     }
   }, [user]);
 
@@ -47,7 +56,7 @@ const MyAccount = () => {
   const handleCancel = () => {
     setEditMode(false);
     setEditProfile({ ...profile });
-    setTempAvatar('/avatar.png');
+    setTempAvatar('/default-avatar.png');
   };
 
   const handleChange = (e) => {
@@ -82,7 +91,7 @@ const MyAccount = () => {
         display_name: editProfile.name,
         phone: editProfile.phone,
         address: editProfile.address,
-        profile_image: tempAvatar !== '/avatar.png' ? tempAvatar : null
+        profile_image: tempAvatar !== '/default-avatar.png' ? tempAvatar : null
       };
 
       // Add birthday if it exists in the table (check if the field exists)
@@ -153,6 +162,12 @@ const MyAccount = () => {
                       src={tempAvatar}
                       alt="Profile"
                       className="w-full h-full rounded-full object-cover bg-white"
+                      onLoad={() => console.log('✅ [MyAccount] Profile image loaded successfully:', tempAvatar)}
+                      onError={(e) => {
+                        console.error('❌ [MyAccount] Profile image failed to load:', tempAvatar);
+                        console.error('❌ [MyAccount] Error details:', e);
+                        console.error('❌ [MyAccount] Current user data:', user);
+                      }}
                     />
                   </div>
                   <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
@@ -219,6 +234,8 @@ const MyAccount = () => {
                       src={tempAvatar}
                       alt="Profile"
                       className="w-24 h-24 rounded-full object-cover border-4 border-blue-200"
+                      onLoad={() => console.log('✅ [MyAccount] Edit mode profile image loaded successfully:', tempAvatar)}
+                      onError={(e) => console.error('❌ [MyAccount] Edit mode profile image failed to load:', tempAvatar, e)}
                     />
                     <button
                       type="button"
