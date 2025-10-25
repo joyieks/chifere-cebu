@@ -7,7 +7,6 @@ SELECT
     id,
     email,
     user_type,
-    role,
     seller_status,
     is_active,
     created_at
@@ -18,8 +17,7 @@ SELECT
     id,
     email,
     user_type,
-    role,
-    seller_status,
+    NULL as seller_status,
     is_active,
     created_at
 FROM public.buyer_users
@@ -50,7 +48,6 @@ WHERE user_type = 'buyer' AND seller_status IS NOT NULL;
 --     id,
 --     email,
 --     user_type,
---     role,
 --     seller_status,
 --     is_active,
 --     created_at
@@ -62,8 +59,7 @@ WHERE user_type = 'buyer' AND seller_status IS NOT NULL;
 --     id,
 --     email,
 --     user_type,
---     role,
---     seller_status,
+--     NULL as seller_status,
 --     is_active,
 --     created_at
 -- FROM public.buyer_users

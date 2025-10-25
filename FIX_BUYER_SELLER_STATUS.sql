@@ -63,7 +63,7 @@ SELECT
     id,
     email,
     user_type,
-    seller_status,
+    NULL as seller_status,
     is_active
 FROM public.buyer_users
 WHERE user_type = 'buyer'
