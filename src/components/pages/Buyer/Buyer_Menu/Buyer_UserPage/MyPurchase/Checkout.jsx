@@ -36,6 +36,7 @@ import { useCart } from '../../../../../../contexts/CartContext';
 import orderService from '../../../../../../services/orderService';
 import paymentService from '../../../../../../services/paymentService';
 import addressService from '../../../../../../services/addressService';
+import { supabase } from '../../../../../../config/supabase';
 import AddressSelectionModal from './AddressSelectionModal';
 import PaymentModal from '../../../../Shared/PaymentModal/PaymentModal';
 
@@ -193,17 +194,46 @@ const CheckoutForm = () => {
         userEmail: user?.email
       });
       
+      // 🔧 FIX: Get seller_id from products if not available in cart items
+      const itemsWithSellerId = await Promise.all(
+        orderData.items.map(async (item) => {
+          let sellerId = item.sellerId || item.seller_id;
+          
+          // If no sellerId, fetch from products table
+          if (!sellerId) {
+            try {
+              const { data: product, error } = await supabase
+                .from('products')
+                .select('seller_id')
+                .eq('id', item.id || item.itemId)
+                .single();
+              
+              if (!error && product?.seller_id) {
+                sellerId = product.seller_id;
+                console.log('🔍 [Checkout] Got seller_id from product:', sellerId);
+              }
+            } catch (error) {
+              console.warn('⚠️ [Checkout] Could not fetch seller_id for product:', item.id);
+            }
+          }
+          
+          return {
+            id: item.id || item.itemId,
+            product_id: item.id || item.itemId,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity || item.qty || 1,
+            qty: item.quantity || item.qty || 1,
+            image: item.image || '',
+            sellerId: sellerId,
+            seller_id: sellerId
+          };
+        })
+      );
+      
       const newOrderData = {
         buyerId: user.id || user.uid, // Use user.id first, fallback to user.uid
-        items: orderData.items.map(item => ({
-          id: item.id || item.itemId,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity || item.qty || 1,
-          qty: item.quantity || item.qty || 1, // Add both for compatibility
-          image: item.image || '',
-          sellerId: item.sellerId || null // Will be set to null, then updated from first item
-        })),
+        items: itemsWithSellerId,
         deliveryAddress: selectedAddress ? {
           name: selectedAddress.recipient_name,
           phone: selectedAddress.phone_number,
