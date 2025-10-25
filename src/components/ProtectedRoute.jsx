@@ -71,8 +71,8 @@ const ProtectedRoute = ({ children, requireAuth = true, requireRole = null, redi
     return <Navigate to={redirectPath} replace />;
   }
 
-  // Check if seller is pending approval
-  if (requireRole === 'seller' && user && user.role === 'seller' && user.seller_status === 'pending') {
+  // Check if seller is pending approval (ONLY for actual sellers, not buyers)
+  if (requireRole === 'seller' && user && user.role === 'seller' && user.user_type === 'seller' && user.seller_status === 'pending') {
     console.log('⏳ [ProtectedRoute] Seller account pending approval - user:', user.email, 'seller_status:', user.seller_status);
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
