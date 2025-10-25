@@ -234,6 +234,47 @@ class NotificationService {
   }
 
   /**
+   * Create a new notification
+   * @param {string} userId - User ID to send notification to
+   * @param {Object} notificationData - Notification data
+   * @returns {Promise<Object>} - Result
+   */
+  async createNotification(userId, notificationData) {
+    try {
+      console.log('🔔 [NotificationService] Creating notification:', { userId, notificationData });
+
+      const { title, message, type = 'general', data = {} } = notificationData;
+
+      // Ensure message is not null or empty
+      const notificationMessage = message || title || 'New notification';
+
+      const { data: notification, error } = await supabase
+        .from('notifications')
+        .insert([{
+          user_id: userId,
+          title: title || 'Notification',
+          message: notificationMessage,
+          type: type,
+          data: data,
+          is_read: false
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ [NotificationService] Create notification error:', error);
+        throw error;
+      }
+
+      console.log('✅ [NotificationService] Notification created:', notification.id);
+      return { success: true, notificationId: notification.id };
+    } catch (error) {
+      console.error('❌ [NotificationService] Create notification error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
    * Get notification types for filtering
    * @returns {Array} - Available notification types
    */
@@ -332,74 +373,10 @@ class NotificationService {
         return { success: true, notificationId: existingNotifications[0].id, duplicate: true };
       }
 
-      // Get order details
-      const { data: order, error: orderError } = await supabase
-        .from('buyer_orders')
-        .select(`
-          id,
-          order_number,
-          buyer_id,
-          seller_id,
-          status,
-          total_amount
-        `)
-        .eq('id', orderId)
-        .single();
-
-      if (orderError) {
-        console.error('❌ [NotificationService] Error fetching order:', orderError);
-        return { success: false, error: orderError.message };
-      }
-
-      // Get buyer and seller names
-      const { data: users, error: usersError } = await supabase
-        .from('user_profiles')
-        .select('id, display_name, business_name')
-        .in('id', [buyerId, sellerId]);
-
-      if (usersError) {
-        console.error('❌ [NotificationService] Error fetching users:', usersError);
-        return { success: false, error: usersError.message };
-      }
-
-      const buyer = users.find(u => u.id === buyerId);
-      const seller = users.find(u => u.id === sellerId);
-      const buyerName = buyer ? (buyer.display_name || buyer.business_name || 'Buyer') : 'Buyer';
-      const sellerName = seller ? (seller.display_name || seller.business_name || 'Seller') : 'Seller';
-
-      // Get product name from order items
-      const { data: orderItems, error: itemsError } = await supabase
-        .from('buyer_order_items')
-        .select('product_name')
-        .eq('order_id', orderId)
-        .limit(1);
-
-      const productName = orderItems && orderItems.length > 0 ? orderItems[0].product_name : 'items';
-
-      // Create notification for buyer
-      const notificationData = {
-        title: 'Order Status Updated 📦',
-        message: `Your order for ${productName} has been updated to: ${newStatus} by ${sellerName}`,
-        type: 'order_status_update',
-        data: {
-          order_id: orderId,
-          order_number: order.order_number,
-          old_status: oldStatus,
-          new_status: newStatus,
-          seller_name: sellerName,
-          product_name: productName
-        }
-      };
-
-      const result = await this.createNotification(buyerId, notificationData);
-
-      if (result.success) {
-        console.log('✅ [NotificationService] Order status update notification created');
-        return { success: true, notificationId: result.notificationId };
-      } else {
-        console.error('❌ [NotificationService] Failed to create notification:', result.error);
-        return { success: false, error: result.error };
-      }
+      // NOTE: Database trigger will handle notification creation automatically
+      // We don't need to create notifications here to avoid duplicates
+      console.log('✅ [NotificationService] Order status update notification will be handled by database trigger');
+      return { success: true, handledByTrigger: true };
     } catch (error) {
       console.error('❌ [NotificationService] Notify order status update error:', error);
       return { success: false, error: error.message };
