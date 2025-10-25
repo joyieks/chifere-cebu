@@ -44,7 +44,6 @@ const PendingApproval = lazy(() => import('./components/pages/Seller/PendingAppr
 const SellerDashboard = lazy(() => import('./components/pages/Seller/Seller_Menu/Seller_Dashboard/SellerDashboard.jsx'));
 const SellerProducts = lazy(() => import('./components/pages/Seller/Seller_Menu/Products/Products.jsx'));
 const SellerOrders = lazy(() => import('./components/pages/Seller/Seller_Menu/Orders/Orders.jsx'));
-const SellerAnalytics = lazy(() => import('./components/pages/Seller/Seller_Menu/Analytics/Analytics.jsx'));
 const SellerMessages = lazy(() => import('./components/pages/Seller/Seller_Menu/Messages/Messages.jsx'));
 const SellerProfile = lazy(() => import('./components/pages/Seller/Seller_Menu/Profile/Profile.jsx'));
 const SellerSettings = lazy(() => import('./components/pages/Seller/Seller_Menu/Settings/Settings.jsx'));
@@ -262,14 +261,6 @@ function AppRoutes() {
           element={
             <ProtectedRoute requireRole="seller" redirectTo="/buyer/dashboard">
               <SellerOrders />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/seller/analytics" 
-          element={
-            <ProtectedRoute requireRole="seller" redirectTo="/buyer/dashboard">
-              <SellerAnalytics />
             </ProtectedRoute>
           } 
         />

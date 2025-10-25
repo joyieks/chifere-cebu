@@ -8,7 +8,6 @@ import {
   FiHome, 
   FiPackage, 
   FiShoppingCart, 
-  FiBarChart2, 
   FiMessageSquare, 
   FiSettings, 
   FiUser,
@@ -58,7 +57,6 @@ const SellerLayout = ({
     { id: 'dashboard', label: 'Dashboard', icon: FiHome, path: '/seller/dashboard' },
     { id: 'products', label: 'Products', icon: FiPackage, path: '/seller/products', badge: productCount },
     { id: 'orders', label: 'Orders', icon: FiShoppingCart, path: '/seller/orders', badge: 7 },
-    { id: 'analytics', label: 'Analytics', icon: FiBarChart2, path: '/seller/analytics' },
     { id: 'messages', label: 'Messages', icon: FiMessageSquare, path: '/seller/messages', badge: 3 },
     { id: 'profile', label: 'Profile', icon: FiUser, path: '/seller/profile' },
     { id: 'settings', label: 'Settings', icon: FiSettings, path: '/seller/settings' }
