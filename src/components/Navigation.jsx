@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FiShoppingCart, FiHeart, FiUser, FiLogOut, FiMenu, FiX, FiBell, FiPhone, FiMessageCircle, FiSettings, FiPackage, FiHome, FiBarChart2, FiAlertTriangle } from 'react-icons/fi';
+import { FiShoppingCart, FiHeart, FiUser, FiLogOut, FiMenu, FiX, FiBell, FiPhone, FiMessageCircle, FiSettings, FiPackage, FiHome, FiAlertTriangle } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { useMessages } from '../contexts/MessageContext';
@@ -219,13 +219,6 @@ const Navigation = ({ showPromotionalBar = false }) => {
                       <span className="text-sm">Orders</span>
                     </Link>
 
-                    <Link
-                      to="/seller/analytics"
-                      className="text-gray-700 hover:text-blue-600 flex items-center gap-2"
-                    >
-                      <FiBarChart2 className="w-5 h-5" />
-                      <span className="text-sm">Analytics</span>
-                    </Link>
 
                     <Link
                       to="/seller/messages"
@@ -489,27 +482,12 @@ const Navigation = ({ showPromotionalBar = false }) => {
                       Orders
                     </Link>
                     <Link
-                      to="/seller/analytics"
-                      className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      <FiBarChart2 className="inline mr-2 w-4 h-4" />
-                      Analytics
-                    </Link>
-                    <Link
                       to="/seller/messages"
                       className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <FiMessageCircle className="inline mr-2 w-4 h-4" />
                       Messages
-                    </Link>
-                    <Link
-                      to="/seller/analytics"
-                      className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Analytics
                     </Link>
                     <Link
                       to="/seller/settings"
