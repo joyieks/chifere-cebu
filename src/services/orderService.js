@@ -107,19 +107,74 @@ class OrderService {
 
       // Create order items
       if (items.length > 0) {
-        const orderItems = items.map(item => ({
-          order_id: orderResult.id,
-          product_id: item.product_id || item.id || item.itemId || this.generateUUID(), // Generate UUID if no ID
-          product_type: 'product', // Default type
-          product_name: item.name || 'Unknown Product',
-          product_image: item.image || '',
-          product_price: parseFloat(item.price) || 0,
-          quantity: parseInt(item.quantity || item.qty) || 1,
-          unit_price: parseFloat(item.price) || 0,
-          total_price: (parseFloat(item.price) || 0) * (parseInt(item.quantity || item.qty) || 1),
-          product_specs: {},
-          seller_id: item.sellerId || null, // Include seller_id from item
-          created_at: new Date().toISOString()
+        // Get seller_id for each item from all product tables
+        const orderItems = await Promise.all(items.map(async (item) => {
+          let itemSellerId = item.sellerId || item.seller_id;
+          
+          // If no seller_id, try to get it from product tables
+          if (!itemSellerId) {
+            const productId = item.product_id || item.id || item.itemId;
+            if (productId) {
+              try {
+                // Try products table first
+                let { data: product, error: productError } = await supabase
+                  .from('products')
+                  .select('seller_id')
+                  .eq('id', productId)
+                  .single();
+                
+                // If not found, try seller_add_item_preloved
+                if (productError || !product?.seller_id) {
+                  const { data: prelovedProduct, error: prelovedError } = await supabase
+                    .from('seller_add_item_preloved')
+                    .select('seller_id')
+                    .eq('id', productId)
+                    .single();
+                  
+                  if (!prelovedError && prelovedProduct?.seller_id) {
+                    product = prelovedProduct;
+                    productError = null;
+                  }
+                }
+                
+                // If still not found, try seller_add_barter_item
+                if (productError || !product?.seller_id) {
+                  const { data: barterProduct, error: barterError } = await supabase
+                    .from('seller_add_barter_item')
+                    .select('seller_id')
+                    .eq('id', productId)
+                    .single();
+                  
+                  if (!barterError && barterProduct?.seller_id) {
+                    product = barterProduct;
+                    productError = null;
+                  }
+                }
+                
+                if (!productError && product?.seller_id) {
+                  itemSellerId = product.seller_id;
+                  console.log('✅ [OrderService] Found seller_id for item:', item.name, itemSellerId);
+                }
+              } catch (error) {
+                console.warn('⚠️ [OrderService] Could not fetch seller_id for item:', item.name, error);
+              }
+            }
+          }
+          
+          return {
+            order_id: orderResult.id,
+            product_id: item.product_id || item.id || item.itemId || this.generateUUID(),
+            product_type: 'product',
+            product_name: item.name || 'Unknown Product',
+            product_image: item.image || '',
+            product_price: parseFloat(item.price) || 0,
+            quantity: parseInt(item.quantity || item.qty) || 1,
+            unit_price: parseFloat(item.price) || 0,
+            total_price: (parseFloat(item.price) || 0) * (parseInt(item.quantity || item.qty) || 1),
+            product_specs: {},
+            seller_id: itemSellerId,
+            created_at: new Date().toISOString()
+          };
         }));
 
         console.log('📦 [OrderService] Order items to insert:', orderItems);
@@ -148,15 +203,46 @@ class OrderService {
           console.log('⚠️ [OrderService] No seller ID provided in order data or items');
           console.log('🔍 [OrderService] Items data:', items);
           
-          // Try to get seller ID from the first product
+          // Try to get seller ID from the first product - check ALL product tables
           const productId = items[0]?.product_id || items[0]?.id || items[0]?.itemId;
           if (productId) {
             try {
-              const { data: product, error: productError } = await supabase
+              // Try products table first
+              let { data: product, error: productError } = await supabase
                 .from('products')
                 .select('seller_id')
                 .eq('id', productId)
                 .single();
+              
+              // If not found in products, try seller_add_item_preloved
+              if (productError || !product?.seller_id) {
+                console.log('🔍 [OrderService] Product not found in products table, trying seller_add_item_preloved');
+                const { data: prelovedProduct, error: prelovedError } = await supabase
+                  .from('seller_add_item_preloved')
+                  .select('seller_id')
+                  .eq('id', productId)
+                  .single();
+                
+                if (!prelovedError && prelovedProduct?.seller_id) {
+                  product = prelovedProduct;
+                  productError = null;
+                }
+              }
+              
+              // If still not found, try seller_add_barter_item
+              if (productError || !product?.seller_id) {
+                console.log('🔍 [OrderService] Product not found in preloved table, trying seller_add_barter_item');
+                const { data: barterProduct, error: barterError } = await supabase
+                  .from('seller_add_barter_item')
+                  .select('seller_id')
+                  .eq('id', productId)
+                  .single();
+                
+                if (!barterError && barterProduct?.seller_id) {
+                  product = barterProduct;
+                  productError = null;
+                }
+              }
               
               if (!productError && product?.seller_id) {
                 console.log('✅ [OrderService] Found seller_id from product:', product.seller_id);

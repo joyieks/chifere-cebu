@@ -199,21 +199,54 @@ const CheckoutForm = () => {
         orderData.items.map(async (item) => {
           let sellerId = item.sellerId || item.seller_id;
           
-          // If no sellerId, fetch from products table
+          // If no sellerId, fetch from ALL product tables
           if (!sellerId) {
             try {
-              const { data: product, error } = await supabase
+              // Try products table first
+              let { data: product, error } = await supabase
                 .from('products')
                 .select('seller_id')
                 .eq('id', item.id || item.itemId)
                 .single();
               
+              // If not found, try seller_add_item_preloved
+              if (error || !product?.seller_id) {
+                console.log('🔍 [Checkout] Product not found in products table, trying seller_add_item_preloved');
+                const { data: prelovedProduct, error: prelovedError } = await supabase
+                  .from('seller_add_item_preloved')
+                  .select('seller_id')
+                  .eq('id', item.id || item.itemId)
+                  .single();
+                
+                if (!prelovedError && prelovedProduct?.seller_id) {
+                  product = prelovedProduct;
+                  error = null;
+                }
+              }
+              
+              // If still not found, try seller_add_barter_item
+              if (error || !product?.seller_id) {
+                console.log('🔍 [Checkout] Product not found in preloved table, trying seller_add_barter_item');
+                const { data: barterProduct, error: barterError } = await supabase
+                  .from('seller_add_barter_item')
+                  .select('seller_id')
+                  .eq('id', item.id || item.itemId)
+                  .single();
+                
+                if (!barterError && barterProduct?.seller_id) {
+                  product = barterProduct;
+                  error = null;
+                }
+              }
+              
               if (!error && product?.seller_id) {
                 sellerId = product.seller_id;
                 console.log('🔍 [Checkout] Got seller_id from product:', sellerId);
+              } else {
+                console.warn('⚠️ [Checkout] Could not find seller_id for product:', item.id, 'in any table');
               }
             } catch (error) {
-              console.warn('⚠️ [Checkout] Could not fetch seller_id for product:', item.id);
+              console.warn('⚠️ [Checkout] Could not fetch seller_id for product:', item.id, error);
             }
           }
           
