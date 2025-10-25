@@ -240,7 +240,7 @@ function AppRoutes() {
         <Route 
           path="/seller/pending" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireRole="seller" redirectTo="/buyer/dashboard">
               <PendingApproval />
             </ProtectedRoute>
           } 

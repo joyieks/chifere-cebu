@@ -169,30 +169,71 @@ export const AuthProvider = ({ children }) => {
   const loadUserProfile = async (authUser) => {
     console.log('👤 [AuthContext] Loading user profile for:', authUser.email);
     try {
-      const userType = authUser.user_metadata?.user_type || 'buyer';
-      console.log('📊 [AuthContext] User type:', userType);
-      
-      // Determine which table to query based on user type
-      const tableName = userType === 'buyer' ? 'buyer_users' : 'user_profiles';
-      
-      console.log(`🔍 [AuthContext] Querying table: ${tableName} for email: ${authUser.email}`);
-      
-      // Get user profile from correct table BY EMAIL (not by auth.id!)
+      // First, check if user exists in buyer_users table
+      console.log(`🔍 [AuthContext] Checking buyer_users table for email: ${authUser.email}`);
+      const { data: buyerProfile, error: buyerError } = await supabase
+        .from('buyer_users')
+        .select('*')
+        .eq('email', authUser.email)
+        .single();
+
+      if (!buyerError && buyerProfile) {
+        console.log('✅ [AuthContext] Found user in buyer_users table:', buyerProfile.email);
+        const userType = 'buyer';
+        
+        // Check if user account is disabled
+        if (buyerProfile.is_active === false || buyerProfile.is_active === null) {
+          console.log('❌ [AuthContext] Buyer account is disabled, logging out');
+          await supabase.auth.signOut();
+          setUser(null);
+          return;
+        }
+        
+        // Set user as buyer
+        setUser(prevUser => ({
+          ...prevUser,
+          id: buyerProfile.id,
+          email: buyerProfile.email,
+          user_type: userType,
+          role: userType,
+          seller_status: null, // Buyers don't have seller_status
+          display_name: buyerProfile.display_name,
+          first_name: buyerProfile.first_name,
+          last_name: buyerProfile.last_name,
+          middle_name: buyerProfile.middle_name,
+          phone: buyerProfile.phone,
+          address: buyerProfile.address,
+          profile_image: buyerProfile.profile_image,
+          is_verified: buyerProfile.is_verified,
+          is_active: buyerProfile.is_active,
+          created_at: buyerProfile.created_at,
+          updated_at: buyerProfile.updated_at,
+          avatar: buyerProfile.profile_image || '/default-avatar.png',
+          name: buyerProfile.first_name || buyerProfile.display_name || 'User'
+        }));
+        
+        console.log('✅ [AuthContext] User set as buyer:', buyerProfile.email);
+        return;
+      }
+
+      // If not found in buyer_users, check user_profiles table (for sellers)
+      console.log(`🔍 [AuthContext] User not in buyer_users, checking user_profiles table for email: ${authUser.email}`);
       const { data: profile, error } = await supabase
-        .from(tableName)
+        .from('user_profiles')
         .select('*')
         .eq('email', authUser.email)
         .single();
 
       if (error || !profile) {
-        console.warn('⚠️ [AuthContext] Error loading profile from DB:', error?.message || 'No profile found');
-        console.log('📋 [AuthContext] Attempted table:', tableName);
-        // If no profile found, create a basic one
+        console.warn('⚠️ [AuthContext] Error loading profile from user_profiles table:', error?.message || 'No profile found');
+        console.log('📋 [AuthContext] User not found in either buyer_users or user_profiles tables');
+        // If no profile found in either table, create a basic buyer profile
         const basicProfile = {
           id: authUser.id,
           email: authUser.email,
-          user_type: userType,
-          role: userType, // Add role property for compatibility
+          user_type: 'buyer',
+          role: 'buyer',
+          seller_status: null, // Buyers don't have seller_status
           display_name: authUser.user_metadata?.display_name || authUser.email.split('@')[0],
           first_name: authUser.user_metadata?.first_name || '',
           last_name: authUser.user_metadata?.last_name || '',
@@ -200,12 +241,12 @@ export const AuthProvider = ({ children }) => {
           avatar: '/default-avatar.png',
           name: authUser.user_metadata?.first_name || authUser.user_metadata?.display_name || 'User'
         };
-        console.log('✅ [AuthContext] Using basic profile:', basicProfile);
+        console.log('✅ [AuthContext] Using basic buyer profile:', basicProfile);
         setUser(basicProfile);
         return;
       }
 
-      console.log('✅ [AuthContext] Profile loaded from DB:', profile.email, profile.user_type || userType);
+      console.log('✅ [AuthContext] Profile loaded from user_profiles table:', profile.email, profile.user_type);
       console.log('👤 [AuthContext] First name from DB:', profile.first_name);
       console.log('👤 [AuthContext] Display name from DB:', profile.display_name);
       console.log('👤 [AuthContext] Seller status from DB:', profile.seller_status);
@@ -219,13 +260,14 @@ export const AuthProvider = ({ children }) => {
         return;
       }
       
-      // Merge profile data with existing user (don't replace, update!)
+      // Set user as seller (since they're in user_profiles table)
+      const userType = profile.user_type || 'seller';
       setUser(prevUser => ({
         ...prevUser, // Keep existing data
         id: profile.id,
         email: profile.email,
-        user_type: profile.user_type || userType,
-        role: profile.user_type || userType, // Add role property for compatibility
+        user_type: userType,
+        role: userType,
         seller_status: profile.seller_status, // Include seller_status for seller verification
         display_name: profile.display_name,
         first_name: profile.first_name,
@@ -242,7 +284,7 @@ export const AuthProvider = ({ children }) => {
         name: profile.first_name || profile.display_name || 'User'
       }));
       
-      console.log('✅ [AuthContext] User updated with first_name:', profile.first_name);
+      console.log('✅ [AuthContext] User set as seller:', profile.email, 'seller_status:', profile.seller_status);
     } catch (error) {
       console.error('❌ [AuthContext] Exception in loadUserProfile:', error);
       // Don't override user on error, just log it

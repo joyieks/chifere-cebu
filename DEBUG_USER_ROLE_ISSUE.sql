@@ -31,15 +31,6 @@ SELECT
     seller_status,
     'Has seller_status but is buyer' as problem
 FROM public.user_profiles
-WHERE user_type = 'buyer' AND seller_status IS NOT NULL
-UNION ALL
-SELECT 
-    'Conflicting Users' as issue,
-    email,
-    user_type,
-    seller_status,
-    'Has seller_status but is buyer' as problem
-FROM public.buyer_users
 WHERE user_type = 'buyer' AND seller_status IS NOT NULL;
 
 -- Step 3: Check specific user by email (replace with actual email)

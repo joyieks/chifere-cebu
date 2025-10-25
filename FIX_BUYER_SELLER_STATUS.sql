@@ -10,16 +10,6 @@ SELECT
     seller_status,
     'Should be NULL for buyers' as fix_needed
 FROM public.user_profiles
-WHERE user_type = 'buyer' AND seller_status IS NOT NULL
-UNION ALL
-SELECT 
-    'Buyer accounts with seller_status' as issue,
-    id,
-    email,
-    user_type,
-    seller_status,
-    'Should be NULL for buyers' as fix_needed
-FROM public.buyer_users
 WHERE user_type = 'buyer' AND seller_status IS NOT NULL;
 
 -- Step 2: Fix buyer accounts in user_profiles table
@@ -27,10 +17,7 @@ UPDATE public.user_profiles
 SET seller_status = NULL 
 WHERE user_type = 'buyer' AND seller_status IS NOT NULL;
 
--- Step 3: Fix buyer accounts in buyer_users table
-UPDATE public.buyer_users 
-SET seller_status = NULL 
-WHERE user_type = 'buyer' AND seller_status IS NOT NULL;
+-- Step 3: Note - buyer_users table doesn't have seller_status column, so no update needed
 
 -- Step 4: Verify the fix
 SELECT 
@@ -43,7 +30,7 @@ UNION ALL
 SELECT 
     'After fix - buyer_users' as table_name,
     COUNT(*) as total_buyers,
-    COUNT(seller_status) as buyers_with_seller_status
+    0 as buyers_with_seller_status
 FROM public.buyer_users
 WHERE user_type = 'buyer';
 
