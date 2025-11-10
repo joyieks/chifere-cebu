@@ -68,29 +68,112 @@ class StoreService {
     try {
       console.log('📦 [StoreService] Fetching products for store:', storeId);
       
-      const { data: products, error } = await supabase
+      // Fetch from old products table
+      const { data: oldProducts, error: oldError } = await supabase
         .from('products')
-        .select('*')
+        .select(`
+          *,
+          user_profiles!products_seller_id_fkey (
+            id,
+            display_name,
+            business_name,
+            profile_image
+          )
+        `)
         .eq('seller_id', storeId)
         .eq('status', 'active')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('❌ [StoreService] Get store products error:', error);
-        return { success: false, error: 'Failed to fetch store products' };
+      if (oldError) {
+        console.warn('⚠️ [StoreService] Error fetching from old products table:', oldError);
       }
 
-      console.log(`✅ [StoreService] Found ${products?.length || 0} products for store`);
-      if (products && products.length > 0) {
+      // Fetch from new seller preloved items table
+      const { data: prelovedItems, error: prelovedError } = await supabase
+        .from('seller_add_item_preloved')
+        .select(`
+          *,
+          user_profiles!seller_add_item_preloved_seller_id_fkey (
+            id,
+            display_name,
+            business_name,
+            profile_image
+          )
+        `)
+        .eq('seller_id', storeId)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+
+      if (prelovedError) {
+        console.warn('⚠️ [StoreService] Error fetching from preloved items table:', prelovedError);
+      }
+
+      // Fetch from new seller barter items table
+      const { data: barterItems, error: barterError } = await supabase
+        .from('seller_add_barter_item')
+        .select(`
+          *,
+          user_profiles!seller_add_barter_item_seller_id_fkey (
+            id,
+            display_name,
+            business_name,
+            profile_image
+          )
+        `)
+        .eq('seller_id', storeId)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+
+      if (barterError) {
+        console.warn('⚠️ [StoreService] Error fetching from barter items table:', barterError);
+      }
+
+      // Add metadata to products to indicate their source table
+      const oldProductsWithMeta = (oldProducts || []).map(p => ({ ...p, collection: 'products' }));
+      const prelovedItemsWithMeta = (prelovedItems || []).map(p => ({ ...p, collection: 'seller_add_item_preloved' }));
+      const barterItemsWithMeta = (barterItems || []).map(p => ({ ...p, collection: 'seller_addBarterItem' }));
+
+      // Combine all products
+      const allProducts = [
+        ...oldProductsWithMeta,
+        ...prelovedItemsWithMeta,
+        ...barterItemsWithMeta
+      ];
+
+      // Remove duplicates based on ID (keep the newest version)
+      const uniqueProducts = [];
+      const seenIds = new Set();
+      
+      for (const product of allProducts) {
+        if (!seenIds.has(product.id)) {
+          seenIds.add(product.id);
+          uniqueProducts.push(product);
+        } else {
+          console.log(`🔄 [StoreService] Removing duplicate product: ${product.name} (ID: ${product.id})`);
+        }
+      }
+
+      // Sort by creation date (newest first)
+      uniqueProducts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+      console.log(`✅ [StoreService] Found ${allProducts.length} total products (${uniqueProducts.length} unique) for store:`);
+      console.log(`   - Old products: ${oldProducts?.length || 0}`);
+      console.log(`   - Preloved items: ${prelovedItems?.length || 0}`);
+      console.log(`   - Barter items: ${barterItems?.length || 0}`);
+      console.log(`   - Duplicates removed: ${allProducts.length - uniqueProducts.length}`);
+
+      if (uniqueProducts.length > 0) {
         console.log('First product sample:', {
-          id: products[0].id,
-          name: products[0].name,
-          price: products[0].price,
-          quantity: products[0].quantity,
-          category: products[0].category
+          id: uniqueProducts[0].id,
+          name: uniqueProducts[0].name,
+          price: uniqueProducts[0].price,
+          quantity: uniqueProducts[0].quantity,
+          category: uniqueProducts[0].category,
+          collection: uniqueProducts[0].collection || uniqueProducts[0].table_name || 'products'
         });
       }
-      return { success: true, data: products || [] };
+
+      return { success: true, data: uniqueProducts };
     } catch (error) {
       console.error('❌ [StoreService] Get store products error:', error);
       return { success: false, error: error.message };
@@ -106,15 +189,37 @@ class StoreService {
     try {
       console.log('📊 [StoreService] Fetching stats for store:', storeId);
       
-      // Get product count
-      const { count: productCount, error: productError } = await supabase
-        .from('products')
-        .select('*', { count: 'exact', head: true })
-        .eq('seller_id', storeId)
-        .eq('status', 'active');
+      // Get product count from all tables
+      const [oldProductsCount, prelovedCount, barterCount] = await Promise.all([
+        supabase
+          .from('products')
+          .select('*', { count: 'exact', head: true })
+          .eq('seller_id', storeId)
+          .eq('status', 'active'),
+        supabase
+          .from('seller_add_item_preloved')
+          .select('*', { count: 'exact', head: true })
+          .eq('seller_id', storeId)
+          .eq('status', 'active'),
+        supabase
+          .from('seller_add_barter_item')
+          .select('*', { count: 'exact', head: true })
+          .eq('seller_id', storeId)
+          .eq('status', 'active')
+      ]);
 
-      if (productError) {
-        console.error('❌ [StoreService] Get product count error:', productError);
+      const productCount = (oldProductsCount.count || 0) + 
+                          (prelovedCount.count || 0) + 
+                          (barterCount.count || 0);
+
+      if (oldProductsCount.error) {
+        console.warn('⚠️ [StoreService] Get old products count error:', oldProductsCount.error);
+      }
+      if (prelovedCount.error) {
+        console.warn('⚠️ [StoreService] Get preloved count error:', prelovedCount.error);
+      }
+      if (barterCount.error) {
+        console.warn('⚠️ [StoreService] Get barter count error:', barterCount.error);
       }
 
       // Get seller stats (followers, reviews, ratings)

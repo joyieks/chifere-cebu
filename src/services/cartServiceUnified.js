@@ -106,12 +106,22 @@ class CartServiceUnified {
   async buildCartItemFromRow(row, columnSupport) {
     const context = await this.resolveCartRowContext(row, columnSupport);
 
+    // Fetch current product to get available stock
+    let availableQuantity = row.available_quantity || row.availableQuantity;
+    if (!availableQuantity) {
+      const productResult = await productService.getProductById(row.product_id);
+      if (productResult.success && productResult.data) {
+        availableQuantity = productResult.data.quantity || 0;
+      }
+    }
+
     return {
       id: row.product_id,
       itemId: row.product_id,
       name: row.product_name,
       price: parseFloat(row.product_price || row.price || 0),
       quantity: parseInt(row.quantity || 1),
+      availableQuantity: availableQuantity || parseInt(row.quantity || 1),
       image: row.product_image || row.image || '',
       sellerId: row.seller_id,
       sellerName: context.sellerName,
@@ -311,15 +321,33 @@ class CartServiceUnified {
 
       const currentItems = cartResult.data.items || [];
 
+      // Fetch current product to check available stock
+      const productResult = await productService.getProductById(item.id);
+      let availableStock = item.availableQuantity || item.quantity || 0;
+      
+      if (productResult.success && productResult.data) {
+        availableStock = productResult.data.quantity || 0;
+      }
+
       // Check if item already exists
       const existingItemIndex = currentItems.findIndex(cartItem => cartItem.id === item.id);
       
       if (existingItemIndex >= 0) {
         const existingItem = currentItems[existingItemIndex];
         const updatedQuantity = existingItem.quantity + quantity;
+        
+        // Validate against available stock
+        if (updatedQuantity > availableStock) {
+          return {
+            success: false,
+            error: `Only ${availableStock} item${availableStock !== 1 ? 's' : ''} available in stock. You already have ${existingItem.quantity} in your cart.`
+          };
+        }
+        
         currentItems[existingItemIndex] = {
           ...existingItem,
           quantity: updatedQuantity,
+          availableQuantity: availableStock,
           orderType: existingItem.orderType || item.orderType || (item.isBarter ? 'barter' : existingItem.orderType),
           isBarter: typeof existingItem.isBarter === 'boolean' ? existingItem.isBarter : item.isBarter,
           sellingMode: existingItem.sellingMode || item.sellingMode,
@@ -329,10 +357,19 @@ class CartServiceUnified {
           addedAt: existingItem.addedAt || new Date().toISOString()
         };
       } else {
+        // Validate against available stock for new item
+        if (quantity > availableStock) {
+          return {
+            success: false,
+            error: `Only ${availableStock} item${availableStock !== 1 ? 's' : ''} available in stock. Cannot add more than available quantity.`
+          };
+        }
+        
         // Add new item
         currentItems.push({
           ...item,
           quantity,
+          availableQuantity: availableStock,
           addedAt: new Date().toISOString()
         });
       }
@@ -425,6 +462,22 @@ class CartServiceUnified {
       if (quantity <= 0) {
         // Remove item if quantity is 0 or negative
         return await this.removeFromCart(userId, itemId);
+      }
+
+      // Fetch current product to check available stock
+      const productResult = await productService.getProductById(itemId);
+      if (productResult.success && productResult.data) {
+        const availableStock = productResult.data.quantity || 0;
+        
+        if (quantity > availableStock) {
+          return {
+            success: false,
+            error: `Only ${availableStock} item${availableStock !== 1 ? 's' : ''} available in stock. Cannot add more than available quantity.`
+          };
+        }
+        
+        // Update availableQuantity in cart item
+        currentItems[itemIndex].availableQuantity = availableStock;
       }
 
       // Update quantity

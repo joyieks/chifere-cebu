@@ -186,14 +186,14 @@ export const CartProvider = ({ children }) => {
       // Authenticated user: DATABASE ONLY
       setLoading(true);
       try {
-        const result = await cartService.updateCartItemQuantity(user.id, itemId, quantity);
+        const result = await cartService.updateQuantity(user.id, itemId, quantity);
         if (result.success) {
           setCart(result.data.items);
         } else {
           console.error('Failed to update quantity in database:', result.error);
-          // Check if it's a cart limit error
-          if (result.error && result.error.includes('Maximum') && result.error.includes('items allowed')) {
-            alert(result.error); // Show the specific limit error message
+          // Show the specific error message (could be stock limit, cart limit, etc.)
+          if (result.error) {
+            alert(result.error);
           } else {
             alert('Failed to update quantity. Please try again.');
           }

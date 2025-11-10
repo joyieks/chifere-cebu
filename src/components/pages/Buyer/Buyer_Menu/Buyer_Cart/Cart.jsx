@@ -173,44 +173,62 @@ const CartSection = ({
                     </div>
 
                     {/* Quantity Controls */}
-                    <div className="flex items-center space-x-3 mb-4">
-                      <span 
-                        className="text-sm font-medium"
-                        style={{ color: theme.colors.gray[600] }}
-                      >
-                        Quantity:
-                      </span>
-                      <div 
-                        className="flex items-center border rounded-lg"
-                        style={{ borderColor: theme.colors.gray[300] }}
-                      >
-                        <button 
-                          className="p-2 transition-colors duration-200 hover:bg-gray-100"
-                          style={{ color: theme.colors.gray[600] }}
-                          onClick={() => {
-                            if (item.quantity > 1) {
-                              updateQuantity(item.id, item.quantity - 1);
-                            }
-                          }}
-                        >
-                          −
-                        </button>
+                    <div className="flex flex-col space-y-2 mb-4">
+                      <div className="flex items-center space-x-3">
                         <span 
-                          className="px-4 py-2 min-w-[3rem] text-center"
-                          style={{ color: theme.colors.gray[800] }}
-                        >
-                          {item.quantity}
-                        </span>
-                        <button 
-                          className="p-2 transition-colors duration-200 hover:bg-gray-100"
+                          className="text-sm font-medium"
                           style={{ color: theme.colors.gray[600] }}
-                          onClick={() => {
-                            updateQuantity(item.id, item.quantity + 1);
-                          }}
                         >
-                          +
-                        </button>
+                          Quantity:
+                        </span>
+                        <div 
+                          className="flex items-center border rounded-lg"
+                          style={{ borderColor: theme.colors.gray[300] }}
+                        >
+                          <button 
+                            className="p-2 transition-colors duration-200 hover:bg-gray-100"
+                            style={{ color: theme.colors.gray[600] }}
+                            onClick={() => {
+                              if (item.quantity > 1) {
+                                updateQuantity(item.id, item.quantity - 1);
+                              }
+                            }}
+                          >
+                            −
+                          </button>
+                          <span 
+                            className="px-4 py-2 min-w-[3rem] text-center"
+                            style={{ color: theme.colors.gray[800] }}
+                          >
+                            {item.quantity}
+                          </span>
+                          <button 
+                            className="p-2 transition-colors duration-200 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                            style={{ 
+                              color: theme.colors.gray[600],
+                              cursor: (item.availableQuantity && item.quantity >= item.availableQuantity) ? 'not-allowed' : 'pointer'
+                            }}
+                            disabled={item.availableQuantity && item.quantity >= item.availableQuantity}
+                            onClick={() => {
+                              if (!item.availableQuantity || item.quantity < item.availableQuantity) {
+                                updateQuantity(item.id, item.quantity + 1);
+                              }
+                            }}
+                          >
+                            +
+                          </button>
+                        </div>
                       </div>
+                      {item.availableQuantity && (
+                        <span 
+                          className="text-xs"
+                          style={{ color: theme.colors.gray[500] }}
+                        >
+                          {item.availableQuantity - item.quantity > 0 
+                            ? `${item.availableQuantity - item.quantity} available` 
+                            : 'Out of stock'}
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -419,6 +437,7 @@ const Cart = () => {
           name: item.name || item.itemName || 'Product',
           price: item.price || 0,
           quantity: item.quantity || 1,
+          availableQuantity: item.availableQuantity || item.quantity || 999,
           image: item.image || item.imageUrl || '/placeholder.png',
           barter: item.isBarter || item.orderType === 'barter' || false
         });
