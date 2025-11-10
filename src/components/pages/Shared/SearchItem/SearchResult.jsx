@@ -17,6 +17,7 @@ const SearchResult = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('all');
+  const [addingProductId, setAddingProductId] = useState(null);
 
   // Load search results
   useEffect(() => {
@@ -61,7 +62,19 @@ const SearchResult = () => {
   };
 
   const handleAddToCart = async (product) => {
+    if (cartLoading) {
+      return;
+    }
+
+    setAddingProductId(product.id);
+
     try {
+      const isBarter = product.selling_mode === 'barter' ||
+        product.product_type === 'barter' ||
+        product.is_barter_only === true ||
+        product.collection === 'seller_addBarterItem';
+      const orderType = isBarter ? 'barter' : 'purchase';
+
       const cartItem = {
         id: product.id,
         name: product.name,
@@ -70,13 +83,20 @@ const SearchResult = () => {
         sellerId: product.seller_id || '',
         sellerName: product.user_profiles?.business_name || product.user_profiles?.display_name || 'Store',
         category: product.category,
-        quantity: 1
+        quantity: 1,
+        isBarter,
+        orderType,
+        sellingMode: product.selling_mode,
+        productType: product.product_type,
+        collection: product.collection
       };
       
       await addToCart(cartItem, 1);
       console.log('✅ Item added to cart:', product.name);
     } catch (error) {
       console.error('❌ Error adding to cart:', error);
+    } finally {
+      setAddingProductId(null);
     }
   };
 
@@ -282,7 +302,7 @@ const SearchResult = () => {
                                 ? theme.colors.primary[500] 
                                 : theme.colors.gray[300],
                               color: theme.colors.white,
-                              cursor: product.quantity > 0 ? 'pointer' : 'not-allowed'
+                              cursor: product.quantity > 0 && !cartLoading ? 'pointer' : 'not-allowed'
                             }}
                             onMouseEnter={(e) => {
                               if (product.quantity > 0) {
@@ -299,7 +319,7 @@ const SearchResult = () => {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v4a2 2 0 01-2 2H9a2 2 0 01-2-2v-4m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
                             </svg>
                             <span>
-                              {cartLoading ? 'Adding...' : (product.quantity > 0 ? 'Add to Cart' : 'Out of Stock')}
+                              {cartLoading && addingProductId === product.id ? 'Adding...' : (product.quantity > 0 ? 'Add to Cart' : 'Out of Stock')}
                             </span>
                           </button>
                         </div>

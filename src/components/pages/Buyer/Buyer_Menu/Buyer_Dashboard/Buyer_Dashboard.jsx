@@ -20,6 +20,7 @@ const Buyer_Dashboard = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedStore, setSelectedStore] = useState(null);
   const [error, setError] = useState(null);
+  const [addingProductId, setAddingProductId] = useState(null);
 
   // Load products from database
   useEffect(() => {
@@ -69,7 +70,19 @@ const Buyer_Dashboard = () => {
       return;
     }
 
+    if (cartLoading) {
+      return;
+    }
+
+    setAddingProductId(product.id);
+
     try {
+      const isBarter = product.selling_mode === 'barter' ||
+        product.product_type === 'barter' ||
+        product.is_barter_only === true ||
+        product.collection === 'seller_addBarterItem';
+      const orderType = isBarter ? 'barter' : 'purchase';
+
       const cartItem = {
         id: product.id,
         name: product.name,
@@ -78,7 +91,12 @@ const Buyer_Dashboard = () => {
         sellerId: product.seller_id || '',
         sellerName: product.user_profiles?.business_name || product.user_profiles?.display_name || 'Store',
         category: product.category,
-        quantity: 1
+        quantity: 1,
+        isBarter,
+        orderType,
+        sellingMode: product.selling_mode,
+        productType: product.product_type,
+        collection: product.collection
       };
       
       await addToCart(cartItem, 1);
@@ -87,6 +105,8 @@ const Buyer_Dashboard = () => {
     } catch (error) {
       console.error('❌ Error adding to cart:', error);
       showToast('Failed to add item to cart', 'error');
+    } finally {
+      setAddingProductId(null);
     }
   };
 
@@ -326,7 +346,7 @@ const Buyer_Dashboard = () => {
                       }}
                       style={{
                         cursor: 'pointer',
-                        pointerEvents: 'auto',
+                        pointerEvents: cartLoading ? 'none' : 'auto',
                         zIndex: 999,
                         position: 'relative',
                         userSelect: 'none',
@@ -363,7 +383,7 @@ const Buyer_Dashboard = () => {
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v4a2 2 0 01-2 2H9a2 2 0 01-2-2v-4m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
                           </svg>
-                          <span>{cartLoading ? 'Adding...' : 'Add to Cart'}</span>
+                          <span>{cartLoading && addingProductId === product.id ? 'Adding...' : 'Add to Cart'}</span>
                         </>
                       )}
                     </div>

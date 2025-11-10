@@ -36,7 +36,24 @@ import { useToast } from '../../../../../components/Toast';
 import BuyerLayout from '../Buyer_Layout/Buyer_layout';
 import theme from '../../../../../styles/designSystem';
 
-const CartSection = ({ title, cart, selected, setSelected, handleRemove, handleSelectAll, handleSelect, allSelected, total, isBarter, navigate, updateQuantity }) => (
+const CartSection = ({
+  title,
+  cart,
+  selected,
+  setSelected,
+  handleRemove,
+  handleSelectAll,
+  handleSelect,
+  handleDeleteSelected,
+  allSelected,
+  total,
+  isBarter,
+  navigate,
+  updateQuantity
+}) => {
+  const hasSelection = Object.values(selected || {}).some(Boolean);
+
+  return (
   <div className="mb-8">
     {/* Section Header */}
     <h3 
@@ -278,18 +295,20 @@ const CartSection = ({ title, cart, selected, setSelected, handleRemove, handleS
           </span>
         </label>
         <button 
-          className="px-4 py-2 rounded-lg font-medium transition-all duration-200"
+          className="px-4 py-2 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
             color: theme.colors.error[600],
             backgroundColor: 'transparent'
           }}
           onMouseEnter={(e) => {
+            if (!hasSelection) return;
             e.target.style.backgroundColor = theme.colors.error[50];
           }}
           onMouseLeave={(e) => {
             e.target.style.backgroundColor = 'transparent';
           }}
-          onClick={() => setSelected({})}
+          onClick={handleDeleteSelected}
+          disabled={!hasSelection}
         >
           🗑️ Delete Selected
         </button>
@@ -356,6 +375,7 @@ const CartSection = ({ title, cart, selected, setSelected, handleRemove, handleS
     </div>
   </div>
 );
+};
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -439,6 +459,33 @@ const Cart = () => {
     });
   };
 
+  const handlePrelovedDeleteSelected = async () => {
+    const selectedIds = Object.entries(prelovedSelected)
+      .filter(([, isChecked]) => isChecked)
+      .map(([itemId]) => itemId);
+
+    if (selectedIds.length === 0) {
+      return;
+    }
+
+    try {
+      for (const itemId of selectedIds) {
+        await removeFromCart(itemId);
+      }
+      setPrelovedSelected(prev => {
+        const newSel = { ...prev };
+        selectedIds.forEach(id => {
+          delete newSel[id];
+        });
+        return newSel;
+      });
+      showToast('Selected preloved items removed from cart.', 'success');
+    } catch (error) {
+      console.error('Failed to remove selected preloved items:', error);
+      showToast('Failed to delete selected items. Please try again.', 'error');
+    }
+  };
+
   const prelovedTotal = prelovedCart.reduce((sum, store) =>
     sum + store.items.reduce((s, item) => s + (prelovedSelected[item.id] ? item.price * item.quantity : 0), 0)
   , 0);
@@ -464,6 +511,33 @@ const Cart = () => {
       delete newSel[itemId];
       return newSel;
     });
+  };
+
+  const handleBarterDeleteSelected = async () => {
+    const selectedIds = Object.entries(barterSelected)
+      .filter(([, isChecked]) => isChecked)
+      .map(([itemId]) => itemId);
+
+    if (selectedIds.length === 0) {
+      return;
+    }
+
+    try {
+      for (const itemId of selectedIds) {
+        await removeFromCart(itemId);
+      }
+      setBarterSelected(prev => {
+        const newSel = { ...prev };
+        selectedIds.forEach(id => {
+          delete newSel[id];
+        });
+        return newSel;
+      });
+      showToast('Selected barter items removed from cart.', 'success');
+    } catch (error) {
+      console.error('Failed to remove selected barter items:', error);
+      showToast('Failed to delete selected items. Please try again.', 'error');
+    }
   };
 
   const barterTotal = barterCart.reduce((sum, store) =>
@@ -607,6 +681,7 @@ const Cart = () => {
             handleRemove={handlePrelovedRemove}
             handleSelectAll={handlePrelovedSelectAll}
             handleSelect={handlePrelovedSelect}
+            handleDeleteSelected={handlePrelovedDeleteSelected}
             allSelected={prelovedAllSelected}
             total={prelovedTotal}
             isBarter={false}
@@ -623,6 +698,7 @@ const Cart = () => {
             handleRemove={handleBarterRemove}
             handleSelectAll={handleBarterSelectAll}
             handleSelect={handleBarterSelect}
+            handleDeleteSelected={handleBarterDeleteSelected}
             allSelected={barterAllSelected}
             total={barterTotal}
             isBarter={true}

@@ -213,6 +213,12 @@ const Item = () => {
     if (!product) return;
     
     try {
+      const isBarter = product.selling_mode === 'barter' ||
+        product.product_type === 'barter' ||
+        product.is_barter_only === true ||
+        product.collection === 'seller_addBarterItem';
+      const orderType = isBarter ? 'barter' : 'purchase';
+
       const cartItem = {
         id: product.id,
         name: product.name,
@@ -221,7 +227,12 @@ const Item = () => {
         sellerId: product.seller_id || '',
         sellerName: product.user_profiles?.business_name || product.user_profiles?.display_name || 'Store',
         category: product.category,
-        quantity: quantity
+        quantity: quantity,
+        isBarter,
+        orderType,
+        sellingMode: product.selling_mode,
+        productType: product.product_type,
+        collection: product.collection
       };
       
       await addToCart(cartItem, quantity);
