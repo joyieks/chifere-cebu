@@ -56,7 +56,7 @@ const CheckoutModal = ({ isOpen, onClose, cartItems, onOrderSuccess }) => {
     paymentMethod: 'cash_on_delivery',
     
     // Order details
-    shippingFee: 0,
+    shippingFee: 50,
     notes: ''
   });
   
@@ -95,7 +95,7 @@ const CheckoutModal = ({ isOpen, onClose, cartItems, onOrderSuccess }) => {
         province: '',
         postalCode: '',
         paymentMethod: 'cash_on_delivery',
-        shippingFee: 0,
+        shippingFee: 50,
         notes: ''
       });
       setCurrentStep(1);
@@ -434,11 +434,11 @@ const CheckoutModal = ({ isOpen, onClose, cartItems, onOrderSuccess }) => {
                       {errors.postalCode && <p className="text-red-500 text-sm mt-1">{errors.postalCode}</p>}
                     </div>
 
-                    {/* Shipping Fee */}
+                    {/* Transaction Fee */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         <span className="inline mr-1 font-semibold">₱</span>
-                        Shipping Fee (₱)
+                        Transaction Fee (₱)
                       </label>
                       <input
                         type="number"
@@ -448,7 +448,7 @@ const CheckoutModal = ({ isOpen, onClose, cartItems, onOrderSuccess }) => {
                         min="0"
                         step="0.01"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="0.00"
+                        placeholder="50.00"
                       />
                     </div>
                   </div>
@@ -572,7 +572,7 @@ const CheckoutModal = ({ isOpen, onClose, cartItems, onOrderSuccess }) => {
                       </div>
                       {shippingFee > 0 && (
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Shipping:</span>
+                          <span className="text-gray-600">Transaction Fee:</span>
                           <span className="text-gray-900">₱{shippingFee.toLocaleString()}</span>
                         </div>
                       )}

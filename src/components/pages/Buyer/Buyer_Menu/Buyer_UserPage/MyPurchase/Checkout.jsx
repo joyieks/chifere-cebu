@@ -63,7 +63,7 @@ const demoOrder = {
     },
   ],
   voucher: 0,
-  deliveryFee: 150,
+  deliveryFee: 50,
 };
 
 // Get available payment methods from service
@@ -131,7 +131,7 @@ const CheckoutForm = () => {
     items: cartData.selectedItems,
     isBarter: cartData.isBarter,
     total: cartData.total,
-    deliveryFee: cartData.isBarter ? 0 : 150
+    deliveryFee: cartData.isBarter ? 0 : 50
   } : {
     // Use real cart data if available, otherwise use demo data
     items: cart && cart.length > 0 ? cart.map(item => {
@@ -150,7 +150,7 @@ const CheckoutForm = () => {
       const quantity = parseInt(item.quantity) || 1;
       return sum + (price * quantity);
     }, 0) : demoOrder.items.reduce((sum, item) => sum + (item.price * item.qty), 0),
-    deliveryFee: 150
+    deliveryFee: 50
   };
   
   console.log('🛒 [Checkout] Final order data:', orderData);
@@ -762,7 +762,7 @@ const CheckoutForm = () => {
               <span style={{ color: theme.colors.gray[800] }}>₱{itemTotal.toLocaleString()}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span style={{ color: theme.colors.gray[600] }}>Delivery Fee</span>
+              <span style={{ color: theme.colors.gray[600] }}>Transaction Fee</span>
               <span style={{ color: theme.colors.gray[800] }}>₱{orderData.deliveryFee.toLocaleString()}</span>
             </div>
             <div 

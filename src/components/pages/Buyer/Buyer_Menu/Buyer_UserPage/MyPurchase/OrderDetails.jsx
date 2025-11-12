@@ -506,7 +506,7 @@ const OrderDetails = () => {
                 </div>
                 {order.delivery_fee > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Delivery Fee</span>
+                    <span className="text-gray-600">Transaction Fee</span>
                     <span className="font-medium">₱{parseFloat(order.delivery_fee).toLocaleString()}</span>
                   </div>
                 )}

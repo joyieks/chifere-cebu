@@ -57,7 +57,7 @@ const EnhancedCheckout = () => {
     items: cartData.selectedItems || [],
     isBarter: cartData.isBarter || false,
     total: cartData.total || 0,
-    deliveryFee: cartData.isBarter ? 0 : 150
+    deliveryFee: cartData.isBarter ? 0 : 50
   } : null;
 
   // Calculate totals
@@ -619,7 +619,7 @@ const EnhancedCheckout = () => {
                     {!orderData.isBarter && (
                       <>
                         <div className="flex justify-between">
-                          <span style={{ color: theme.colors.gray[600] }}>Delivery Fee</span>
+                          <span style={{ color: theme.colors.gray[600] }}>Transaction Fee</span>
                           <span style={{ color: theme.colors.gray[800] }}>
                             ₱{(orderData.deliveryFee || 0).toLocaleString()}
                           </span>
