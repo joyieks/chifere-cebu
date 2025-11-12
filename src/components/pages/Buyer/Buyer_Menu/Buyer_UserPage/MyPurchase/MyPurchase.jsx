@@ -26,7 +26,6 @@ import {
   FiSearch,
   FiRefreshCw,
   FiEye,
-  FiDollarSign,
   FiUser,
   FiMapPin,
   FiPhone,

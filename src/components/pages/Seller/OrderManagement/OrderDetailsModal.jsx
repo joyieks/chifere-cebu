@@ -27,7 +27,6 @@ import {
   FiMapPin,
   FiPhone,
   FiMail,
-  FiDollarSign,
   FiCalendar,
   FiCreditCard,
   FiMessageSquare

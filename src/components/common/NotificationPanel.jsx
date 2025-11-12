@@ -21,7 +21,6 @@ import {
   FiUsers,
   FiStar,
   FiXCircle,
-  FiDollarSign,
   FiCheckCircle
 } from 'react-icons/fi';
 import { useNotifications } from '../../contexts/NotificationContext';
@@ -51,7 +50,7 @@ const NotificationPanel = ({ onClose }) => {
       'new_follower': <FiUsers className="w-5 h-5" />,
       'new_review': <FiStar className="w-5 h-5" />,
       'order_cancelled': <FiXCircle className="w-5 h-5" />,
-      'payment_received': <FiDollarSign className="w-5 h-5" />,
+      'payment_received': <span className="text-lg font-bold">₱</span>,
       'item_sold': <FiCheckCircle className="w-5 h-5" />
     };
     return icons[type] || <FiBell className="w-5 h-5" />;

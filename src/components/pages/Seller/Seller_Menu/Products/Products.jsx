@@ -15,7 +15,6 @@ import {
   FiToggleLeft,
   FiToggleRight,
   FiTrendingUp,
-  FiDollarSign,
   FiRefreshCw
 } from 'react-icons/fi';
 import { useAuth } from '../../../../../contexts/AuthContext';
@@ -386,7 +385,7 @@ const Products = () => {
                 <p className="text-2xl font-bold text-gray-800">{stats.sold}</p>
               </div>
               <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <FiDollarSign className="w-6 h-6 text-purple-500" />
+                <span className="text-2xl font-bold text-purple-500">₱</span>
               </div>
             </div>
           </div>

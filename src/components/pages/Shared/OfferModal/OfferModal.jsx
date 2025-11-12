@@ -9,7 +9,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiX, FiDollarSign, FiPackage, FiMessageSquare, FiClock } from 'react-icons/fi';
+import { FiX, FiPackage, FiMessageSquare, FiClock } from 'react-icons/fi';
 import { useMessaging } from '../../../../contexts/MessagingContext';
 import { useAuth } from '../../../../contexts/AuthContext';
 import { useToast } from '../../../../components/Toast';
@@ -310,7 +310,7 @@ const OfferModal = ({
                     Cash Offer (₱)
                   </label>
                   <div className="relative">
-                    <FiDollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg font-semibold">₱</span>
                     <input
                       type="number"
                       name="offerValue"

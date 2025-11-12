@@ -23,14 +23,19 @@ import {
   FiMail, 
   FiUser,
   FiCreditCard,
-  FiDollarSign,
   FiShoppingCart,
   FiCheck,
   FiAlertCircle
 } from 'react-icons/fi';
+
 import { useAuth } from '../../../../contexts/AuthContext';
 import { useToast } from '../../../../components/Toast';
 import checkoutService from '../../../../services/checkoutService';
+
+// Peso Icon Component
+const PesoIcon = ({ className, style }) => (
+  <span className={className} style={style}>₱</span>
+);
 
 const CheckoutModal = ({ isOpen, onClose, cartItems, onOrderSuccess }) => {
   const { user } = useAuth();
@@ -432,7 +437,7 @@ const CheckoutModal = ({ isOpen, onClose, cartItems, onOrderSuccess }) => {
                     {/* Shipping Fee */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        <FiDollarSign className="inline w-4 h-4 mr-1" />
+                        <span className="inline mr-1 font-semibold">₱</span>
                         Shipping Fee (₱)
                       </label>
                       <input
@@ -454,7 +459,7 @@ const CheckoutModal = ({ isOpen, onClose, cartItems, onOrderSuccess }) => {
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Method</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {[
-                      { value: 'cash_on_delivery', label: 'Cash on Delivery', icon: FiDollarSign },
+                      { value: 'cash_on_delivery', label: 'Cash on Delivery', icon: PesoIcon },
                       { value: 'gcash', label: 'GCash', icon: FiCreditCard },
                       { value: 'paypal', label: 'PayPal', icon: FiCreditCard },
                       { value: 'bank_transfer', label: 'Bank Transfer', icon: FiCreditCard }
@@ -472,9 +477,15 @@ const CheckoutModal = ({ isOpen, onClose, cartItems, onOrderSuccess }) => {
                           }`}
                         >
                           <div className="flex items-center">
-                            <Icon className={`w-5 h-5 mr-3 ${
-                              formData.paymentMethod === method.value ? 'text-blue-600' : 'text-gray-500'
-                            }`} />
+                            {typeof Icon === 'function' && Icon.name === 'PesoIcon' ? (
+                              <Icon className={`text-lg font-bold mr-3 ${
+                                formData.paymentMethod === method.value ? 'text-blue-600' : 'text-gray-500'
+                              }`} />
+                            ) : (
+                              <Icon className={`w-5 h-5 mr-3 ${
+                                formData.paymentMethod === method.value ? 'text-blue-600' : 'text-gray-500'
+                              }`} />
+                            )}
                             <span className={`font-medium ${
                               formData.paymentMethod === method.value ? 'text-blue-900' : 'text-gray-900'
                             }`}>

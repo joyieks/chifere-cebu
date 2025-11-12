@@ -21,7 +21,6 @@ import {
   FiCheckCircle, 
   FiXCircle,
   FiArrowLeft,
-  FiDollarSign,
   FiUser,
   FiMapPin,
   FiPhone,

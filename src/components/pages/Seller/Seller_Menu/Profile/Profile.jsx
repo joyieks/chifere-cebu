@@ -15,9 +15,13 @@ import {
   FiStar,
   FiShield,
   FiTrendingUp,
-  FiPackage,
-  FiDollarSign
+  FiPackage
 } from 'react-icons/fi';
+
+// Peso Icon Component
+const PesoIcon = ({ className, style }) => (
+  <span className={className} style={style}>₱</span>
+);
 
 const Profile = () => {
   const { user, updateProfile } = useAuth();
@@ -173,7 +177,11 @@ const Profile = () => {
       <div className="flex items-center space-x-4">
         <div className={`w-12 h-12 rounded-lg flex items-center justify-center`}
              style={{ backgroundColor: theme.colors[color][100] }}>
-          <Icon className="w-6 h-6" style={{ color: theme.colors[color][500] }} />
+          {typeof Icon === 'function' && Icon.name === 'PesoIcon' ? (
+            <Icon className="text-2xl font-bold" style={{ color: theme.colors[color][500] }} />
+          ) : (
+            <Icon className="w-6 h-6" style={{ color: theme.colors[color][500] }} />
+          )}
         </div>
         <div>
           <p className="text-gray-600 text-sm">{title}</p>
@@ -252,7 +260,7 @@ const Profile = () => {
             color="primary"
           />
           <StatCard
-            icon={FiDollarSign}
+            icon={PesoIcon}
             title="Total Revenue"
             value={`₱${profile.totalRevenue.toLocaleString()}`}
             color="success"

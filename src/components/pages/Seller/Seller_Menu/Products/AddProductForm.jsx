@@ -6,7 +6,6 @@ import {
   FiUpload,
   FiTrash2,
   FiPackage,
-  FiDollarSign,
   FiImage,
   FiTag,
   FiRefreshCw

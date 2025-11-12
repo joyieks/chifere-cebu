@@ -2,10 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SellerLayout from '../Seller_Layout/SellerLayout';
 import { theme } from '../../../../../styles/designSystem';
-import { FiDollarSign, FiPackage, FiEye, FiTrendingUp, FiShoppingCart, FiMessageSquare, FiRefreshCw } from 'react-icons/fi';
+import { FiPackage, FiEye, FiTrendingUp, FiShoppingCart, FiMessageSquare, FiRefreshCw } from 'react-icons/fi';
 import { useAuth } from '../../../../../contexts/AuthContext';
 import { supabase } from '../../../../../config/supabase';
 import itemService from '../../../../../services/itemService';
+
+// Peso Icon Component
+const PesoIcon = ({ className, style }) => (
+  <span className={className} style={style}>₱</span>
+);
 
 const SellerDashboard = () => {
   const { user } = useAuth();
@@ -278,7 +283,11 @@ const SellerDashboard = () => {
         </div>
         <div className="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center"
              style={{ backgroundColor: theme.colors[color][100] }}>
-          <Icon className="w-6 h-6" style={{ color: theme.colors[color][500] }} />
+          {typeof Icon === 'function' && Icon.name === 'PesoIcon' ? (
+            <Icon className="text-2xl font-bold" style={{ color: theme.colors[color][500] }} />
+          ) : (
+            <Icon className="w-6 h-6" style={{ color: theme.colors[color][500] }} />
+          )}
         </div>
       </div>
     </div>
@@ -400,7 +409,7 @@ const SellerDashboard = () => {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
           <StatCard
-            icon={FiDollarSign}
+            icon={PesoIcon}
             title="Total Earnings"
             value={stats.totalEarnings}
             color="primary"

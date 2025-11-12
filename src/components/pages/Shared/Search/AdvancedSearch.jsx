@@ -26,7 +26,6 @@ import {
   FiX,
   FiMapPin,
   FiTag,
-  FiDollarSign,
   FiStar,
   FiClock,
   FiBookmark,
