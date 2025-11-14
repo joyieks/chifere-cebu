@@ -446,8 +446,24 @@ const Item = () => {
                     {product.name}
                   </h1>
                   
+                  {/* SOLD Badge */}
+                  {product.status === 'sold' && (
+                    <div style={{
+                      backgroundColor: '#dc2626',
+                      color: 'white',
+                      padding: `${theme.spacing[1]} ${theme.spacing[3]}`,
+                      borderRadius: theme.borderRadius.full,
+                      fontSize: theme.typography.fontSize.sm,
+                      fontWeight: theme.typography.fontWeight.bold,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em'
+                    }}>
+                      SOLD
+                    </div>
+                  )}
+                  
                   {/* Barter Badge */}
-                  {(product.selling_mode === 'barter' || product.product_type === 'barter') && (
+                  {(product.selling_mode === 'barter' || product.product_type === 'barter') && product.status !== 'sold' && (
                     <div style={{
                       backgroundColor: theme.colors.secondary[100],
                       color: theme.colors.secondary[700],
@@ -507,52 +523,99 @@ const Item = () => {
                 backgroundColor: theme.colors.gray[50],
                 borderRadius: theme.borderRadius.xl
               }}>
-                {/* Price Label */}
-                <div style={{ marginBottom: theme.spacing[2] }}>
-                  <span style={{
-                    fontSize: theme.typography.fontSize.sm,
-                    fontWeight: theme.typography.fontWeight.medium,
-                    color: theme.colors.gray[600],
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
-                  }}>
-                    {(product.selling_mode === 'barter' || product.product_type === 'barter') ? 'Estimated Value' : 'Price'}
-                  </span>
-                </div>
-                
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: theme.spacing[3] }}>
-                  <span style={{
-                    fontSize: theme.typography.fontSize['3xl'],
-                    fontWeight: theme.typography.fontWeight.bold,
-                    color: theme.colors.gray[900]
-                  }}>
-                    ₱{(product.selling_mode === 'barter' || product.product_type === 'barter') 
-                      ? (product.estimated_value?.toLocaleString() || product.price?.toLocaleString() || '0')
-                      : (product.price?.toLocaleString() || '0')
-                    }
-                  </span>
-                  {product.original_price && product.original_price > product.price && (
-                    <span style={{
-                      fontSize: theme.typography.fontSize.lg,
+                {product.status === 'sold' ? (
+                  <>
+                    <div style={{ marginBottom: theme.spacing[2] }}>
+                      <span style={{
+                        fontSize: theme.typography.fontSize.sm,
+                        fontWeight: theme.typography.fontWeight.medium,
+                        color: '#dc2626',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em'
+                      }}>
+                        Status
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: theme.spacing[3] }}>
+                      <span style={{
+                        fontSize: theme.typography.fontSize['3xl'],
+                        fontWeight: theme.typography.fontWeight.bold,
+                        color: '#dc2626'
+                      }}>
+                        SOLD
+                      </span>
+                    </div>
+                    <div style={{
+                      fontSize: theme.typography.fontSize.sm,
                       color: theme.colors.gray[500],
+                      marginTop: theme.spacing[1],
                       textDecoration: 'line-through'
                     }}>
-                      ₱{product.original_price.toLocaleString()}
-                    </span>
-                  )}
-                </div>
-                <div style={{
-                  fontSize: theme.typography.fontSize.sm,
-                  color: theme.colors.gray[600],
-                  marginTop: theme.spacing[1]
-                }}>
-                  {product.selling_mode === 'sell' ? 'For Sale' : 'Barter Only'} • Qty: {product.quantity || 1}
-                </div>
+                      Original Price: ₱{product.price?.toLocaleString() || '0'}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {/* Price Label */}
+                    <div style={{ marginBottom: theme.spacing[2] }}>
+                      <span style={{
+                        fontSize: theme.typography.fontSize.sm,
+                        fontWeight: theme.typography.fontWeight.medium,
+                        color: theme.colors.gray[600],
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em'
+                      }}>
+                        {(product.selling_mode === 'barter' || product.product_type === 'barter') ? 'Estimated Value' : 'Price'}
+                      </span>
+                    </div>
+                    
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: theme.spacing[3] }}>
+                      <span style={{
+                        fontSize: theme.typography.fontSize['3xl'],
+                        fontWeight: theme.typography.fontWeight.bold,
+                        color: theme.colors.gray[900]
+                      }}>
+                        ₱{(product.selling_mode === 'barter' || product.product_type === 'barter') 
+                          ? (product.estimated_value?.toLocaleString() || product.price?.toLocaleString() || '0')
+                          : (product.price?.toLocaleString() || '0')
+                        }
+                      </span>
+                      {product.original_price && product.original_price > product.price && (
+                        <span style={{
+                          fontSize: theme.typography.fontSize.lg,
+                          color: theme.colors.gray[500],
+                          textDecoration: 'line-through'
+                        }}>
+                          ₱{product.original_price.toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+                    <div style={{
+                      fontSize: theme.typography.fontSize.sm,
+                      color: theme.colors.gray[600],
+                      marginTop: theme.spacing[1]
+                    }}>
+                      {product.selling_mode === 'sell' ? 'For Sale' : 'Barter Only'} • Qty: {product.quantity || 1}
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Stock Status */}
               <div style={{ marginBottom: theme.spacing[6] }}>
-                {product.quantity > 0 ? (
+                {product.status === 'sold' ? (
+                  <div style={{
+                    color: '#dc2626',
+                    fontSize: theme.typography.fontSize.sm,
+                    fontWeight: theme.typography.fontWeight.bold,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: theme.spacing[2]
+                  }}>
+                    <span>●</span>
+                    This item has been sold
+                  </div>
+                ) : product.quantity > 0 ? (
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -584,60 +647,61 @@ const Item = () => {
               </div>
 
               {/* Quantity Selector */}
-              <div style={{ 
-                marginBottom: theme.spacing[6],
-                display: 'flex',
-                alignItems: 'center',
-                gap: theme.spacing[4]
-              }}>
-                <span style={{
-                  fontSize: theme.typography.fontSize.sm,
-                  fontWeight: theme.typography.fontWeight.medium,
-                  color: theme.colors.gray[700],
-                  minWidth: '60px'
-                }}>
-                  Quantity:
-                </span>
-                <div style={{
+              {product.status !== 'sold' && (
+                <div style={{ 
+                  marginBottom: theme.spacing[6],
                   display: 'flex',
                   alignItems: 'center',
-                  border: `1px solid ${theme.colors.gray[300]}`,
-                  borderRadius: theme.borderRadius.lg,
-                  overflow: 'hidden'
+                  gap: theme.spacing[4]
                 }}>
-                  <button
-                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                    style={{
-                      width: '40px',
-                      height: '40px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: theme.colors.gray[50],
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: theme.typography.fontSize.lg,
-                      color: theme.colors.gray[600]
-                    }}
-                    disabled={quantity <= 1}
-                  >
-                    −
-                  </button>
-                  <input
-                    type="number"
-                    value={quantity}
-                    onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                    style={{
-                      width: '60px',
-                      height: '40px',
-                      textAlign: 'center',
-                      border: 'none',
-                      fontSize: theme.typography.fontSize.base,
-                      fontWeight: theme.typography.fontWeight.medium
-                    }}
-                    min="1"
-                    max={product.quantity}
-                  />
+                  <span style={{
+                    fontSize: theme.typography.fontSize.sm,
+                    fontWeight: theme.typography.fontWeight.medium,
+                    color: theme.colors.gray[700],
+                    minWidth: '60px'
+                  }}>
+                    Quantity:
+                  </span>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    border: `1px solid ${theme.colors.gray[300]}`,
+                    borderRadius: theme.borderRadius.lg,
+                    overflow: 'hidden'
+                  }}>
+                    <button
+                      onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: theme.colors.gray[50],
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: theme.typography.fontSize.lg,
+                        color: theme.colors.gray[600]
+                      }}
+                      disabled={quantity <= 1}
+                    >
+                      −
+                    </button>
+                    <input
+                      type="number"
+                      value={quantity}
+                      onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                      style={{
+                        width: '60px',
+                        height: '40px',
+                        textAlign: 'center',
+                        border: 'none',
+                        fontSize: theme.typography.fontSize.base,
+                        fontWeight: theme.typography.fontWeight.medium
+                      }}
+                      min="1"
+                      max={product.quantity}
+                    />
                   <button
                     onClick={() => setQuantity(q => Math.min(product.quantity, q + 1))}
                     style={{
@@ -656,8 +720,9 @@ const Item = () => {
                   >
                     +
                   </button>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Action Buttons */}
               <div style={{ 
@@ -666,8 +731,24 @@ const Item = () => {
                 gap: theme.spacing[3],
                 marginBottom: theme.spacing[8]
               }}>
-                {/* Check if item is barter item */}
-                {product.selling_mode === 'barter' || product.product_type === 'barter' ? (
+                {product.status === 'sold' ? (
+                  <button
+                    disabled
+                    style={{
+                      ...theme.components.button.size.lg,
+                      backgroundColor: '#dc2626',
+                      color: theme.colors.white,
+                      border: 'none',
+                      borderRadius: theme.borderRadius.xl,
+                      fontWeight: theme.typography.fontWeight.bold,
+                      cursor: 'not-allowed',
+                      opacity: 0.8,
+                      width: '100%'
+                    }}
+                  >
+                    SOLD OUT
+                  </button>
+                ) : product.selling_mode === 'barter' || product.product_type === 'barter' ? (
                   // Barter item buttons
                   <>
                     <button

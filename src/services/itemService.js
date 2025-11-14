@@ -153,20 +153,27 @@ class ItemService {
   // Get items by seller
   async getItemsBySeller(sellerId, status = 'active') {
     try {
+      // Build queries for both collections
+      let prelovedQuery = supabase
+        .from('seller_add_item_preloved')
+        .select('*')
+        .eq('seller_id', sellerId);
+      
+      let barterQuery = supabase
+        .from('seller_add_barter_item')
+        .select('*')
+        .eq('seller_id', sellerId);
+      
+      // Only filter by status if it's not 'all' or null
+      if (status && status !== 'all') {
+        prelovedQuery = prelovedQuery.eq('status', status);
+        barterQuery = barterQuery.eq('status', status);
+      }
+      
       // Query both collections
       const [prelovedResult, barterResult] = await Promise.all([
-        supabase
-          .from('seller_add_item_preloved')
-          .select('*')
-          .eq('seller_id', sellerId)
-          .eq('status', status)
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('seller_add_barter_item')
-          .select('*')
-          .eq('seller_id', sellerId)
-          .eq('status', status)
-          .order('created_at', { ascending: false })
+        prelovedQuery.order('created_at', { ascending: false }),
+        barterQuery.order('created_at', { ascending: false })
       ]);
 
       if (prelovedResult.error) throw prelovedResult.error;

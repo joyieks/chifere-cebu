@@ -249,7 +249,12 @@ const Buyer_Dashboard = () => {
                     
                     {/* Badges */}
                     <div className="absolute top-3 left-3 flex flex-col space-y-2">
-                      {product.selling_mode === 'barter' && (
+                      {product.status === 'sold' && (
+                        <span className="bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm font-bold uppercase tracking-wide">
+                          SOLD
+                        </span>
+                      )}
+                      {product.selling_mode === 'barter' && product.status !== 'sold' && (
                         <span className="bg-orange-500 text-white px-2 py-1 rounded-lg text-sm font-semibold">
                           Barter
                         </span>
@@ -258,9 +263,11 @@ const Buyer_Dashboard = () => {
                     
                     {/* Condition Badge */}
                     <div className="absolute top-3 right-3">
-                      <span className="bg-green-500 text-white px-2 py-1 rounded-lg text-xs font-semibold">
-                        {product.condition}
-                      </span>
+                      {product.status !== 'sold' && (
+                        <span className="bg-green-500 text-white px-2 py-1 rounded-lg text-xs font-semibold">
+                          {product.condition}
+                        </span>
+                      )}
                     </div>
                     
                     {/* Wishlist Button */}
@@ -302,7 +309,12 @@ const Buyer_Dashboard = () => {
                     
                     {/* Price */}
                     <div className="mb-4">
-                      {product.selling_mode === 'barter' ? (
+                      {product.status === 'sold' ? (
+                        <div>
+                          <p className="text-2xl font-bold text-red-600">SOLD</p>
+                          <p className="text-sm text-gray-500 line-through">₱{product.price?.toLocaleString() || '0'}</p>
+                        </div>
+                      ) : product.selling_mode === 'barter' ? (
                         <div>
                           <p className="text-lg font-bold text-orange-600">Barter Only</p>
                           <p className="text-sm text-gray-600">Open to offers</p>
@@ -316,28 +328,45 @@ const Buyer_Dashboard = () => {
                     </div>
                     
                     {/* Add to Cart / Make Offer Button */}
-                    <div 
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.log('🔘 [BuyerDashboard] Button clicked for product:', product.name);
-                        
-                        // Visual feedback - flash the button
-                        e.target.style.backgroundColor = '#10b981';
-                        setTimeout(() => {
-                          e.target.style.backgroundColor = product.selling_mode === 'barter'
-                            ? '#ea580c' 
-                            : '#2563eb';
-                        }, 200);
-                        
-                        if (product.selling_mode === 'barter') {
-                          console.log('🛍️ [BuyerDashboard] This is a barter product, calling handleMakeOffer');
-                          handleMakeOffer(product);
-                        } else {
-                          console.log('🛒 [BuyerDashboard] This is a regular product, calling handleAddToCart');
-                          handleAddToCart(product);
-                        }
-                      }}
+                    {product.status === 'sold' ? (
+                      <div 
+                        style={{
+                          width: '100%',
+                          padding: '12px 0',
+                          backgroundColor: '#dc2626',
+                          color: 'white',
+                          textAlign: 'center',
+                          borderRadius: '8px',
+                          fontWeight: 'bold',
+                          cursor: 'not-allowed',
+                          opacity: 0.8
+                        }}
+                      >
+                        SOLD OUT
+                      </div>
+                    ) : (
+                      <div 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log('🔘 [BuyerDashboard] Button clicked for product:', product.name);
+                          
+                          // Visual feedback - flash the button
+                          e.target.style.backgroundColor = '#10b981';
+                          setTimeout(() => {
+                            e.target.style.backgroundColor = product.selling_mode === 'barter'
+                              ? '#ea580c' 
+                              : '#2563eb';
+                          }, 200);
+                          
+                          if (product.selling_mode === 'barter') {
+                            console.log('🛍️ [BuyerDashboard] This is a barter product, calling handleMakeOffer');
+                            handleMakeOffer(product);
+                          } else {
+                            console.log('🛒 [BuyerDashboard] This is a regular product, calling handleAddToCart');
+                            handleAddToCart(product);
+                          }
+                        }}
                       onMouseDown={(e) => {
                         console.log('🖱️ [BuyerDashboard] Button mouse down for product:', product.name);
                       }}
@@ -387,6 +416,7 @@ const Buyer_Dashboard = () => {
                         </>
                       )}
                     </div>
+                    )}
                   </div>
                 </div>
               ))}

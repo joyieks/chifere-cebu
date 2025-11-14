@@ -59,8 +59,7 @@ const Products = () => {
   const statuses = [
     { value: 'all', label: 'All Status' },
     { value: 'active', label: 'Active' },
-    { value: 'sold', label: 'Sold' },
-    { value: 'inactive', label: 'Inactive' }
+    { value: 'sold', label: 'Sold' }
   ];
 
   // Load products on mount
@@ -78,7 +77,8 @@ const Products = () => {
     setError(null);
 
     try {
-      const result = await itemService.getItemsBySeller(user.id, 'active');
+      // Fetch all products (active and sold) so seller can see all their products
+      const result = await itemService.getItemsBySeller(user.id, 'all');
 
       if (result.success) {
         setProducts(result.data || []);
@@ -109,9 +109,9 @@ const Products = () => {
     totalViews: products.reduce((sum, p) => sum + (p.views || 0), 0)
   };
 
-  // Toggle product status (active/inactive)
+  // Toggle product status (active/sold)
   const toggleProductStatus = async (product) => {
-    const newStatus = product.status === 'active' ? 'inactive' : 'active';
+    const newStatus = product.status === 'active' ? 'sold' : 'active';
 
     try {
       const result = await itemService.updateItem(
@@ -223,9 +223,9 @@ const Products = () => {
                 className={`p-1 rounded transition-colors ${
                   product.status === 'active'
                     ? 'text-green-500 hover:text-green-600'
-                    : 'text-gray-400 hover:text-gray-500'
+                    : 'text-blue-500 hover:text-blue-600'
                 }`}
-                title={product.status === 'active' ? 'Deactivate' : 'Activate'}
+                title={product.status === 'active' ? 'Mark as Sold' : 'Mark as Active'}
               >
                 {product.status === 'active' ? (
                   <FiToggleRight className="w-5 h-5" />
