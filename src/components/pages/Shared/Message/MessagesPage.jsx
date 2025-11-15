@@ -6,8 +6,9 @@ import { BsThreeDotsVertical } from 'react-icons/bs';
 
 const MessagesPage = ({ onConversationSelect }) => {
   const { user } = useAuth();
-  const { conversations, isLoading, error } = useMessaging();
+  const { conversations, isLoading, error, markMessagesAsRead } = useMessaging();
   const [searchTerm, setSearchTerm] = useState('');
+  const [processingConversationId, setProcessingConversationId] = useState(null);
 
   // Debug logging
   console.log('🔄 [MessagesPage] Conversations loaded:', conversations);
@@ -130,11 +131,31 @@ const MessagesPage = ({ onConversationSelect }) => {
             const otherParticipant = getOtherParticipant(conversation);
             const unreadCount = conversation.unreadCount?.[user?.id] || 0;
             
+            const isProcessing = processingConversationId === conversation.id;
+            
+            const handleClick = () => {
+              if (isProcessing) return;
+              
+              // Select conversation immediately
+              onConversationSelect?.(conversation);
+              
+              // Mark messages as read in the background
+              const unreadCount = conversation.unreadCount?.[user?.id] || 0;
+              if (unreadCount > 0) {
+                setProcessingConversationId(conversation.id);
+                markMessagesAsRead(conversation.id)
+                  .finally(() => {
+                    setProcessingConversationId(null);
+                  });
+              }
+            };
+
             return (
               <div
                 key={conversation.id}
-                className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
-                onClick={() => onConversationSelect?.(conversation)}
+                className={`p-4 hover:bg-gray-50 transition-colors ${isProcessing ? 'opacity-60 cursor-wait' : 'cursor-pointer'}`}
+                onClick={handleClick}
+                style={{ pointerEvents: isProcessing ? 'none' : 'auto' }}
               >
                 <div className="flex items-center space-x-3">
                   {/* Avatar */}

@@ -31,18 +31,19 @@ const ConversationList = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredConversations, setFilteredConversations] = useState([]);
   const [loadingList, setLoadingList] = useState(false);
+  const [processingConversationId, setProcessingConversationId] = useState(null);
 
   // Conversations are already loaded by MessagingContext
   // No need to reload them here
 
-  // Filter conversations based on search term
+  // Filter conversations based on search term - use useMemo to prevent unnecessary re-renders
   useEffect(() => {
     if (!searchTerm.trim()) {
       setFilteredConversations(conversations);
     } else {
       const filtered = conversations.filter(conversation => {
         const otherParticipant = conversation.participants.find(p => String(p) !== currentUserId);
-        const participantInfo = conversation.participantInfo[otherParticipant];
+        const participantInfo = conversation.participantInfo?.[otherParticipant];
         const participantName = participantInfo?.name || 'Unknown User';
         const lastMessageContent = conversation.lastMessage?.content || '';
         
@@ -53,15 +54,27 @@ const ConversationList = ({
       });
       setFilteredConversations(filtered);
     }
-  }, [searchTerm, conversations, user]);
+  }, [searchTerm, conversations, currentUserId]);
 
   const handleConversationClick = async (conversation) => {
-    // Mark messages as read
-    if (conversation.unreadCount[user?.id] > 0) {
-      await markMessagesAsRead(conversation.id);
+    // Prevent multiple clicks on the same conversation
+    if (processingConversationId === conversation.id) {
+      return;
     }
-    
+
+    // Select conversation immediately for better UX
     onConversationSelect(conversation);
+    
+    // Mark messages as read in the background (don't wait for it)
+    const unreadCount = conversation.unreadCount?.[user?.id] || 0;
+    if (unreadCount > 0) {
+      setProcessingConversationId(conversation.id);
+      // Mark as read without blocking the UI
+      markMessagesAsRead(conversation.id)
+        .finally(() => {
+          setProcessingConversationId(null);
+        });
+    }
   };
 
   const getLastMessagePreview = (lastMessage) => {
@@ -255,24 +268,28 @@ const ConversationList = ({
             const unreadCount = conversation.unreadCount[currentUserId] || 0;
             const isSelected = selectedConversationId === conversation.id;
 
+            const isProcessing = processingConversationId === conversation.id;
+
             return (
               <div
                 key={conversation.id}
-                onClick={() => handleConversationClick(conversation)}
+                onClick={() => !isProcessing && handleConversationClick(conversation)}
                 style={{
                   padding: theme.spacing[4],
                   borderBottom: `1px solid ${theme.colors.gray[100]}`,
                   backgroundColor: isSelected ? theme.colors.primary[50] : 'transparent',
-                  cursor: 'pointer',
-                  transition: theme.animations.transition.colors
+                  cursor: isProcessing ? 'wait' : 'pointer',
+                  opacity: isProcessing ? 0.6 : 1,
+                  transition: theme.animations.transition.colors,
+                  pointerEvents: isProcessing ? 'none' : 'auto'
                 }}
                 onMouseEnter={(e) => {
-                  if (!isSelected) {
+                  if (!isSelected && !isProcessing) {
                     e.target.style.backgroundColor = theme.colors.gray[50];
                   }
                 }}
                 onMouseLeave={(e) => {
-                  if (!isSelected) {
+                  if (!isSelected && !isProcessing) {
                     e.target.style.backgroundColor = 'transparent';
                   }
                 }}

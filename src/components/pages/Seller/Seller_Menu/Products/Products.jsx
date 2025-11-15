@@ -7,7 +7,6 @@ import { theme } from '../../../../../styles/designSystem';
 import {
   FiPlus,
   FiSearch,
-  FiFilter,
   FiMoreVertical,
   FiEye,
   FiEdit3,
@@ -29,7 +28,6 @@ const Products = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
-  const [showFilters, setShowFilters] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -439,14 +437,6 @@ const Products = () => {
                   <option key={status.value} value={status.value}>{status.label}</option>
                 ))}
               </select>
-
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="btn-base btn-md btn-outline"
-              >
-                <FiFilter className="w-5 h-5 mr-2" />
-                Filters
-              </button>
             </div>
           </div>
         </div>

@@ -222,10 +222,18 @@ const Navigation = ({ showPromotionalBar = false }) => {
 
                     <Link
                       to="/seller/messages"
-                      className="text-gray-700 hover:text-blue-600 flex items-center gap-2"
+                      className="text-gray-700 hover:text-blue-600 flex items-center gap-2 relative"
                     >
                       <FiMessageCircle className="w-5 h-5" />
                       <span className="text-sm">Messages</span>
+                      {/* Unread message count badge */}
+                      {unreadCount > 0 && (
+                        <span 
+                          className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold"
+                        >
+                          {unreadCount > 99 ? '99+' : unreadCount}
+                        </span>
+                      )}
                     </Link>
                   </>
                 )}
@@ -483,11 +491,16 @@ const Navigation = ({ showPromotionalBar = false }) => {
                     </Link>
                     <Link
                       to="/seller/messages"
-                      className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                      className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md relative"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <FiMessageCircle className="inline mr-2 w-4 h-4" />
                       Messages
+                      {unreadCount > 0 && (
+                        <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-red-500 rounded-full">
+                          {unreadCount > 99 ? '99+' : unreadCount}
+                        </span>
+                      )}
                     </Link>
                     <Link
                       to="/seller/settings"

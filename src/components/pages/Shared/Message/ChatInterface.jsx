@@ -39,8 +39,12 @@ const ChatInterface = ({ conversation, onBack }) => {
     if (conversation?.id && user?.id) {
       // Load messages for this conversation
       getConversationMessages(conversation.id);
-      // Mark messages as read
-      markMessagesAsRead(conversation.id, user.id);
+      
+      // Mark messages as read in the background (don't block UI)
+      // Note: This might be called again from ConversationList, but that's fine - it's idempotent
+      markMessagesAsRead(conversation.id).catch(err => {
+        console.warn('Failed to mark messages as read:', err);
+      });
       
       // Fetch participant details if not available
       if (conversation.participants && fetchParticipantDetails) {
@@ -51,7 +55,9 @@ const ChatInterface = ({ conversation, onBack }) => {
         }
       }
     }
-  }, [conversation?.id, user?.id, getConversationMessages, markMessagesAsRead, fetchParticipantDetails]);
+    // Only depend on conversation.id and user.id to prevent unnecessary re-runs
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversation?.id, user?.id]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();

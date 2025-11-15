@@ -746,25 +746,35 @@ ${offerData.message ? `**Additional Message:** ${offerData.message}` : ''}
 
   // Mark messages as read
   const markMessagesAsRead = useCallback(async (conversationId) => {
-    if (!user?.uid) return { success: false, error: 'User not authenticated' };
+    if (!user?.id) return { success: false, error: 'User not authenticated' };
     
     try {
-      const result = await messagingService.markMessagesAsRead(conversationId, user.uid);
+      const result = await messagingService.markMessagesAsRead(conversationId, user.id);
       
       if (result.success) {
-        // Update local state
-        setConversations(prev => prev.map(conv => {
-          if (conv.id === conversationId) {
-            return {
-              ...conv,
-              unreadCount: {
-                ...conv.unreadCount,
-                [user.id]: 0
-              }
-            };
-          }
-          return conv;
-        }));
+        // Update local state using functional update to avoid dependency on conversations
+        setConversations(prev => {
+          const updated = prev.map(conv => {
+            if (conv.id === conversationId) {
+              return {
+                ...conv,
+                unreadCount: {
+                  ...conv.unreadCount,
+                  [user.id]: 0
+                }
+              };
+            }
+            return conv;
+          });
+          
+          // Recalculate total unread count from updated conversations
+          const newUnreadCount = updated.reduce((total, conv) => {
+            return total + (conv.unreadCount?.[user.id] || 0);
+          }, 0);
+          setUnreadCount(newUnreadCount);
+          
+          return updated;
+        });
 
         // Mark messages as read locally
         setMessages(prev => ({
@@ -775,15 +785,10 @@ ${offerData.message ? `**Additional Message:** ${offerData.message}` : ''}
           }))
         }));
 
-        // Recalculate total unread count
-        const newUnreadCount = conversations.reduce((total, conv) => {
-          if (conv.id === conversationId) return total;
-          return total + (conv.unreadCount[user.id] || 0);
-        }, 0);
-        setUnreadCount(newUnreadCount);
-
-        // Also update the unread count in the database
-        await messagingService.markMessagesAsRead(conversationId, user.id);
+        // Dispatch custom event to notify MessageContext to refresh
+        window.dispatchEvent(new CustomEvent('messagesMarkedAsRead', { 
+          detail: { conversationId, userId: user.id } 
+        }));
       }
 
       return result;
@@ -791,7 +796,7 @@ ${offerData.message ? `**Additional Message:** ${offerData.message}` : ''}
       setError(error.message);
       return { success: false, error: error.message };
     }
-  }, [user, conversations]);
+  }, [user?.id]);
 
   // Set typing status
   const setTypingStatus = useCallback((conversationId, isTyping) => {

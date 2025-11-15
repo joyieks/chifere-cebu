@@ -58,6 +58,20 @@ export const MessageProvider = ({ children }) => {
     return () => clearInterval(interval);
   }, [user?.id]);
 
+  // Listen for messages marked as read event from MessagingContext
+  useEffect(() => {
+    const handleMessagesMarkedAsRead = () => {
+      // Refresh unread count when messages are marked as read
+      fetchUnreadCount();
+    };
+
+    window.addEventListener('messagesMarkedAsRead', handleMessagesMarkedAsRead);
+
+    return () => {
+      window.removeEventListener('messagesMarkedAsRead', handleMessagesMarkedAsRead);
+    };
+  }, []);
+
   // Function to manually refresh count (call after sending/reading a message)
   const refreshUnreadCount = () => {
     fetchUnreadCount();
@@ -68,9 +82,11 @@ export const MessageProvider = ({ children }) => {
     if (!user?.id) return;
 
     try {
-      await messagingService.markConversationAsRead(conversationId, user.id);
-      // Refresh count after marking as read
-      await fetchUnreadCount();
+      const result = await messagingService.markConversationAsRead(conversationId, user.id);
+      if (result.success) {
+        // Refresh count after marking as read
+        await fetchUnreadCount();
+      }
     } catch (error) {
       console.error('Error marking conversation as read:', error);
     }
