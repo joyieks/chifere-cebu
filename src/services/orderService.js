@@ -782,15 +782,38 @@ class OrderService {
    */
   async updateOrderStatus(orderId, newStatus, changedBy, notes = null, statusType = 'status') {
     try {
+      // First, get the current order to check payment method
+      const { data: currentOrder, error: fetchError } = await supabase
+        .from('buyer_orders')
+        .select('payment_method, payment_status')
+        .eq('id', orderId)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching order:', fetchError);
+        throw fetchError;
+      }
+
       const updateData = {
         [statusType]: newStatus,
         updated_at: new Date().toISOString()
       };
 
+      // If status is being changed to "completed" and payment method is COD, automatically set payment_status to "paid"
+      if (statusType === 'status' && newStatus === 'completed') {
+        if (currentOrder.payment_method === 'cod' && currentOrder.payment_status !== 'paid') {
+          updateData.payment_status = 'paid';
+          updateData.paid_at = new Date().toISOString();
+          console.log('✅ [OrderService] Auto-updating COD payment status to paid for completed order');
+        }
+      }
+
       // Set specific timestamps based on status
       if (newStatus === 'paid' && statusType === 'payment_status') {
         updateData.paid_at = new Date().toISOString();
       } else if (newStatus === 'delivered' && statusType === 'delivery_status') {
+        updateData.delivered_at = new Date().toISOString();
+      } else if (newStatus === 'completed' && statusType === 'status') {
         updateData.delivered_at = new Date().toISOString();
       }
 
@@ -808,8 +831,13 @@ class OrderService {
 
       if (error) throw error;
 
-      // Create order status history entry
+      // Create order status history entry for status update
       await this.createOrderStatusHistory(orderId, newStatus, changedBy, notes, statusType);
+
+      // If payment status was auto-updated, also create a history entry for it
+      if (updateData.payment_status === 'paid' && statusType === 'status') {
+        await this.createOrderStatusHistory(orderId, 'paid', changedBy, 'Auto-updated: Order marked as completed (COD)', 'payment_status');
+      }
 
       return { success: true, message: 'Order status updated successfully', data };
     } catch (error) {

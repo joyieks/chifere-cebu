@@ -186,7 +186,12 @@ const OrderDetails = () => {
   };
 
   // Get payment status info
-  const getPaymentStatusInfo = (status) => {
+  const getPaymentStatusInfo = (status, orderStatus) => {
+    // If order is completed, always show as paid in green
+    if (orderStatus === 'completed' || orderStatus === 'received') {
+      return { color: 'text-green-600', bg: 'bg-green-100', label: 'Paid' };
+    }
+    
     const paymentConfig = {
       'pending': { color: 'text-yellow-600', bg: 'bg-yellow-100', label: 'Pending' },
       'paid': { color: 'text-green-600', bg: 'bg-green-100', label: 'Paid' },
@@ -268,7 +273,8 @@ const OrderDetails = () => {
   }
 
   const statusInfo = getStatusInfo(order.status);
-  const paymentInfo = getPaymentStatusInfo(order.payment_status);
+  // If order is completed, show payment as paid in green
+  const paymentInfo = getPaymentStatusInfo(order.payment_status, order.status);
   const PaymentIcon = getPaymentMethodIcon(order.payment_method);
   const StatusIcon = statusInfo.icon;
 
@@ -478,15 +484,8 @@ const OrderDetails = () => {
                           </p>
                         )}
                       </div>
-                      {/* Show Received button for delivered orders */}
-                      {timeline.status === 'delivered' && order.status === 'delivered' && (
-                        <button
-                          onClick={handleMarkAsReceived}
-                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                        >
-                          Mark as Received
-                        </button>
-                      )}
+                      {/* Remove "Mark as Received" button - only seller can complete delivery */}
+                      {/* Button removed: buyers cannot mark orders as received when status is "deliver" */}
                     </div>
                   );
                 })}
